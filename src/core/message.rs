@@ -34,6 +34,45 @@ pub enum SipMessage {
     }
 }
 
+impl SipMessage {
+
+    pub fn is_request(&self) -> bool {
+        if let SipMessage::Request { .. } = self {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn body(&self) -> &Vec<u8> {
+        match self {
+            SipMessage::Request { body, .. } => body,
+            SipMessage::Response { body, .. } => body
+        }
+    }
+
+    pub fn body_mut(&mut self) -> &mut Vec<u8> {
+        match self {
+            SipMessage::Request { body, .. } => body,
+            SipMessage::Response { body, .. } => body
+        }
+    }
+
+    pub fn headers(&self) -> &Vec<Header> {
+        match self {
+            SipMessage::Request { headers, .. } => headers,
+            SipMessage::Response { headers, .. } => headers
+        }
+    }
+
+    pub fn headers_mut(&mut self) -> &mut Vec<Header> {
+        match self {
+            SipMessage::Request { headers, .. } => headers,
+            SipMessage::Response { headers, .. } => headers
+        }
+    }
+}
+
 impl fmt::Display for SipMessage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
