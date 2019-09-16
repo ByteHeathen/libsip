@@ -9,7 +9,7 @@ fn write() {
 
 #[test]
 fn read() {
-    let remains = vec![' ' as u8];
+    let remains = vec![];
     let header = Header::ContentLength(60);
-    assert_eq!(Ok((remains.as_ref(), header)), parse_content_length_header(b"Content-Length: 60 "));
+    assert_eq!(Ok((remains.as_ref(), header)), parse_content_length_header(b"Content-Length: 60\r\n"));
 }

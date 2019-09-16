@@ -9,7 +9,7 @@ fn write() {
 
 #[test]
 fn read() {
-    let remains = vec![' ' as u8];
+    let remains = vec![];
     let header = Header::MaxForwards(60);
-    assert_eq!(Ok((remains.as_ref(), header)), parse_max_forwards_header(b"Max-Forwards: 60 "));
+    assert_eq!(Ok((remains.as_ref(), header)), parse_max_forwards_header(b"Max-Forwards: 60\r\n"));
 }

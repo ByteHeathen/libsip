@@ -11,5 +11,5 @@ fn write() {
 fn read() {
     let remains = vec![];
     let header = Header::UserAgent("Softphone 1.0".into());
-    assert_eq!(Ok((remains.as_ref(), header)), parse_useragent_header(b"User-Agent: Softphone 1.0\n"));
+    assert_eq!(Ok((remains.as_ref(), header)), parse_useragent_header(b"User-Agent: Softphone 1.0\r\n"));
 }

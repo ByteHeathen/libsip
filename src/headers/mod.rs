@@ -11,11 +11,13 @@ pub use self::language::Language;
 use crate::uri::Uri;
 use crate::core::Method;
 
+use std::collections::HashMap;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Header {
-    To(Option<String>, Uri),
-    From(Option<String>, Uri),
-    Contact(Option<String>, Uri),
+    To(Option<String>, Uri, HashMap<String, String>),
+    From(Option<String>, Uri, HashMap<String, String>),
+    Contact(Option<String>, Uri, HashMap<String, String>),
     CSeq(u32, Method),
     MaxForwards(u32),
     Expires(u32),
@@ -43,14 +45,14 @@ pub enum Header {
     ProxyAuthenticate(String),
     ProxyAuthorization(String),
     ProxyRequire(String),
-    ReplyTo(Option<String>, Uri),
+    ReplyTo(Option<String>, Uri, HashMap<String, String>),
     Require(String),
     RetryAfter(String),
     Route(String),
     Subject(String),
     RecordRoute(String),
     Server(String),
-    Supported(String),
+    Supported(Vec<String>),
     Timestamp(u32),
     Unsupported(String),
     Warning(String),

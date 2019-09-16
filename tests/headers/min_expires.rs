@@ -9,7 +9,7 @@ fn write() {
 
 #[test]
 fn read() {
-    let remains = vec![' ' as u8];
+    let remains = vec![];
     let header = Header::MinExpires(60);
-    assert_eq!(Ok((remains.as_ref(), header)), parse_min_expires_header(b"Min-Expires: 60 "));
+    assert_eq!(Ok((remains.as_ref(), header)), parse_min_expires_header(b"Min-Expires: 60"));
 }

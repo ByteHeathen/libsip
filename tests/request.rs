@@ -50,7 +50,7 @@ fn read_simple() {
         headers: vec![],
         body: vec![]
     };
-    assert_eq!(Ok((remains.as_ref(), req)), parse_request(b"REGISTER sip:user@example.com SIP/2.0\r\n"));
+    assert_eq!(Ok((remains.as_ref(), req)), parse_request(b"REGISTER sip:user@example.com SIP/2.0\r\n\r\n"));
 }
 
 #[test]
@@ -68,5 +68,5 @@ fn read_complex() {
         ],
         body: vec!['6' as u8 ; 5]
     };
-    assert_eq!(Ok((remains.as_ref(), req)), parse_request(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n66666"));
+    assert_eq!(Ok((remains.as_ref(), req)), parse_request(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));
 }

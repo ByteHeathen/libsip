@@ -11,5 +11,5 @@ fn write() {
 fn read() {
     let remains = vec![];
     let header = Header::ProxyAuthenticate("call@id.com".into());
-    assert_eq!(Ok((remains.as_ref(), header)), parse_proxy_authenticate_header(b"Proxy-Authenticate: call@id.com\n"));
+    assert_eq!(Ok((remains.as_ref(), header)), parse_proxy_authenticate_header(b"Proxy-Authenticate: call@id.com\r\n"));
 }

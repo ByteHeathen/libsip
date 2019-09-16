@@ -108,22 +108,13 @@ pub fn parse_headers(input: &[u8]) -> Result<(&[u8], Vec<Header>), nom::Err<(&[u
         match parse_header(input) {
             Ok((data, value)) => {
                 headers.push(value);
-                if let Ok((remains, _)) = parse_header_ending(data) {
-                    input = remains;
-                } else {
-                    break;
-                }
+                input = data;
             },
             _ => break
         }
     }
     Ok((input, headers))
 }
-
-named!(parse_header_ending<()>, do_parse!(
-    tag!("\r\n") >>
-    (())
-));
 
 named!(pub parse_response<SipMessage>, do_parse!(
     version: parse_version >>
@@ -134,6 +125,7 @@ named!(pub parse_response<SipMessage>, do_parse!(
     opt!(char!(' ')) >>
     tag!("\r\n") >>
     headers: parse_headers >>
+    tag!("\r\n") >>
     body: parse_byte_vec >>
     (SipMessage::Response { code, version, headers, body })
 ));
@@ -147,6 +139,7 @@ named!(pub parse_request<SipMessage>, do_parse!(
     opt!(char!(' ')) >>
     tag!("\r\n") >>
     headers: parse_headers >>
+    tag!("\r\n") >>
     body: parse_byte_vec >>
     (SipMessage::Request { method, uri, version, headers, body })
 ));

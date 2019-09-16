@@ -10,7 +10,7 @@ fn write() {
 
 #[test]
 fn read() {
-    let remains = vec![' ' as u8];
+    let remains = vec![];
     let header = Header::CSeq(60, Method::Register);
-    assert_eq!(Ok((remains.as_ref(), header)), parse_cseq_header(b"CSeq: 60 REGISTER "));
+    assert_eq!(Ok((remains.as_ref(), header)), parse_cseq_header(b"CSeq: 60 REGISTER\r\n"));
 }

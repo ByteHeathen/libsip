@@ -37,7 +37,7 @@ fn read_simple() {
         headers: vec![],
         body: vec![]
     };
-    assert_eq!(Ok((remains.as_ref(), req)), parse_response(b"SIP/2.0 200 OK\r\n"));
+    assert_eq!(Ok((remains.as_ref(), req)), parse_response(b"SIP/2.0 200 OK\r\n\r\n"));
 }
 
 #[test]
@@ -52,5 +52,5 @@ fn read_complex() {
         ],
         body: vec!['5' as u8; 5]
     };
-    assert_eq!(Ok((remains.as_ref(), req)), parse_response(b"SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n55555"));
+    assert_eq!(Ok((remains.as_ref(), req)), parse_response(b"SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555"));
 }
