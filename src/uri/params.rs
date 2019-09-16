@@ -9,7 +9,8 @@ use crate::core::parse_transport;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Param {
-    Transport(Transport)
+    Transport(Transport),
+    Branch(String)
 }
 
 impl Param {
@@ -17,6 +18,7 @@ impl Param {
     pub fn from_key<'a>(key: &'a [u8], value: &'a [u8]) -> Result<Param, nom::Err<(&'a [u8], ErrorKind)>> {
         match key.as_ref() {
             b"transport" => Ok(Param::Transport(parse_transport(&value)?.1)),
+            b"branch" => Ok(Param::Branch(String::from_utf8(value.to_vec()).expect("Utf-8 Error"))),
             _method => Err(Err::Failure((key, ErrorKind::MapRes)))
         }
     }
@@ -25,7 +27,8 @@ impl Param {
 impl fmt::Display for Param {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Param::Transport(trans) => write!(f, ";transport={}", trans)
+            Param::Transport(trans) => write!(f, ";transport={}", trans),
+            Param::Branch(branch) => write!(f, ";branch={}", branch)
         }
     }
 }

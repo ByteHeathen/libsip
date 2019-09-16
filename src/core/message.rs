@@ -96,6 +96,7 @@ pub fn display_headers_and_body(f: &mut fmt::Formatter, headers: &Vec<Header>, b
     for header in headers.iter() {
         write!(f, "{}\r\n", header)?;
     }
+    write!(f, "\r\n")?;
     f.write_str(&String::from_utf8_lossy(&body))?;
     Ok(())
 }

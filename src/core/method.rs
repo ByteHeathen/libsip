@@ -18,6 +18,28 @@ pub enum Method {
     Update
 }
 
+impl Method {
+
+    pub fn all() -> Vec<Method> {
+        vec![
+            Method::Invite,
+            Method::Ack,
+            Method::Bye,
+            Method::Cancel,
+            Method::Register,
+            Method::Options,
+            Method::PRack,
+            Method::Subscribe,
+            Method::Notify,
+            Method::Publish,
+            Method::Info,
+            Method::Refer,
+            Method::Message,
+            Method::Update
+        ]
+    }
+}
+
 impl fmt::Display for Method {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {

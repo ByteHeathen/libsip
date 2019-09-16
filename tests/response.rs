@@ -11,7 +11,7 @@ fn write_simple() {
         headers: vec![],
         body: vec![]
     };
-    assert_eq!("SIP/2.0 200 OK\r\n".to_string(), format!("{}", req));
+    assert_eq!("SIP/2.0 200 OK\r\n\r\n".to_string(), format!("{}", req));
 }
 
 #[test]
@@ -25,7 +25,7 @@ fn write_complex() {
         ],
         body: vec!['5' as u8; 5]
     };
-    assert_eq!("SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n55555".to_string(), format!("{}", req));
+    assert_eq!("SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555".to_string(), format!("{}", req));
 }
 
 #[test]
