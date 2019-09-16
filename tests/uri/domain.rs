@@ -1,7 +1,7 @@
-use std::net::Ipv4Addr;
-
-use libsip::uri::Domain;
+use libsip::Domain;
 use libsip::uri::parse_domain;
+
+use std::net::Ipv4Addr;
 
 #[test]
 fn read_domain() {

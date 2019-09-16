@@ -1,4 +1,4 @@
-use libsip::headers::Header;
+use libsip::Header;
 use libsip::headers::Language;
 use libsip::headers::parse::parse_accept_language_header;
 

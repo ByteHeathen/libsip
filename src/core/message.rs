@@ -4,14 +4,11 @@ use nom::error::ErrorKind;
 
 use std::fmt;
 
-use crate::core::code::error_code_to_str;
-use crate::core::Version;
-use crate::core::version::parse_version;
-use crate::core::Method;
-use crate::core::method::parse_method;
-use crate::uri::Uri;
+use crate::*;
 use crate::uri::parse_uri;
-use crate::headers::Header;
+use crate::core::code::error_code_to_str;
+use crate::core::version::parse_version;
+use crate::core::method::parse_method;
 use crate::headers::parse_header;
 use crate::parse::parse_u32;
 use crate::parse::parse_byte_vec;

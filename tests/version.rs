@@ -1,4 +1,4 @@
-use libsip::core::Version;
+use libsip::Version;
 use libsip::core::parse_version;
 
 #[test]

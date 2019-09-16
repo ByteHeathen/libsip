@@ -1,4 +1,4 @@
-use libsip::headers::Header;
+use libsip::*;
 use libsip::headers::parse::parse_callid_header;
 
 #[test]

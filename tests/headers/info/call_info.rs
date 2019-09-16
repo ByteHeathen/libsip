@@ -1,4 +1,4 @@
-use libsip::headers::Header;
+use libsip::Header;
 use libsip::headers::parse::parse_call_info_header;
 
 #[test]

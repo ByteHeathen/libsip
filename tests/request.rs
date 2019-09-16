@@ -1,10 +1,6 @@
-use libsip::core::Method;
-use libsip::core::Version;
-use libsip::core::SipMessage;
+use libsip::*;
 use libsip::core::message::parse_request;
-use libsip::uri::Uri;
 use libsip::uri::UriAuth;
-use libsip::uri::Domain;
 use libsip::headers::Header;
 
 #[test]

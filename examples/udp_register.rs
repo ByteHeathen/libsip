@@ -1,6 +1,6 @@
 extern crate libsip;
 
-use libsip::builder::RequestBuilder;
+use libsip::registration::RegistrationManager;
 use libsip::core::Version;
 use libsip::core::Method;
 use libsip::core::Transport;
@@ -44,21 +44,16 @@ fn send_request_print_response(req: SipMessage) -> Result<(), failure::Error> {
     let addr = "0.0.0.0:5060";
     let sock = UdpSocket::bind(addr)?;
     sock.send_to(&format!("{}", req).as_ref(), "192.168.1.123:5060")?;
-    //let recieved = reader.recv(&mut buf)?;
-    //println!("{:?}", String::from_utf8(buf));
-    loop {
-        let mut buf = vec![0; 65535];
-        let (amt, src) = sock.recv_from(&mut buf)?;
-        let (_, msg) = parse_message(&buf[..amt]).unwrap();
-        println!("{:?} - {:?} - {:?}", src, amt, &msg);
-        println!("{:?}", String::from_utf8_lossy(msg.body()));
-    }
+    let mut buf = vec![0; 65535];
+    let (amt, src) = sock.recv_from(&mut buf)?;
+    let (_, msg) = parse_message(&buf[..amt]).unwrap();
+    println!("{:?} - {:?} - {:?}", src, amt, &msg);
     Ok(())
 }
 
 
 fn main() -> Result<(), failure::Error>{
-    let mut builder = RequestBuilder::new(Default::default());
+    let mut builder = RegistrationManager::default();
 
     let req = get_register_request();
 

@@ -1,8 +1,6 @@
-use libsip::headers::Header;
-use libsip::headers::parse::parse_contact_header;
-use libsip::uri::Uri;
-use libsip::uri::Domain;
+use libsip::uri::*;
 use libsip::uri::UriAuth;
+use libsip::headers::parse::parse_contact_header;
 
 #[test]
 fn write() {

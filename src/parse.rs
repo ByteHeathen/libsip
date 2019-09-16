@@ -1,4 +1,4 @@
-use nom::character::is_digit;
+use nom::character::*;
 use nom::error::ErrorKind;
 use failure::Error;
 
@@ -43,4 +43,16 @@ named!(pub parse_ip_address<Ipv4Addr>, do_parse!(
     char!('.') >>
     byte4: map_res!(take_while!(is_digit), parse_u8) >>
     (Ipv4Addr::new(byte1, byte2,  byte3, byte4))
+));
+
+named!(pub parse_string<String>, map_res!(
+    take_while!(is_alphabetic), slice_to_string
+));
+
+
+named!(pub parse_quoted_string<String>, do_parse!(
+    char!('\"') >>
+    out: map_res!(take_while!(|item| is_alphabetic(item) || is_space(item) ), slice_to_string) >>
+    char!('\"') >>
+    (out)
 ));

@@ -1,6 +1,5 @@
-use libsip::headers::Header;
+use libsip::{ Header, Method };
 use libsip::headers::parse::parse_cseq_header;
-use libsip::core::Method;
 
 #[test]
 fn write() {

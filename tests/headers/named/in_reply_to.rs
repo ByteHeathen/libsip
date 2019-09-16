@@ -1,4 +1,4 @@
-use libsip::headers::Header;
+use libsip::Header;
 use libsip::headers::parse::parse_in_reply_to_header;
 
 #[test]

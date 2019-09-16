@@ -1,11 +1,5 @@
-use libsip::core::Method;
-use libsip::core::SipMessage;
-use libsip::core::Version;
-use libsip::core::parse_message;
-use libsip::uri::Uri;
+use libsip::*;
 use libsip::uri::UriAuth;
-use libsip::uri::Domain;
-use libsip::headers::Header;
 
 #[test]
 fn read_message() {

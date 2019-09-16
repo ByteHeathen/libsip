@@ -1,4 +1,4 @@
-use libsip::headers::Header;
+use libsip::Header;
 use libsip::headers::parse::parse_www_authenticate_header;
 
 #[test]

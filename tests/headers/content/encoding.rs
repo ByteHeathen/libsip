@@ -1,4 +1,4 @@
-use libsip::headers::Header;
+use libsip::Header;
 use libsip::headers::ContentType;
 use libsip::headers::parse::parse_content_encoding_header;
 

@@ -1,14 +1,9 @@
-use nom::character::is_digit;
-use nom::character::is_alphabetic;
-use nom::character::is_alphanumeric;
-use nom::character::is_space;
+use nom::character::*;
 use nom::error::ErrorKind;
 
 use std::collections::HashMap;
 
-use crate::parse::parse_u32;
-use crate::parse::parse_f32;
-use crate::parse::slice_to_string;
+use crate::parse::*;
 use crate::uri::parse_uri;
 use crate::core::parse_method;
 use super::Header;
@@ -202,10 +197,6 @@ impl_type_parser!(parse_accept_encoding_header, "Accept-Encoding", AcceptEncodin
 impl_lang_parser!(parse_content_language_header, "Content-Language", ContentLanguage);
 impl_lang_parser!(parse_accept_language_header, "Accept-Language", AcceptLanguage);
 
-named!(parse_string<String>, map_res!(
-    take_while!(is_alphabetic), slice_to_string
-));
-
 named!(pub parse_cseq_header<Header>, do_parse!(
     tag!("CSeq") >>
     opt!(take_while!(is_space)) >>
@@ -227,15 +218,8 @@ named!(pub parse_named_field_param<(String, String)>, do_parse!(
 ));
 
 named!(pub parse_name<String>, alt!(
-        parse_quoted_name |
+        parse_quoted_string |
         map_res!(take_while!(is_alphabetic), slice_to_string)
-));
-
-named!(parse_quoted_name<String>, do_parse!(
-    char!('\"') >>
-    out: map_res!(take_while!(|item| is_alphabetic(item) || is_space(item) ), slice_to_string) >>
-    char!('\"') >>
-    (out)
 ));
 
 named!(parse_named_field_value<(Option<String>, Uri)>, do_parse!(

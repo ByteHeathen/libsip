@@ -1,26 +1,43 @@
-mod config;
-pub use self::config::BuilderConfig;
-
 use crate::core::SipMessage;
 use crate::core::Method;
 use crate::headers::Header;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct RequestBuilder {
-    cfg: BuilderConfig,
+pub struct Config {
+    pub content_length: bool,
+    pub add_cseq: bool,
+    pub expires_header: Option<u32>,
+    pub user_agent: Option<String>
+}
+
+impl Default for Config {
+    fn default() -> Config {
+        Config {
+            content_length: true,
+            add_cseq: true,
+            expires_header: Some(60),
+            user_agent: Some(format!("libsip {}", env!("CARGO_PKG_VERSION")))
+        }
+    }
+}
+
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct RegistrationManager {
+    cfg: Config,
     cseq_counter: Vec<(Method, u32)>
 }
 
-impl RequestBuilder {
+impl RegistrationManager {
 
-    pub fn new(cfg: BuilderConfig) -> RequestBuilder {
+    pub fn new(cfg: Config) -> RegistrationManager {
         let mut cseq_counter = vec![];
-        if cfg.add_cseq {        
+        if cfg.add_cseq {
             for method in Method::all() {
                 cseq_counter.push((method, 444));
             }
         }
-        RequestBuilder { cfg, cseq_counter }
+        RegistrationManager { cfg, cseq_counter }
     }
 
     pub fn process(&mut self, req: SipMessage) -> Result<SipMessage, failure::Error> {
@@ -45,5 +62,11 @@ impl RequestBuilder {
             }
             Ok(SipMessage::Request { method, uri, version, headers, body })
         } else { unreachable!() }
+    }
+}
+
+impl Default for RegistrationManager {
+    fn default() -> RegistrationManager {
+        RegistrationManager::new(Default::default())
     }
 }

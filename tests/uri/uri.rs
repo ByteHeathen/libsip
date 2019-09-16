@@ -1,7 +1,7 @@
-use std::net::Ipv4Addr;
-
 use libsip::uri::*;
 use libsip::core::Transport;
+
+use std::net::Ipv4Addr;
 
 #[test]
 fn read_uri() {

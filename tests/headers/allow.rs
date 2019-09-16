@@ -1,6 +1,5 @@
+use libsip::*;
 use libsip::headers::parse::parse_allow_header;
-use libsip::headers::Header;
-use libsip::core::Method;
 
 #[test]
 fn write() {

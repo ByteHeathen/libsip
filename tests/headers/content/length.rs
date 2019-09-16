@@ -1,5 +1,5 @@
+use libsip::Header;
 use libsip::headers::parse::parse_content_length_header;
-use libsip::headers::Header;
 
 #[test]
 fn write() {
