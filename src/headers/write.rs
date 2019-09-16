@@ -2,15 +2,14 @@ use std::fmt;
 
 use crate::core::Method;
 use super::Header;
-use super::NamedHeader;
 
 impl fmt::Display for Header {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Header::To(value) => write_named_header("To", value, f),
-            Header::From(value) => write_named_header("From", value, f),
-            Header::Contact(value) => write_named_header("Contact", value, f),
-            Header::ReplyTo(value) => write_named_header("Reply-To", value, f),
+            Header::To(value) => write_simple_field("To", value, f),
+            Header::From(value) => write_simple_field("From", value, f),
+            Header::Contact(value) => write_simple_field("Contact", value, f),
+            Header::ReplyTo(value) => write_simple_field("Reply-To", value, f),
             Header::CSeq(num, method) => write!(f, "CSeq: {} {}", num, method),
             Header::MaxForwards(num) => write!(f, "Max-Forwards: {}", num),
             Header::Expires(num) => write!(f, "Expires: {}", num),
@@ -55,47 +54,25 @@ impl fmt::Display for Header {
     }
 }
 
+
+macro_rules! write_array_header {
+    ($name:ident, $item: ident) => {
+        fn $name(name: &str, f: &mut fmt::Formatter, v: &Vec<$item>) -> fmt::Result {
+            write!(f, "{}: ", name)?;
+            for (index, item) in v.iter().enumerate() {
+                if index == 0 {
+                    write!(f, "{}", item)?;
+                } else {
+                    write!(f, ",{}", item)?;
+                }
+            }
+            Ok(())
+        }
+    }
+}
+
+write_array_header!(write_method_array_header, Method);
+write_array_header!(write_string_array_header, String);
 fn write_simple_field<D: fmt::Display>(header: &str, data: D, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "{}: {}", header, data)
-}
-
-fn write_named_header(header: &str, value: &NamedHeader, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "{}: ", header)?;
-    if let Some(name) = &value.display_name {
-        if name.contains(' ') {
-            write!(f, "\"{}\" <{}>", name, value.uri)?;
-        } else {
-            write!(f, "{} <{}>", name, value.uri)?;
-        }
-    } else {
-        write!(f, "<{}>", value.uri)?;
-    }
-    for (key, value) in (&value.params).iter() {
-        write!(f, ";{}={}", key, value)?;
-    }
-    Ok(())
-}
-
-fn write_method_array_header(name: &str, f: &mut fmt::Formatter, v: &Vec<Method>) -> fmt::Result {
-    write!(f, "{}: ", name)?;
-    for (index, method) in v.iter().enumerate() {
-        if index == 0 {
-            write!(f, "{}", method)?;
-        } else {
-            write!(f, ",{}", method)?;
-        }
-    }
-    Ok(())
-}
-
-fn write_string_array_header(name: &str, f: &mut fmt::Formatter, v: &Vec<String>) -> fmt::Result {
-    write!(f, "{}: ", name)?;
-    for (index, method) in v.iter().enumerate() {
-        if index == 0 {
-            write!(f, "{}", method)?;
-        } else {
-            write!(f, ",{}", method)?;
-        }
-    }
-    Ok(())
 }

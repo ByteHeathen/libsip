@@ -1,16 +1,12 @@
 use nom::character::*;
-use nom::error::ErrorKind;
 
-use std::collections::HashMap;
-
+use super::*;
 use crate::parse::*;
-use crate::uri::parse_uri;
+use super::named::*;
+use super::content::*;
+use super::language::*;
 use crate::core::parse_method;
-use super::Header;
-use super::ContentType;
-use super::Language;
-use super::NamedHeader;
-use crate::uri::Uri;
+
 
 named!(pub parse_header<Header>, alt!(
     parse_accept_encoding_header |
@@ -208,49 +204,4 @@ named!(pub parse_cseq_header<Header>, do_parse!(
     method: parse_method >>
     tag!("\r\n") >>
     (Header::CSeq(value, method))
-));
-
-named!(pub parse_named_field_param<(String, String)>, do_parse!(
-    char!(';') >>
-    key: map_res!(take_while!(is_alphabetic), slice_to_string) >>
-    char!('=') >>
-    value: map_res!(take_while!(is_alphanumeric), slice_to_string) >>
-    (key, value)
-));
-
-named!(pub parse_name<String>, alt!(
-        parse_quoted_string |
-        map_res!(take_while!(is_alphabetic), slice_to_string)
-));
-
-named!(parse_named_field_value<(Option<String>, Uri)>, do_parse!(
-    name: opt!(parse_name) >>
-    opt!(take_while!(is_space)) >>
-    char!('<') >>
-    value: parse_uri>>
-    char!('>') >>
-    ((name, value))
-));
-
-pub fn parse_named_field_params(input: &[u8]) -> Result<(&[u8], HashMap<String, String>), nom::Err<(&[u8], ErrorKind)>> {
-    let mut map = HashMap::new();
-    let mut input = input;
-    loop {
-        match parse_named_field_param(input) {
-            Ok((data, (key, value))) => {
-                map.insert(key, value);
-                input = data;
-            },
-            _ => break
-        }
-    }
-    Ok((input, map))
-}
-
-named!(parse_content_type<ContentType>, alt!(
-    map!(tag!("application/sdp"), |_| ContentType::Sdp)
-));
-
-named!(parse_language<Language>, alt!(
-    map!(tag!("en"), |_| Language::English)
 ));

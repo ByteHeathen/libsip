@@ -12,3 +12,7 @@ impl fmt::Display for ContentType {
         }
     }
 }
+
+named!(pub parse_content_type<ContentType>, alt!(
+    map!(tag!("application/sdp"), |_| ContentType::Sdp)
+));

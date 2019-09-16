@@ -12,3 +12,7 @@ impl fmt::Display for Language {
         }
     }
 }
+
+named!(pub parse_language<Language>, alt!(
+    map!(tag!("en"), |_| Language::English)
+));
