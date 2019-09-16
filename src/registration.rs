@@ -1,5 +1,4 @@
 use crate::core::SipMessage;
-use crate::core::Method;
 use crate::headers::Header;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -25,34 +24,24 @@ impl Default for Config {
 #[derive(Debug, PartialEq, Clone)]
 pub struct RegistrationManager {
     cfg: Config,
-    cseq_counter: Vec<(Method, u32)>
+    cseq_counter: u32
 }
 
 impl RegistrationManager {
 
     pub fn new(cfg: Config) -> RegistrationManager {
-        let mut cseq_counter = vec![];
-        if cfg.add_cseq {
-            for method in Method::all() {
-                cseq_counter.push((method, 444));
-            }
-        }
-        RegistrationManager { cfg, cseq_counter }
+        RegistrationManager { cfg, cseq_counter: 444 }
     }
 
     pub fn process(&mut self, req: SipMessage) -> Result<SipMessage, failure::Error> {
-        if let SipMessage::Request { mut method, uri, version, mut headers, body } = req {
+        if let SipMessage::Request { method, uri, version, mut headers, body } = req {
             if self.cfg.content_length {
                 let length = body.len() as u32;
                 headers.push(Header::ContentLength(length));
             }
             if self.cfg.add_cseq {
-                for (_method, mut num) in &mut self.cseq_counter {
-                    if _method == &mut method {
-                        num += 1;
-                        headers.push(Header::CSeq(num, method.clone()));
-                    }
-                }
+                self.cseq_counter += 1;
+                headers.push(Header::CSeq(self.cseq_counter, method.clone()));
             }
             if let Some(exp) = self.cfg.expires_header {
                 headers.push(Header::Expires(exp));
