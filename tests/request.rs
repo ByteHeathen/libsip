@@ -1,12 +1,10 @@
 use libsip::*;
 use libsip::core::message::parse_request;
-use libsip::uri::UriAuth;
 use libsip::headers::Header;
 
 #[test]
 fn write_simple() {
-    let domain = Domain::Domain("example.com".into(), None);
-    let uri = Uri::sip(domain).auth(UriAuth::new("user"));
+    let uri = Uri::sip(domain!("example.com")).auth(uri_auth!("user"));
     let req = SipMessage::Request {
         method: Method::Register,
         version: Version::default(),
@@ -19,8 +17,7 @@ fn write_simple() {
 
 #[test]
 fn write_complex() {
-    let domain = Domain::Domain("example.com".into(), None);
-    let uri = Uri::sip(domain);
+    let uri = Uri::sip(domain!("example.com"));
     let req = SipMessage::Request {
         method: Method::Register,
         version: Version::default(),
@@ -37,8 +34,7 @@ fn write_complex() {
 #[test]
 fn read_simple() {
     let remains = vec![];
-    let domain = Domain::Domain("example.com".into(), None);
-    let uri = Uri::sip(domain).auth(UriAuth::new("user"));
+    let uri = Uri::sip(domain!("example.com")).auth(uri_auth!("user"));
     let req = SipMessage::Request {
         method: Method::Register,
         version: Version::default(),
@@ -52,8 +48,7 @@ fn read_simple() {
 #[test]
 fn read_complex() {
     let remains = vec![];
-    let domain = Domain::Domain("example.com".into(), None);
-    let uri = Uri::sip(domain).auth(UriAuth::new("user"));
+    let uri = Uri::sip(domain!("example.com")).auth(uri_auth!("user"));
     let req = SipMessage::Request {
         method: Method::Register,
         version: Version::default(),

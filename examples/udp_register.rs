@@ -1,25 +1,18 @@
 extern crate libsip;
 
-use libsip::registration::RegistrationManager;
-use libsip::core::Version;
-use libsip::core::Method;
-use libsip::core::Transport;
-use libsip::headers::Header;
-use libsip::core::SipMessage;
-use libsip::uri::Uri;
-use libsip::uri::UriAuth;
-use libsip::uri::Domain;
+use libsip::*;
 use libsip::uri::Param;
+use libsip::core::Transport;
 use libsip::core::parse_message;
+use libsip::registration::RegistrationManager;
 
 use std::net::UdpSocket;
-use std::net::Ipv4Addr;
 use std::collections::HashMap;
 
 fn get_register_request() -> SipMessage {
     SipMessage::Request {
         method: Method::Register,
-        uri: Uri::sip(Domain::Ipv4(Ipv4Addr::new(192,168,1,123), None)),
+        uri: Uri::sip(ip_domain!(192,168,1,123)),
         version: Version::default(),
         headers: vec![
             Header::Via(format!("SIP/2.0/UDP 192.168.1.123;transport=UDP;branch=Some-Branch")),
@@ -35,8 +28,8 @@ fn get_register_request() -> SipMessage {
 }
 
 fn get_our_uri() -> Uri {
-    Uri::sip(Domain::Ipv4(Ipv4Addr::new(192, 168, 1, 76), Some(5060)))
-        .auth(UriAuth::new("program"))
+    Uri::sip(ip_domain!(192, 168, 1, 76, 5060))
+        .auth(uri_auth!("program"))
         .parameter(Param::Transport(Transport::Udp))
 }
 

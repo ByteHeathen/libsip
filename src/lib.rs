@@ -2,6 +2,9 @@
 extern crate nom;
 extern crate failure;
 
+#[macro_use]
+mod macros;
+
 pub mod core;
 pub mod uri;
 pub mod headers;

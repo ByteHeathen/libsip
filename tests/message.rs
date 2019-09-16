@@ -1,11 +1,9 @@
 use libsip::*;
-use libsip::uri::UriAuth;
 
 #[test]
 fn read_message() {
     let remains = vec![];
-    let domain = Domain::Domain("example.com".into(), None);
-    let uri = Uri::sip(domain);
+    let uri = Uri::sip(domain!("example.com"));
     let req = SipMessage::Request {
         method: Method::Register,
         version: Version::default(),
@@ -19,8 +17,7 @@ fn read_message() {
 #[test]
 fn read_complex() {
     let remains = vec![];
-    let domain = Domain::Domain("example.com".into(), None);
-    let uri = Uri::sip(domain).auth(UriAuth::new("user"));
+    let uri = Uri::sip(domain!("example.com")).auth(uri_auth!("user"));
     let req = SipMessage::Request {
         method: Method::Register,
         version: Version::default(),
