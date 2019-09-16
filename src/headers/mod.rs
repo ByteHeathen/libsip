@@ -8,16 +8,17 @@ pub use self::content::ContentType;
 mod language;
 pub use self::language::Language;
 
-use crate::uri::Uri;
-use crate::core::Method;
+mod named;
+pub use self::named::NamedHeader;
 
-use std::collections::HashMap;
+use crate::core::Method;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Header {
-    To(Option<String>, Uri, HashMap<String, String>),
-    From(Option<String>, Uri, HashMap<String, String>),
-    Contact(Option<String>, Uri, HashMap<String, String>),
+    To(NamedHeader),
+    Contact(NamedHeader),
+    From(NamedHeader),
+    ReplyTo(NamedHeader),
     CSeq(u32, Method),
     MaxForwards(u32),
     Expires(u32),
@@ -45,7 +46,6 @@ pub enum Header {
     ProxyAuthenticate(String),
     ProxyAuthorization(String),
     ProxyRequire(String),
-    ReplyTo(Option<String>, Uri, HashMap<String, String>),
     Require(String),
     RetryAfter(String),
     Route(String),

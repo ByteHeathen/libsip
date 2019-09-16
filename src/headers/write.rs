@@ -1,18 +1,16 @@
 use std::fmt;
 
 use crate::core::Method;
-use crate::uri::Uri;
 use super::Header;
-
-use std::collections::HashMap;
+use super::NamedHeader;
 
 impl fmt::Display for Header {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Header::To(name, uri, params) => write_named_header("To", name, uri, params, f),
-            Header::From(name, uri, params) => write_named_header("From", name, uri, params, f),
-            Header::Contact(name, uri, params) => write_named_header("Contact", name, uri, params, f),
-            Header::ReplyTo(name, uri, params) => write_named_header("Reply-To", name, uri, params, f),
+            Header::To(value) => write_named_header("To", value, f),
+            Header::From(value) => write_named_header("From", value, f),
+            Header::Contact(value) => write_named_header("Contact", value, f),
+            Header::ReplyTo(value) => write_named_header("Reply-To", value, f),
             Header::CSeq(num, method) => write!(f, "CSeq: {} {}", num, method),
             Header::MaxForwards(num) => write!(f, "Max-Forwards: {}", num),
             Header::Expires(num) => write!(f, "Expires: {}", num),
@@ -61,18 +59,18 @@ fn write_simple_field<D: fmt::Display>(header: &str, data: D, f: &mut fmt::Forma
     write!(f, "{}: {}", header, data)
 }
 
-fn write_named_header(header: &str, name: &Option<String>, uri: &Uri, params: &HashMap<String, String>, f: &mut fmt::Formatter) -> fmt::Result {
+fn write_named_header(header: &str, value: &NamedHeader, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "{}: ", header)?;
-    if let Some(name) = name {
+    if let Some(name) = &value.display_name {
         if name.contains(' ') {
-            write!(f, "\"{}\" <{}>", name, uri)?;
+            write!(f, "\"{}\" <{}>", name, value.uri)?;
         } else {
-            write!(f, "{} <{}>", name, uri)?;
+            write!(f, "{} <{}>", name, value.uri)?;
         }
     } else {
-        write!(f, "<{}>", uri)?;
+        write!(f, "<{}>", value.uri)?;
     }
-    for (key, value) in params.iter() {
+    for (key, value) in (&value.params).iter() {
         write!(f, ";{}={}", key, value)?;
     }
     Ok(())

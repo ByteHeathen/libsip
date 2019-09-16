@@ -9,6 +9,7 @@ use crate::core::parse_method;
 use super::Header;
 use super::ContentType;
 use super::Language;
+use super::NamedHeader;
 use crate::uri::Uri;
 
 named!(pub parse_header<Header>, alt!(
@@ -122,7 +123,7 @@ macro_rules! impl_named_parser {
             out: parse_named_field_value >>
             params: parse_named_field_params >>
             tag!("\r\n") >>
-            (Header::$variant(out.0, out.1, params))
+            (Header::$variant(NamedHeader { display_name: out.0, uri: out.1, params: params }))
         ));
     }
 }

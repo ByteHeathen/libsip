@@ -28,3 +28,10 @@ macro_rules! uri_auth {
         libsip::uri::UriAuth::new($u).password($p)
     }
 }
+
+#[macro_export]
+macro_rules! named_header {
+    ($u:tt) => {
+        libsip::headers::NamedHeader { display_name: None, uri: $u, params: ::std::collections::HashMap::new() }
+    }
+}

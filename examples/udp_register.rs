@@ -7,9 +7,11 @@ use libsip::core::parse_message;
 use libsip::registration::RegistrationManager;
 
 use std::net::UdpSocket;
-use std::collections::HashMap;
 
 fn get_register_request() -> SipMessage {
+    let to_uri = get_our_uri();
+    let from_uri = to_uri.clone();
+    let contact_uri = to_uri.clone();
     SipMessage::Request {
         method: Method::Register,
         uri: Uri::sip(ip_domain!(192,168,1,123)),
@@ -17,9 +19,9 @@ fn get_register_request() -> SipMessage {
         headers: vec![
             Header::Via(format!("SIP/2.0/UDP 192.168.1.123;transport=UDP;branch=Some-Branch")),
             Header::MaxForwards(70),
-            Header::From(None, get_our_uri(), HashMap::new()),
-            Header::To(None, get_our_uri(), HashMap::new()),
-            Header::Contact(None, get_our_uri(), HashMap::new()),
+            Header::From(named_header!(from_uri)),
+            Header::To(named_header!(to_uri)),
+            Header::Contact(named_header!(contact_uri)),
             Header::CallId("kjh34asdfasdfasdfasdf@192.168.1.123".into()),
             Header::Allow(vec![Method::Invite, Method::Ack, Method::Cancel]),
         ],
