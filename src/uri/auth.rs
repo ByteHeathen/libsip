@@ -4,6 +4,7 @@ use crate::parse::slice_to_string;
 
 use std::fmt;
 
+/// URI Credentials
 #[derive(Debug, PartialEq, Clone)]
 pub struct UriAuth {
     username: String,

@@ -4,6 +4,8 @@ use crate::parse::parse_u8;
 
 use std::fmt;
 
+/// SIP Protocol version struct.
+/// default: 2.0
 #[derive(Debug, PartialEq, Clone)]
 pub struct Version(u8, u8);
 

@@ -8,6 +8,7 @@ use crate::parse::parse_u16;
 use crate::parse::slice_to_string;
 use crate::parse::parse_ip_address;
 
+/// Domain address for a URI.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Domain {
     Ipv4(Ipv4Addr, Option<u16>),

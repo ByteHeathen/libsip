@@ -1,5 +1,6 @@
 use std::fmt;
 
+/// SIP protocol methods.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Method {
     Invite,

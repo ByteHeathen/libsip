@@ -1,3 +1,8 @@
+/// Generate a URI domain from an domain name.
+/// ```rust,compile_fail
+///    let domain = domain!("example.com");
+///    let domain = domain!("example.com", 5060);
+/// ```
 #[macro_export]
 macro_rules! domain {
     ($domain:tt) => {
@@ -8,6 +13,11 @@ macro_rules! domain {
     };
 }
 
+/// Generate a URI domain from an ip address.
+/// ```rust,compile_fail
+///    let domain = ip_domain!(192, 168, 0, 1);
+///    let domain = ip_domain!(192, 168, 0, 1, 5060);
+/// ```
 #[macro_export]
 macro_rules! ip_domain {
     ($a:tt, $b:tt, $c:tt, $d:tt) => {
@@ -19,6 +29,11 @@ macro_rules! ip_domain {
     };
 }
 
+/// Generate a URI authentication from credentials.
+/// ```rust,compile_fail
+///    let auth = uri_auth!("user");
+///    let auth = uri_auth!("user", "pass");
+/// ```
 #[macro_export]
 macro_rules! uri_auth {
     ($u: tt) => {
@@ -29,6 +44,10 @@ macro_rules! uri_auth {
     }
 }
 
+/// Generate `NamedHeader` from a uri;
+/// ```rust,ignore,compile_fail
+///    let domain = named_header!(Uri::sip("example.com"));
+/// ```
 #[macro_export]
 macro_rules! named_header {
     ($u:tt) => {

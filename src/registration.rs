@@ -3,9 +3,14 @@ use crate::headers::Header;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Config {
+    /// Whether to append the `Content-Length` header
+    /// default: true
     pub content_length: bool,
-    pub add_cseq: bool,
+    /// The value to use for the `Expiration` header
+    /// default: 60
     pub expires_header: Option<u32>,
+    /// The value to set for the user_agent header,
+    /// default: `libsip env!('CARGO_PKG_VERSION')`
     pub user_agent: Option<String>
 }
 
@@ -13,14 +18,13 @@ impl Default for Config {
     fn default() -> Config {
         Config {
             content_length: true,
-            add_cseq: true,
             expires_header: Some(60),
             user_agent: Some(format!("libsip {}", env!("CARGO_PKG_VERSION")))
         }
     }
 }
 
-
+/// Handle's the SIP registration process.
 #[derive(Debug, PartialEq, Clone)]
 pub struct RegistrationManager {
     cfg: Config,
@@ -39,10 +43,8 @@ impl RegistrationManager {
                 let length = body.len() as u32;
                 headers.push(Header::ContentLength(length));
             }
-            if self.cfg.add_cseq {
-                self.cseq_counter += 1;
-                headers.push(Header::CSeq(self.cseq_counter, method));
-            }
+            self.cseq_counter += 1;
+            headers.push(Header::CSeq(self.cseq_counter, method));
             if let Some(exp) = self.cfg.expires_header {
                 headers.push(Header::Expires(exp));
             }

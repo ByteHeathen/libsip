@@ -1,3 +1,4 @@
+/// Get the response code string for the given SIP response code.
 pub fn error_code_to_str(code: u32) -> Option<&'static str> {
 	match code {
 		100 => Some("Trying"),
