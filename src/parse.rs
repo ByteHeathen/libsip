@@ -48,13 +48,16 @@ named!(pub parse_ip_address<Ipv4Addr>, do_parse!(
 ));
 
 named!(pub parse_string<String>, map_res!(
-    take_while!(is_alphabetic), slice_to_string
+    take_while!(is_alphanumeric), slice_to_string
 ));
 
+named!(pub parse_possibly_quoted_string<String>, alt!(
+	parse_string | parse_quoted_string
+));
 
 named!(pub parse_quoted_string<String>, do_parse!(
     char!('\"') >>
-    out: map_res!(take_while!(|item| is_alphabetic(item) || is_space(item) ), slice_to_string) >>
+    out: map_res!(take_until!("\""), slice_to_string) >>
     char!('\"') >>
     (out)
 ));

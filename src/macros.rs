@@ -45,7 +45,7 @@ macro_rules! uri_auth {
 }
 
 /// Generate `NamedHeader` from a uri;
-/// ```rust,ignore,compile_fail
+/// ```rust,compile_fail
 ///    let domain = named_header!(Uri::sip("example.com"));
 /// ```
 #[macro_export]

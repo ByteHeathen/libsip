@@ -7,6 +7,7 @@ use super::content::*;
 use super::language::*;
 use crate::core::parse_method;
 
+use std::collections::HashMap;
 
 named!(pub parse_header<Header>, alt!(
     parse_accept_encoding_header |
@@ -179,7 +180,7 @@ impl_string_parser!(parse_unsupported_header, "Unsupported", Unsupported);
 impl_string_parser!(parse_warning_header, "Warning", Warning);
 impl_string_parser!(parse_via_header, "Via", Via);
 impl_string_parser!(parse_priority_header, "Priority", Priority);
-impl_string_parser!(parse_www_authenticate_header, "WWW-Authenticate", WwwAuthenticate);
+//impl_string_parser!(parse_www_authenticate_header, "WWW-Authenticate", WwwAuthenticate);
 impl_u32_parser!(parse_timestamp_header, "Timestamp", Timestamp);
 impl_array_parser!(parse_accept_header, "Accept", Accept, parse_method);
 impl_array_parser!(parse_allow_header, "Allow", Allow, parse_method);
@@ -204,4 +205,39 @@ named!(pub parse_cseq_header<Header>, do_parse!(
     method: parse_method >>
     tag!("\r\n") >>
     (Header::CSeq(value, method))
+));
+
+named!(pub parse_www_authenticate_header<Header>, do_parse!(
+    tag!("WWW-Authenticate") >>
+    opt!(take_while!(is_space)) >>
+    char!(':') >>
+    opt!(take_while!(is_space)) >>
+    schema: parse_auth_schema >>
+    char!(' ') >>
+    res: parse_auth_header_vars >>
+    opt!(char!(' ')) >>
+    tag!("\r\n") >>
+    (Header::WwwAuthenticate(auth::AuthHeader(schema, res)))
+));
+
+fn parse_auth_header_vars(input: &[u8]) -> ParserResult<HashMap<String, String>> {
+    let mut map = HashMap::new();
+    let mut data = input;
+    while let Ok((remains, (key, value))) = parse_key_value_pair(data) {
+        map.insert(key, value);
+        data = remains;
+    }
+    Ok((data, map))
+}
+named!(parse_key_value_pair<(String, String)>, do_parse!(
+    opt!(char!(',')) >>
+    opt!(char!(' ')) >>
+    key: map_res!(take_while!(is_alphanumeric), slice_to_string) >>
+    char!('=') >>
+    value: parse_possibly_quoted_string >>
+    ((key, value))
+));
+
+named!(parse_auth_schema<auth::Schema>, alt!(
+    map!(tag!("Digest"), |_| auth::Schema::Digest)
 ));

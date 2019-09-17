@@ -3,7 +3,7 @@ extern crate libsip;
 use libsip::*;
 use libsip::uri::Param;
 use libsip::core::Transport;
-use libsip::core::parse_message;
+use libsip::core::message::parse_response;
 use libsip::registration::RegistrationManager;
 
 use std::net::UdpSocket;
@@ -35,19 +35,24 @@ fn get_our_uri() -> Uri {
         .parameter(Param::Transport(Transport::Udp))
 }
 
-fn send_request_print_response(req: SipMessage) -> Result<(), failure::Error> {
+fn send_request_print_response(req: SipMessage) -> Result<SipMessage, failure::Error> {
     let addr = "0.0.0.0:5060";
     let sock = UdpSocket::bind(addr)?;
     sock.send_to(&format!("{}", req).as_ref(), "192.168.1.123:5060")?;
     let mut buf = vec![0; 65535];
-    let (amt, src) = sock.recv_from(&mut buf)?;
-    let (_, msg) = parse_message(&buf[..amt]).unwrap();
-    println!("{:?} - {:?} - {:?}", src, amt, &msg);
-    Ok(())
+    let (amt, _src) = sock.recv_from(&mut buf)?;
+    let (_, msg) = parse_response(&buf[..amt]).unwrap();
+    Ok(msg)
 }
 
 
 fn main() -> Result<(), failure::Error>{
+    let mut builder = RegistrationManager::default();
+
+    let req = get_register_request();
+
+    let final_req = builder.process(req)?;
+    println!("{}", final_req);
     let mut builder = RegistrationManager::default();
 
     let req = get_register_request();

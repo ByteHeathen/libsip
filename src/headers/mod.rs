@@ -1,15 +1,14 @@
+mod named;
 mod write;
+mod content;
+mod language;
+pub mod auth;
 pub mod parse;
+pub use self::content::ContentType;
+pub use self::language::Language;
+pub use self::named::NamedHeader;
 pub use self::parse::parse_header;
 
-mod content;
-pub use self::content::ContentType;
-
-mod language;
-pub use self::language::Language;
-
-mod named;
-pub use self::named::NamedHeader;
 
 use crate::core::Method;
 
@@ -58,5 +57,5 @@ pub enum Header {
     Warning(String),
     Via(String),
     Priority(String),
-    WwwAuthenticate(String)
+    WwwAuthenticate(auth::AuthHeader)
 }
