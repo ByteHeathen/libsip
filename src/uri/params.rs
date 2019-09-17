@@ -4,6 +4,7 @@ use nom::error::ErrorKind;
 
 use std::fmt;
 
+use crate::parse::ParserResult;
 use crate::core::Transport;
 use crate::core::parse_transport;
 
@@ -16,7 +17,7 @@ pub enum Param {
 impl Param {
 
     pub fn from_key<'a>(key: &'a [u8], value: &'a [u8]) -> Result<Param, nom::Err<(&'a [u8], ErrorKind)>> {
-        match key.as_ref() {
+        match key {
             b"transport" => Ok(Param::Transport(parse_transport(&value)?.1)),
             b"branch" => Ok(Param::Branch(String::from_utf8(value.to_vec()).expect("Utf-8 Error"))),
             _method => Err(Err::Failure((key, ErrorKind::MapRes)))
@@ -41,16 +42,13 @@ named!(parse_param<Param>, do_parse!(
     (Param::from_key(key, value)?)
 ));
 
-pub fn parse_params(input: &[u8]) -> Result<(&[u8], Vec<Param>), nom::Err<(&[u8], nom::error::ErrorKind)>> {
+pub fn parse_params(input: &[u8]) -> ParserResult<Vec<Param>> {
     let mut results = vec![];
     let mut data = input;
-    loop {
-        if let Ok((remains, param)) = parse_param(&data) {
-            results.push(param);
-            data = remains;
-        } else {
-            break;
-        }
+
+    while let Ok((remains, param)) = parse_param(&data) {
+        results.push(param);
+        data = remains;
     }
     Ok((data, results))
 }

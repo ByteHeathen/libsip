@@ -26,7 +26,7 @@ fn read_complex() {
            Header::Expires(10),
            Header::ContentLength(5)
         ],
-        body: vec!['6' as u8 ; 5]
+        body: vec![b'6'; 5]
     };
     assert_eq!(Ok((remains.as_ref(), req)), parse_message(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));
 }

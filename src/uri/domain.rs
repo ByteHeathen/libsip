@@ -49,7 +49,7 @@ named!(pub parse_ip_domain<Domain>, do_parse!(
 ));
 
 named!(pub parse_domain_domain<Domain>, do_parse!(
-    domain: map_res!(take_while!(|item| is_alphanumeric(item) || item == '.' as u8), slice_to_string) >>
+    domain: map_res!(take_while!(|item| is_alphanumeric(item) || item == b'.'), slice_to_string) >>
     opt!(char!(':')) >>
     port: opt!(map_res!(take_while!(is_digit), parse_u16)) >>
     (Domain::Domain(domain, port))

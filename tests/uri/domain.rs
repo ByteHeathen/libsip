@@ -6,22 +6,22 @@ use std::net::Ipv4Addr;
 
 #[test]
 fn read_domain() {
-    let remains = vec![' ' as u8];
+    let remains = vec![b' '];
     let domain = domain!("example.com");
     assert_eq!(Ok((remains.as_ref(), domain)), parse_domain(b"example.com "));
 
-    let remains = vec![' ' as u8];
+    let remains = vec![b' '];
     let domain = domain!("example.com", 8080);
     assert_eq!(Ok((remains.as_ref(), domain)), parse_domain(b"example.com:8080 "));
 }
 
 #[test]
 fn read_ip_address() {
-    let remains = vec![' ' as u8];
+    let remains = vec![b' '];
     let domain = ip_domain!(10, 1, 10, 1);
     assert_eq!(Ok((remains.as_ref(), domain)), parse_domain(b"10.1.10.1 "));
 
-    let remains = vec![' ' as u8];
+    let remains = vec![b' '];
     let domain = ip_domain!(10, 1, 10, 1, 8080);
     assert_eq!(Ok((remains.as_ref(), domain)), parse_domain(b"10.1.10.1:8080 "));
 }

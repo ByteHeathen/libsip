@@ -75,7 +75,7 @@ macro_rules! impl_f32_parser {
             opt!(take_while!(is_space)) >>
             char!(':') >>
             opt!(take_while!(is_space)) >>
-            value: map_res!(take_while!(|item| is_digit(item) || item == '.' as u8), parse_f32) >>
+            value: map_res!(take_while!(|item| is_digit(item) || item == b'.'), parse_f32) >>
             (Header::$variant(value))
         ));
     }

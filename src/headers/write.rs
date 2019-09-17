@@ -57,7 +57,7 @@ impl fmt::Display for Header {
 
 macro_rules! write_array_header {
     ($name:ident, $item: ident) => {
-        fn $name(name: &str, f: &mut fmt::Formatter, v: &Vec<$item>) -> fmt::Result {
+        fn $name(name: &str, f: &mut fmt::Formatter, v: &[$item]) -> fmt::Result {
             write!(f, "{}: ", name)?;
             for (index, item) in v.iter().enumerate() {
                 if index == 0 {

@@ -1,4 +1,4 @@
-pub fn error_code_to_str(code: u16) -> Option<&'static str> {
+pub fn error_code_to_str(code: u32) -> Option<&'static str> {
 	match code {
 		100 => Some("Trying"),
 		180 => Some("Ringing"),

@@ -1,5 +1,4 @@
 use nom::character::*;
-use nom::error::ErrorKind;
 
 use crate::Uri;
 use crate::parse::*;
@@ -55,17 +54,12 @@ named!(pub parse_named_field_value<(Option<String>, Uri)>, do_parse!(
     ((name, value))
 ));
 
-pub fn parse_named_field_params(input: &[u8]) -> Result<(&[u8], HashMap<String, String>), nom::Err<(&[u8], ErrorKind)>> {
+pub fn parse_named_field_params(input: &[u8]) -> ParserResult<HashMap<String, String>> {
     let mut map = HashMap::new();
     let mut input = input;
-    loop {
-        match parse_named_field_param(input) {
-            Ok((data, (key, value))) => {
-                map.insert(key, value);
-                input = data;
-            },
-            _ => break
-        }
+    while let Ok((data, (key, value))) = parse_named_field_param(input) {
+        map.insert(key, value);
+        input = data;
     }
     Ok((input, map))
 }

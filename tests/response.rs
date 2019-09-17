@@ -21,7 +21,7 @@ fn write_complex() {
             Header::Expires(10),
             Header::ContentLength(5)
         ],
-        body: vec!['5' as u8; 5]
+        body: vec![b'5'; 5]
     };
     assert_eq!("SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555".to_string(), format!("{}", req));
 }
@@ -48,7 +48,7 @@ fn read_complex() {
             Header::Expires(10),
             Header::ContentLength(5)
         ],
-        body: vec!['5' as u8; 5]
+        body: vec![b'5'; 5]
     };
     assert_eq!(Ok((remains.as_ref(), req)), parse_response(b"SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555"));
 }

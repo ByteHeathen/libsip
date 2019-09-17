@@ -26,7 +26,7 @@ fn write_complex() {
             Header::Expires(10),
             Header::ContentLength(5)
         ],
-        body: vec!['5' as u8; 5]
+        body: vec![b'5'; 5]
     };
     assert_eq!("REGISTER sip:example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555".to_string(), format!("{}", req));
 }
@@ -57,7 +57,7 @@ fn read_complex() {
            Header::Expires(10),
            Header::ContentLength(5)
         ],
-        body: vec!['6' as u8 ; 5]
+        body: vec![b'6' ; 5]
     };
     assert_eq!(Ok((remains.as_ref(), req)), parse_request(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));
 }

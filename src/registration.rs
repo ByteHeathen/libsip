@@ -41,7 +41,7 @@ impl RegistrationManager {
             }
             if self.cfg.add_cseq {
                 self.cseq_counter += 1;
-                headers.push(Header::CSeq(self.cseq_counter, method.clone()));
+                headers.push(Header::CSeq(self.cseq_counter, method));
             }
             if let Some(exp) = self.cfg.expires_header {
                 headers.push(Header::Expires(exp));
