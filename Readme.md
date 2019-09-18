@@ -5,6 +5,7 @@ libsip is a library implementation of the sip protocol as described in
 parsing the entire SIP Protocol, but will only provide helpers for certain
 common use cases.
 
+**WIP** This library is still very much under construction.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -35,3 +36,4 @@ cargo run --example udp_register
 #### dependencies
   - **[nom](https://crates.io/crates/nom) 5.0.1**
   - **[failure](https://crates.io/crates/failure) 0.1.5**
+  - **[rand](https://crates.io/crates/rand) 0.7.2**

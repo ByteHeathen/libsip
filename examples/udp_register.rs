@@ -1,3 +1,10 @@
+//! This example was created using a virtualbox vm
+//! running ubuntu 19.04 and fusionpbx running at
+//! 192.168.1.123
+//!
+//! This expects and extension with the numeric id `20`
+//! and a password of `program`
+
 extern crate libsip;
 
 use libsip::*;
@@ -11,7 +18,7 @@ use std::net::UdpSocket;
 
 fn get_our_uri() -> Uri {
     Uri::sip(ip_domain!(192, 168, 1, 76, 5060))
-        .auth(uri_auth!("phone"))
+        .auth(uri_auth!("20"))
         .parameter(Param::Transport(Transport::Udp))
 }
 

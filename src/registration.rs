@@ -21,9 +21,9 @@ pub struct Config {
     /// The value to set for the user_agent header,
     /// default: `libsip env!('CARGO_PKG_VERSION')`
     pub user_agent: Option<String>,
-
+    /// The username to use for login.
     pub user: Option<String>,
-
+    /// The password to use for login.
     pub pass: Option<String>,
 
     realm: Option<String>,
@@ -48,13 +48,20 @@ impl Default for Config {
 /// Handle's the SIP registration process.
 #[derive(Debug, PartialEq, Clone)]
 pub struct RegistrationManager {
+    /// Uri representing the account to attempt to register.
     account_uri: Uri,
+    /// Uri representing the local machine used to register.
     local_uri: Uri,
     cfg: Config,
+    /// Current REGISTER cseq count number.
     cseq_counter: u32,
+    /// The computed hash nonce count.
     nonce_c: u32,
+    /// The CNonce value of the computer hash.
     c_nonce: Option<String>,
+    /// The Finished computed auth header.
     auth_header: Option<AuthHeader>,
+    /// The branch to use for registration.
     branch: String
 }
 
@@ -126,7 +133,7 @@ impl RegistrationManager {
         }
     }
 
-    fn set_auth_vars(&mut self, d: AuthHeader) -> Result<(), failure::Error> {
+    pub fn set_auth_vars(&mut self, d: AuthHeader) -> Result<(), failure::Error> {
         if let Some(realm) = d.1.get("realm") {
             self.cfg.realm = Some(realm.into());
         }
