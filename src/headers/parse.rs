@@ -161,7 +161,6 @@ impl_string_parser!(parse_callid_header, "Call-ID", CallId);
 impl_string_parser!(parse_alert_info_header, "Alert-Info", AlertInfo);
 impl_string_parser!(parse_error_info_header, "Error-Info", ErrorInfo);
 impl_string_parser!(parse_authentication_info_header, "Authentication-Info", AuthenticationInfo);
-impl_string_parser!(parse_authorization_header, "Authorization", Authorization);
 impl_string_parser!(parse_call_info_header, "Call-Info", CallInfo);
 impl_string_parser!(parse_in_reply_to_header, "In-Reply-To", InReplyTo);
 impl_string_parser!(parse_content_disposition_header, "Content-Disposition", ContentDisposition);
@@ -180,7 +179,6 @@ impl_string_parser!(parse_unsupported_header, "Unsupported", Unsupported);
 impl_string_parser!(parse_warning_header, "Warning", Warning);
 impl_string_parser!(parse_via_header, "Via", Via);
 impl_string_parser!(parse_priority_header, "Priority", Priority);
-//impl_string_parser!(parse_www_authenticate_header, "WWW-Authenticate", WwwAuthenticate);
 impl_u32_parser!(parse_timestamp_header, "Timestamp", Timestamp);
 impl_array_parser!(parse_accept_header, "Accept", Accept, parse_method);
 impl_array_parser!(parse_allow_header, "Allow", Allow, parse_method);
@@ -218,6 +216,19 @@ named!(pub parse_www_authenticate_header<Header>, do_parse!(
     opt!(char!(' ')) >>
     tag!("\r\n") >>
     (Header::WwwAuthenticate(auth::AuthHeader(schema, res)))
+));
+
+named!(pub parse_authorization_header<Header>, do_parse!(
+    tag!("Authorization") >>
+    opt!(take_while!(is_space)) >>
+    char!(':') >>
+    opt!(take_while!(is_space)) >>
+    schema: parse_auth_schema >>
+    char!(' ') >>
+    res: parse_auth_header_vars >>
+    opt!(char!(' ')) >>
+    tag!("\r\n") >>
+    (Header::Authorization(auth::AuthHeader(schema, res)))
 ));
 
 fn parse_auth_header_vars(input: &[u8]) -> ParserResult<HashMap<String, String>> {

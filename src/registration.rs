@@ -1,5 +1,14 @@
+
+use crate::Uri;
+use crate::Version;
+use crate::Method;
 use crate::core::SipMessage;
 use crate::headers::Header;
+use crate::headers::NamedHeader;
+use crate::headers::auth::Schema;
+use crate::headers::auth::AuthHeader;
+
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Config {
@@ -11,7 +20,15 @@ pub struct Config {
     pub expires_header: Option<u32>,
     /// The value to set for the user_agent header,
     /// default: `libsip env!('CARGO_PKG_VERSION')`
-    pub user_agent: Option<String>
+    pub user_agent: Option<String>,
+
+    pub user: Option<String>,
+
+    pub pass: Option<String>,
+
+    realm: Option<String>,
+
+    nonce: Option<String>
 }
 
 impl Default for Config {
@@ -19,7 +36,11 @@ impl Default for Config {
         Config {
             content_length: true,
             expires_header: Some(60),
-            user_agent: Some(format!("libsip {}", env!("CARGO_PKG_VERSION")))
+            user_agent: Some(format!("libsip {}", env!("CARGO_PKG_VERSION"))),
+            user: None,
+            pass: None,
+            realm: None,
+            nonce: None
         }
     }
 }
@@ -27,37 +48,131 @@ impl Default for Config {
 /// Handle's the SIP registration process.
 #[derive(Debug, PartialEq, Clone)]
 pub struct RegistrationManager {
+    account_uri: Uri,
+    local_uri: Uri,
     cfg: Config,
-    cseq_counter: u32
+    cseq_counter: u32,
+    nonce_c: u32,
+    c_nonce: Option<String>,
+    auth_header: Option<AuthHeader>,
+    branch: String
 }
 
 impl RegistrationManager {
 
-    pub fn new(cfg: Config) -> RegistrationManager {
-        RegistrationManager { cfg, cseq_counter: 444 }
+    pub fn new(account_uri: Uri, local_uri: Uri, cfg: Config) -> RegistrationManager {
+        RegistrationManager {
+            account_uri, local_uri, cfg,
+            cseq_counter: 444,
+            auth_header: None,
+            nonce_c: 1,
+            c_nonce: None,
+            branch: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>()))
+        }
     }
 
-    pub fn process(&mut self, req: SipMessage) -> Result<SipMessage, failure::Error> {
-        if let SipMessage::Request { method, uri, version, mut headers, body } = req {
-            if self.cfg.content_length {
-                let length = body.len() as u32;
-                headers.push(Header::ContentLength(length));
-            }
-            self.cseq_counter += 1;
-            headers.push(Header::CSeq(self.cseq_counter, method));
-            if let Some(exp) = self.cfg.expires_header {
-                headers.push(Header::Expires(exp));
-            }
-            if let Some(agent) = &self.cfg.user_agent {
-                headers.push(Header::UserAgent(agent.clone()));
-            }
-            Ok(SipMessage::Request { method, uri, version, headers, body })
-        } else { unreachable!() }
+    pub fn username<S: Into<String>>(&mut self, s: S) {
+        self.cfg.user = Some(s.into());
     }
-}
 
-impl Default for RegistrationManager {
-    fn default() -> RegistrationManager {
-        RegistrationManager::new(Default::default())
+    pub fn password<S: Into<String>>(&mut self, p: S) {
+        self.cfg.pass = Some(p.into());
+    }
+
+    pub fn get_request(&mut self) -> Result<SipMessage, failure::Error> {
+        self.cseq_counter += 1;
+        let to_header = self.account_uri.clone();
+        let from_header = self.account_uri.clone();
+        let contact_header = self.local_uri.clone();
+        let via_header = format!("SIP/2.0/UDP {};branch={}", self.account_uri.host_and_params()?, self.branch);
+        let mut headers = vec![
+            Header::ContentLength(0),
+            Header::To(NamedHeader::new(to_header)),
+            Header::From(NamedHeader::new(from_header)),
+            Header::Contact(NamedHeader::new(contact_header)),
+            Header::CSeq(self.cseq_counter, Method::Register),
+            Header::Via(via_header),
+            Header::CallId("kjh34asdfasdfasdfasdf@192.168.1.123".into())
+        ];
+
+        if let Some(exp) = self.cfg.expires_header {
+            headers.push(Header::Expires(exp));
+        }
+        if let Some(agent) = &self.cfg.user_agent {
+            headers.push(Header::UserAgent(agent.clone()));
+        }
+        self.add_auth_header(&mut headers);
+
+        Ok(SipMessage::Request {
+            method: Method::Register,
+            uri: self.account_uri.clone(),
+            version: Version::default(),
+            body: vec![],
+            headers,
+        })
+    }
+
+    pub fn set_challenge(&mut self, msg: SipMessage) -> Result<(), failure::Error> {
+        if let SipMessage::Response { headers, .. } = msg {
+            for item in headers {
+                match item {
+                    Header::WwwAuthenticate(auth) => self.set_auth_vars(auth)?,
+                    _ => {}
+                }
+            }
+            Ok(())
+        } else {
+            unreachable!()
+        }
+    }
+
+    fn set_auth_vars(&mut self, d: AuthHeader) -> Result<(), failure::Error> {
+        if let Some(realm) = d.1.get("realm") {
+            self.cfg.realm = Some(realm.into());
+        }
+        if let Some(nonce) = d.1.get("nonce") {
+            self.cfg.nonce = Some(nonce.into());
+        }
+        match d.0 {
+            Schema::Digest => self.handle_md5_auth()
+        }
+    }
+
+    fn handle_md5_auth(&mut self) -> Result<(), failure::Error> {
+        if let Some(realm) = &self.cfg.realm {
+            if let Some(nonce) = &self.cfg.nonce {
+                if let Some(user) = &self.cfg.user {
+                    if let Some(pass) = &self.cfg.pass {
+                        let mut map = HashMap::new();
+                        let cnonce = self.generate_cnonce();
+                        map.insert("username".into(), user.clone());
+                        map.insert("nonce".into(), format!("{}", nonce));
+                        map.insert("realm".into(), realm.clone());
+                        map.insert("uri".into(), format!("{}", self.account_uri));
+                        map.insert("qop".into(), "auth".into());
+                        map.insert("algorithm".into(), "MD5".into());
+                        map.insert("cnonce".into(), format!("{:x}", cnonce));
+                        map.insert("nc".into(), format!("{}", self.nonce_c));
+                        let ha1 = md5::compute(&format!("{}:{}:{}", user, realm, pass));
+                        let ha2 = md5::compute(format!("REGISTER:{}", self.account_uri.clone()));
+                        let digest = format!("{:x}:{}:{:x}:{:x}:auth:{:x}", ha1, nonce, self.nonce_c, cnonce, ha2);
+                        let pass = md5::compute(digest);
+                        map.insert("response".into(), format!("{:x}", pass));
+                        self.auth_header = Some(AuthHeader(Schema::Digest, map));
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn generate_cnonce(&self) -> md5::Digest {
+        md5::compute(rand::random::<[u8 ; 16]>())
+    }
+
+    fn add_auth_header(&self, headers: &mut Vec<Header>) {
+        if let Some(header) = self.auth_header.clone() {
+            headers.push(Header::Authorization(header));
+        }
     }
 }

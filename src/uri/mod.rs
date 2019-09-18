@@ -57,6 +57,13 @@ impl Uri {
         self.parameters = p;
         self
     }
+    pub fn host_and_params(&self) -> Result<String, fmt::Error> {
+        let mut auth = format!("{}", self.host);
+        for param in &self.parameters {
+            auth += &format!("{}", param);
+        }
+        Ok(auth)
+    }
 }
 
 impl fmt::Display for Uri {

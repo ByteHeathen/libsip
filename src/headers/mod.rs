@@ -34,7 +34,7 @@ pub enum Header {
     AlertInfo(String),
     ErrorInfo(String),
     AuthenticationInfo(String),
-    Authorization(String),
+    Authorization(auth::AuthHeader),
     CallInfo(String),
     InReplyTo(String),
     ContentDisposition(String),

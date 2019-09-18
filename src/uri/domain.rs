@@ -45,7 +45,6 @@ named!(pub parse_ip_domain<Domain>, do_parse!(
     addr: parse_ip_address >>
     opt!(char!(':')) >>
     port: opt!(map_res!(take_while!(is_digit), parse_u16)) >>
-//    addr: Ipv4Addr::new(0, 0, 0, 0) >>
     (Domain::Ipv4(addr, port))
 ));
 

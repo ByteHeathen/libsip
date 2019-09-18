@@ -19,7 +19,7 @@ pub struct AuthHeader(pub Schema, pub HashMap<String, String>);
 
 impl fmt::Display for AuthHeader {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "WWW-Authenticate: {}", self.0)?;
+        write!(f, "{}", self.0)?;
         for (index, (key, value)) in self.1.iter().enumerate() {
             if index == 0 {
                 write!(f, " {}=\"{}\"", key, value)?;

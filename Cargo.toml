@@ -13,3 +13,5 @@ description = "SIP protocol Implementation, with a focus towords softphone clien
 [dependencies]
 nom = "5.0.1"
 failure = "0.1.5"
+md5 = "*"
+rand = "*"

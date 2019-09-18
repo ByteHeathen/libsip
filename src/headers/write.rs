@@ -26,7 +26,7 @@ impl fmt::Display for Header {
             Header::AlertInfo(data) => write_simple_field("Alert-Info", data, f),
             Header::ErrorInfo(data) => write_simple_field("Error-Info", data, f),
             Header::AuthenticationInfo(data) => write_simple_field("Authentication-Info", data, f),
-            Header::Authorization(data) => write_simple_field("Authorization", data, f),
+            Header::Authorization(data) => write_auth_header("Authorization", data, f),
             Header::CallInfo(data) => write_simple_field("Call-Info", data, f),
             Header::InReplyTo(data) => write_simple_field("In-Reply-To", data, f),
             Header::ContentDisposition(data) => write_simple_field("Content-Disposition", data, f),
@@ -49,7 +49,7 @@ impl fmt::Display for Header {
             Header::Warning(data) => write_simple_field("Warning", data, f),
             Header::Via(data) => write_simple_field("Via", data, f),
             Header::Priority(data) => write_simple_field("Priority", data, f),
-            Header::WwwAuthenticate(data) => write!(f, "{}", data)
+            Header::WwwAuthenticate(data) => write_auth_header("WWW-Authenticate", data, f)
         }
     }
 }
@@ -74,5 +74,8 @@ macro_rules! write_array_header {
 write_array_header!(write_method_array_header, Method);
 write_array_header!(write_string_array_header, String);
 fn write_simple_field<D: fmt::Display>(header: &str, data: D, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{}: {}", header, data)
+}
+fn write_auth_header<D: fmt::Display>(header: &str, data: D, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "{}: {}", header, data)
 }

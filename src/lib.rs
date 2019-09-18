@@ -15,7 +15,7 @@
 //! that is sent to the server you must wait for the Challange response pass
 //! it to the `set_challenge` method of the RegistrationManager.
 //! ```rust,compile_fail
-//!    let manager = RegistrationManager::default();
+//!    let manager = RegistrationManager::new(account_uri, local_uri, Default::default());
 //!    let req = manager.get_request()?;
 //!    // send request
 //!    // get response as res

@@ -3,63 +3,50 @@ extern crate libsip;
 use libsip::*;
 use libsip::uri::Param;
 use libsip::core::Transport;
+use libsip::uri::parse_uri;
 use libsip::core::message::parse_response;
 use libsip::registration::RegistrationManager;
 
 use std::net::UdpSocket;
 
-fn get_register_request() -> SipMessage {
-    let to_uri = get_our_uri();
-    let from_uri = to_uri.clone();
-    let contact_uri = to_uri.clone();
-    SipMessage::Request {
-        method: Method::Register,
-        uri: Uri::sip(ip_domain!(192,168,1,123)),
-        version: Version::default(),
-        headers: vec![
-            Header::Via(format!("SIP/2.0/UDP 192.168.1.123;transport=UDP;branch=Some-Branch")),
-            Header::MaxForwards(70),
-            Header::From(named_header!(from_uri)),
-            Header::To(named_header!(to_uri)),
-            Header::Contact(named_header!(contact_uri)),
-            Header::CallId("kjh34asdfasdfasdfasdf@192.168.1.123".into()),
-            Header::Allow(vec![Method::Invite, Method::Ack, Method::Cancel]),
-        ],
-        body: vec![]
-    }
-}
-
 fn get_our_uri() -> Uri {
     Uri::sip(ip_domain!(192, 168, 1, 76, 5060))
-        .auth(uri_auth!("program"))
+        .auth(uri_auth!("phone"))
         .parameter(Param::Transport(Transport::Udp))
 }
 
-fn send_request_print_response(req: SipMessage) -> Result<SipMessage, failure::Error> {
+fn send_request_get_response(req: SipMessage) -> Result<SipMessage, failure::Error> {
     let addr = "0.0.0.0:5060";
     let sock = UdpSocket::bind(addr)?;
     sock.send_to(&format!("{}", req).as_ref(), "192.168.1.123:5060")?;
     let mut buf = vec![0; 65535];
     let (amt, _src) = sock.recv_from(&mut buf)?;
+    if let Err(nom::Err::Error((data, _))) = parse_response(&buf[..amt]) {
+        panic!("{}", String::from_utf8_lossy(data));
+    }
     let (_, msg) = parse_response(&buf[..amt]).unwrap();
     Ok(msg)
 }
 
 
 fn main() -> Result<(), failure::Error>{
-    let mut builder = RegistrationManager::default();
+    let acc_url = parse_uri(b"sip:20@192.168.1.123 ").unwrap().1
+            .parameter(Param::Transport(Transport::Udp));
+    let mut builder = RegistrationManager::new(acc_url, get_our_uri(), Default::default());
+    builder.username("20");
+    builder.password("program");
 
-    let req = get_register_request();
+    let req = builder.get_request()?;
+    println!("{}", req);
 
-    let final_req = builder.process(req)?;
-    println!("{}", final_req);
-    let mut builder = RegistrationManager::default();
+    let res = send_request_get_response(req)?;
+    println!("{}\n", &res);
+    builder.set_challenge(res)?;
 
-    let req = get_register_request();
+    let authed = builder.get_request()?;
+    println!("\n{}\n", authed);
 
-    let final_req = builder.process(req)?;
-    println!("{}", final_req);
-
-    send_request_print_response(final_req)?;
+    let res = send_request_get_response(authed)?;
+    println!("{}\n", res);
     Ok(())
 }

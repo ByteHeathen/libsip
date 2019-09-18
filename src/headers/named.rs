@@ -14,6 +14,17 @@ pub struct NamedHeader {
     pub params: HashMap<String, String>
 }
 
+impl NamedHeader {
+
+    pub fn new(uri: Uri) -> NamedHeader {
+        NamedHeader {
+            display_name: None,
+            params: HashMap::new(),
+            uri
+        }
+    }
+}
+
 impl fmt::Display for NamedHeader {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if let Some(name) = &self.display_name {
