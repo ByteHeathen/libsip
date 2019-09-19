@@ -47,7 +47,7 @@ impl fmt::Display for Header {
             Header::Timestamp(data) => write_simple_field("Timestamp", data, f),
             Header::Unsupported(data) => write_simple_field("Unsupported", data, f),
             Header::Warning(data) => write_simple_field("Warning", data, f),
-            Header::Via(data) => write_simple_field("Via", data, f),
+            Header::Via(data) => write!(f, "{}", data),
             Header::Priority(data) => write_simple_field("Priority", data, f),
             Header::WwwAuthenticate(data) => write_auth_header("WWW-Authenticate", data, f)
         }

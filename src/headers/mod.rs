@@ -4,6 +4,7 @@ mod content;
 mod language;
 pub mod auth;
 pub mod parse;
+pub mod via;
 pub use self::content::ContentType;
 pub use self::language::Language;
 pub use self::named::NamedHeader;
@@ -55,7 +56,7 @@ pub enum Header {
     Timestamp(u32),
     Unsupported(String),
     Warning(String),
-    Via(String),
+    Via(via::ViaHeader),
     Priority(String),
     WwwAuthenticate(auth::AuthHeader)
 }

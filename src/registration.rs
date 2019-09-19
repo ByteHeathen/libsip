@@ -2,12 +2,14 @@
 use crate::Uri;
 use crate::Version;
 use crate::Method;
+use crate::uri::Param;
 use crate::core::SipMessage;
+use crate::core::Transport;
 use crate::headers::Header;
 use crate::headers::NamedHeader;
 use crate::headers::auth::Schema;
 use crate::headers::auth::AuthHeader;
-
+use crate::headers::via::ViaHeader;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -91,14 +93,15 @@ impl RegistrationManager {
         let to_header = self.account_uri.clone();
         let from_header = self.account_uri.clone();
         let contact_header = self.local_uri.clone();
-        let via_header = format!("SIP/2.0/UDP {};branch={}", self.account_uri.host_and_params()?, self.branch);
+        let uri = self.account_uri.clone().parameter(Param::Branch(self.branch.clone()));
+        let via_uri = format!("{}", uri.host_and_params()?);
         let mut headers = vec![
             Header::ContentLength(0),
             Header::To(NamedHeader::new(to_header)),
             Header::From(NamedHeader::new(from_header)),
             Header::Contact(NamedHeader::new(contact_header)),
             Header::CSeq(self.cseq_counter, Method::Register),
-            Header::Via(via_header),
+            Header::Via(ViaHeader { uri: via_uri, version: Default::default(), transport: Transport::Udp}),
             Header::CallId("kjh34asdfasdfasdfasdf@192.168.1.123".into())
         ];
 

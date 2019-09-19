@@ -6,6 +6,8 @@ use super::named::*;
 use super::content::*;
 use super::language::*;
 use crate::core::parse_method;
+use crate::core::parse_transport;
+use crate::core::parse_version;
 
 use std::collections::HashMap;
 
@@ -177,7 +179,7 @@ impl_string_parser!(parse_record_route_header, "Record-Route", RecordRoute);
 impl_string_parser!(parse_server_header, "Server", Server);
 impl_string_parser!(parse_unsupported_header, "Unsupported", Unsupported);
 impl_string_parser!(parse_warning_header, "Warning", Warning);
-impl_string_parser!(parse_via_header, "Via", Via);
+//impl_string_parser!(parse_via_header, "Via", Via);
 impl_string_parser!(parse_priority_header, "Priority", Priority);
 impl_u32_parser!(parse_timestamp_header, "Timestamp", Timestamp);
 impl_array_parser!(parse_accept_header, "Accept", Accept, parse_method);
@@ -203,6 +205,20 @@ named!(pub parse_cseq_header<Header>, do_parse!(
     method: parse_method >>
     tag!("\r\n") >>
     (Header::CSeq(value, method))
+));
+
+named!(pub parse_via_header<Header>, do_parse!(
+    tag!("Via") >>
+    opt!(take_while!(is_space)) >>
+    char!(':') >>
+    opt!(take_while!(is_space)) >>
+    version: parse_version >>
+    char!('/') >>
+    transport: parse_transport >>
+    char!(' ') >>
+    uri: map_res!(take_until!("\r"), slice_to_string) >>
+    tag!("\r\n") >>
+    (Header::Via(via::ViaHeader { version, transport, uri }))
 ));
 
 named!(pub parse_www_authenticate_header<Header>, do_parse!(
