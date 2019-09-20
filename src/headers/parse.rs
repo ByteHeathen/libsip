@@ -1,6 +1,7 @@
 use nom::character::*;
 
 use super::*;
+use crate::uri::parse_uri;
 use crate::parse::*;
 use super::named::*;
 use super::content::*;
@@ -235,7 +236,7 @@ named!(pub parse_via_header<Header>, do_parse!(
     char!('/') >>
     transport: parse_transport >>
     char!(' ') >>
-    uri: map_res!(take_until!("\r"), slice_to_string) >>
+    uri: parse_uri >>
     tag!("\r\n") >>
     (Header::Via(via::ViaHeader { version, transport, uri }))
 ));

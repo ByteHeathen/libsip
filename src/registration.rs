@@ -97,8 +97,11 @@ impl RegistrationManager {
         if let Some(name) = &self.cfg.user {
             contact_header = contact_header.auth(UriAuth::new(name));
         }
-        let uri = self.account_uri.clone().parameter(Param::Branch(self.branch.clone()));
-        let via_uri = format!("{}", uri.host_and_params()?);
+        let via_uri = self.account_uri.clone()
+                    .parameter(Param::Branch(self.branch.clone()))
+                    .authless()
+                    .schemaless();
+        //let via_uri = format!("{}", uri.host_and_params()?);
         let mut headers = vec![
             Header::ContentLength(0),
             Header::To(NamedHeader::new(to_header)),

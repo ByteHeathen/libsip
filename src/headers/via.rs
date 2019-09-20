@@ -1,5 +1,6 @@
-use crate::core::Transport;
+use crate::uri::Uri;
 use crate::core::Version;
+use crate::core::Transport;
 
 use std::fmt;
 
@@ -7,7 +8,7 @@ use std::fmt;
 pub struct ViaHeader {
     pub version: Version,
     pub transport: Transport,
-    pub uri: String
+    pub uri: Uri
 }
 
 impl fmt::Display for ViaHeader {

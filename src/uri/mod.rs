@@ -18,7 +18,7 @@ pub use self::auth::parse_uriauth;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Uri {
-    schema: Schema,
+    schema: Option<Schema>,
     host: Domain,
     auth: Option<UriAuth>,
     parameters: Vec<Param>
@@ -28,7 +28,16 @@ impl Uri {
 
     pub fn new(schema: Schema, host: Domain) -> Uri {
         Uri {
-            schema,
+            schema: Some(schema),
+            host,
+            auth: None,
+            parameters: vec![]
+        }
+    }
+
+    pub fn new_schemaless(host: Domain) -> Uri {
+        Uri {
+            schema: None,
             host,
             auth: None,
             parameters: vec![]
@@ -48,6 +57,11 @@ impl Uri {
         self
     }
 
+    pub fn authless(mut self) -> Uri {
+        self.auth = None;
+        self
+    }
+
     pub fn parameter(mut self, p: Param) -> Uri {
         self.parameters.push(p);
         self
@@ -55,6 +69,11 @@ impl Uri {
 
     pub fn parameters(mut self, p: Vec<Param>) -> Uri {
         self.parameters = p;
+        self
+    }
+
+    pub fn schemaless(mut self) -> Uri {
+        self.schema = None;
         self
     }
     pub fn host_and_params(&self) -> Result<String, fmt::Error> {
@@ -68,11 +87,14 @@ impl Uri {
 
 impl fmt::Display for Uri {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}:", self.schema)?;
-        if let Some(auth) = &self.auth {
-            write!(f, "{}@", auth)?;
+        if let Some(schema) = self.schema {
+            write!(f, "{}:", schema)?;
         }
-        write!(f, "{}", self.host)?;
+        if let Some(auth) = &self.auth {
+            write!(f, "{}@{}", auth, self.host)?;
+        } else {
+            write!(f, "{}", self.host)?;
+        }
         for param in &self.parameters {
             write!(f, "{}", param)?;
         }
@@ -81,10 +103,9 @@ impl fmt::Display for Uri {
 }
 
 named!(pub parse_uri<Uri>, do_parse!(
-    schema: parse_schema >>
-    char!(':') >>
+    schema: opt!(pair!(parse_schema, char!(':'))) >>
     auth: opt!(parse_uriauth) >>
     host: parse_domain >>
     parameters: parse_params >>
-    (Uri { schema, host, parameters, auth })
+    (Uri { schema: schema.map(|item|item.0), host, parameters, auth })
 ));
