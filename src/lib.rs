@@ -27,9 +27,16 @@
 #[macro_use]
 extern crate nom;
 extern crate failure;
+#[cfg(feature = "tokio")]
+extern crate tokio_codec;
 
 #[macro_use]
 mod macros;
+
+#[cfg(feature = "tokio")]
+mod codec;
+#[cfg(feature = "tokio")]
+pub use self::codec::SipCodec;
 
 pub mod core;
 pub mod uri;

@@ -10,8 +10,15 @@ homepage = "https://github.com/Bytebuddha/libsip"
 repository = "https://github.com/Bytebuddha/libsip"
 description = "SIP protocol Implementation, with a focus towords softphone clients."
 
+[features]
+default = []
+async = ["tokio", "tokio-codec"]
+
 [dependencies]
 nom = "5.0.1"
 failure = "0.1.5"
 md5 = "*"
 rand = "*"
+bytes = "*"
+tokio = { version = "0.2.0-alpha.4", optional = true }
+tokio-codec = { version = "0.2.0-alpha.5", optional = true }
