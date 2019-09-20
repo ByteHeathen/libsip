@@ -55,12 +55,14 @@ named!(pub parse_header<Header>, alt!(
     parse_useragent_header |
     parse_via_header |
     parse_warning_header |
-    parse_www_authenticate_header
+    parse_www_authenticate_header |
+    parse_other_header
 ));
 
 macro_rules! impl_u32_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
         named!(pub $name<Header>, do_parse!(
+            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -74,6 +76,7 @@ macro_rules! impl_u32_parser {
 macro_rules! impl_f32_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
         named!(pub $name<Header>, do_parse!(
+            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -87,6 +90,7 @@ macro_rules! impl_f32_parser {
 macro_rules! impl_string_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
         named!(pub $name<Header>, do_parse!(
+            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -101,6 +105,7 @@ macro_rules! impl_string_parser {
 macro_rules! impl_array_parser {
     ($name:tt, $tag:tt, $variant:ident, $func:ident) => {
         named!(pub $name<Header>, do_parse!(
+            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -115,6 +120,7 @@ macro_rules! impl_array_parser {
 macro_rules! impl_named_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
         named!(pub $name<Header>, do_parse!(
+            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -130,6 +136,7 @@ macro_rules! impl_named_parser {
 macro_rules! impl_type_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
         named!(pub $name<Header>, do_parse!(
+            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -143,6 +150,7 @@ macro_rules! impl_type_parser {
 macro_rules! impl_lang_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
         named!(pub $name<Header>, do_parse!(
+            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -195,7 +203,17 @@ impl_type_parser!(parse_accept_encoding_header, "Accept-Encoding", AcceptEncodin
 impl_lang_parser!(parse_content_language_header, "Content-Language", ContentLanguage);
 impl_lang_parser!(parse_accept_language_header, "Accept-Language", AcceptLanguage);
 
+named!(pub parse_other_header<Header>, do_parse!(
+    opt!(tag!("\r\n")) >>
+    key: map_res!(take_while!(|item| is_alphanumeric(item) || item == b'-'), slice_to_string) >>
+    char!(':') >>
+    value: map_res!(take_until!("\r"), slice_to_string) >>
+    tag!("\r\n") >>
+    (Header::Other(key, value))
+));
+
 named!(pub parse_cseq_header<Header>, do_parse!(
+    opt!(tag!("\r\n")) >>
     tag!("CSeq") >>
     opt!(take_while!(is_space)) >>
     char!(':') >>
@@ -208,6 +226,7 @@ named!(pub parse_cseq_header<Header>, do_parse!(
 ));
 
 named!(pub parse_via_header<Header>, do_parse!(
+    opt!(tag!("\r\n")) >>
     tag!("Via") >>
     opt!(take_while!(is_space)) >>
     char!(':') >>
@@ -222,6 +241,7 @@ named!(pub parse_via_header<Header>, do_parse!(
 ));
 
 named!(pub parse_www_authenticate_header<Header>, do_parse!(
+    opt!(tag!("\r\n")) >>
     tag!("WWW-Authenticate") >>
     opt!(take_while!(is_space)) >>
     char!(':') >>
@@ -235,6 +255,7 @@ named!(pub parse_www_authenticate_header<Header>, do_parse!(
 ));
 
 named!(pub parse_authorization_header<Header>, do_parse!(
+    opt!(tag!("\r\n")) >>
     tag!("Authorization") >>
     opt!(take_while!(is_space)) >>
     char!(':') >>

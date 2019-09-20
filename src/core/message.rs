@@ -1,5 +1,4 @@
-use nom::character::is_digit;
-use nom::character::is_alphabetic;
+use nom::character::*;
 
 use std::fmt;
 
@@ -113,7 +112,7 @@ named!(pub parse_response<SipMessage>, do_parse!(
     char!(' ') >>
     code: map_res!(take_while!(is_digit), parse_u32) >>
     char!(' ') >>
-    opt!(map_res!(take_while!(is_alphabetic), slice_to_string)) >>
+    opt!(map_res!(take_while!(|item| is_alphabetic(item) || is_space(item)), slice_to_string)) >>
     opt!(char!(' ')) >>
     tag!("\r\n") >>
     headers: parse_headers >>

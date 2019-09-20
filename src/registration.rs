@@ -3,6 +3,7 @@ use crate::Uri;
 use crate::Version;
 use crate::Method;
 use crate::uri::Param;
+use crate::uri::UriAuth;
 use crate::core::SipMessage;
 use crate::core::Transport;
 use crate::headers::Header;
@@ -92,7 +93,10 @@ impl RegistrationManager {
         self.cseq_counter += 1;
         let to_header = self.account_uri.clone();
         let from_header = self.account_uri.clone();
-        let contact_header = self.local_uri.clone();
+        let mut contact_header = self.local_uri.clone();
+        if let Some(name) = &self.cfg.user {
+            contact_header = contact_header.auth(UriAuth::new(name));
+        }
         let uri = self.account_uri.clone().parameter(Param::Branch(self.branch.clone()));
         let via_uri = format!("{}", uri.host_and_params()?);
         let mut headers = vec![
@@ -127,6 +131,7 @@ impl RegistrationManager {
             for item in headers {
                 match item {
                     Header::WwwAuthenticate(auth) => self.set_auth_vars(auth)?,
+                    Header::Expires(expire) => { self.cfg.expires_header = Some(expire); },
                     _ => {}
                 }
             }

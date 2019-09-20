@@ -58,5 +58,6 @@ pub enum Header {
     Warning(String),
     Via(via::ViaHeader),
     Priority(String),
-    WwwAuthenticate(auth::AuthHeader)
+    WwwAuthenticate(auth::AuthHeader),
+    Other(String, String)
 }

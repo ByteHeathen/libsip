@@ -11,7 +11,8 @@ use crate::core::parse_transport;
 #[derive(Debug, PartialEq, Clone)]
 pub enum Param {
     Transport(Transport),
-    Branch(String)
+    Branch(String),
+    RPort
 }
 
 impl Param {
@@ -29,12 +30,18 @@ impl fmt::Display for Param {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Param::Transport(trans) => write!(f, ";transport={}", trans),
-            Param::Branch(branch) => write!(f, ";branch={}", branch)
+            Param::Branch(branch) => write!(f, ";branch={}", branch),
+            Param::RPort => write!(f, "rport")
         }
     }
 }
 
-named!(parse_param<Param>, do_parse!(
+named!(parse_param<Param>, alt!(
+    map!(tag!("rport"), |_| Param::RPort) |
+    parse_named_param
+));
+
+named!(parse_named_param<Param>, do_parse!(
     tag!(";") >>
     key: take_while!(is_alphabetic) >>
     tag!("=") >>

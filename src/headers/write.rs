@@ -49,7 +49,8 @@ impl fmt::Display for Header {
             Header::Warning(data) => write_simple_field("Warning", data, f),
             Header::Via(data) => write!(f, "{}", data),
             Header::Priority(data) => write_simple_field("Priority", data, f),
-            Header::WwwAuthenticate(data) => write_auth_header("WWW-Authenticate", data, f)
+            Header::WwwAuthenticate(data) => write_auth_header("WWW-Authenticate", data, f),
+            Header::Other(key, value) => write!(f, "{}: {}", key, value)
         }
     }
 }
