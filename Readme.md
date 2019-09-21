@@ -37,3 +37,21 @@ cargo run --example udp_register
   - **[nom](https://crates.io/crates/nom) 5.0.1**
   - **[failure](https://crates.io/crates/failure) 0.1.5**
   - **[rand](https://crates.io/crates/rand) 0.7.2**
+  - **[bytes](https://crates.io/crates/bytes) 0.4.12**
+  - **[md5](https://crates.io/crates/md5) 0.6.1**
+  ##### Optional
+    - **[tokio](https://crates.io/crates/tokio) 0.2.0-alpha.4**
+    - **[tokio-codec](https://crates.io/crates/tokio-codec) 0.2.0-alpha.5**
+
+#### Alternatives
+  - **[parsip](https://crates/crates/parsip)**
+  Is only for parsing SIP messages. I wanted libsip to be able to handle some user case's
+  specifically Registration.
+  - **[sip-codec](https://crates/crates/sip-codec)**
+  I attempted to use this library first, lots of features are not implemented like writing
+  sip requests and a few other fairly common things. I also wanted SIP Headers to be in the form of an enum witch would have required
+  basically rewriting this crate.
+  - **[sip](https://crates/crates/sip)**
+  This crate appears to be empty
+  - **[tokio-sip](https://crates.io/crates/tokio-sip)**
+  This crate also appears to be empty
