@@ -1,5 +1,6 @@
 /// if the `-v` is present then the registration requests
-/// will be shown as well.
+/// will be shown as well. This example Does not use the sip
+/// codec.
 
 extern crate libsip;
 extern crate tokio;
