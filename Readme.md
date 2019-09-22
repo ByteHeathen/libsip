@@ -9,7 +9,8 @@ common use cases.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/bytebuddha/libsip.svg?branch=master)](https://travis-ci.org/bytebuddha/libsip)
-
+[![Crates.io](https://img.shields.io/crates/v/libsip.svg)](https://crates.io/crates/libsip)
+[![Docs.rs](https://docs.rs/mio/libsip.svg)](https://docs.rs/libsip)
 #### Parsing
 
 ```rust
