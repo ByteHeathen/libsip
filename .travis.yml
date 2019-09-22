@@ -3,5 +3,5 @@ rust: [stable, beta, nightly]
 cache: cargo
 
 script:
-  - bash -c 'cargo build --release'
-  - bash -c 'cargo test --release'
+  - bash -c 'cargo build --release --features async'
+  - bash -c 'cargo test --release --features async'
