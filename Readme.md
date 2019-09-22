@@ -8,6 +8,7 @@ common use cases.
 **WIP** This library is still very much under construction.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/bytebuddha/libsip.svg?branch=master)](https://travis-ci.org/bytebuddha/libsip)
 
 #### Parsing
 
