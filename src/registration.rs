@@ -156,6 +156,10 @@ impl RegistrationManager {
         }
     }
 
+    pub fn expires(&self) -> u32 {
+        self.cfg.expires_header.unwrap_or(60)
+    }
+
     fn handle_md5_auth(&mut self) -> Result<(), failure::Error> {
         if let Some(realm) = &self.cfg.realm {
             if let Some(nonce) = &self.cfg.nonce {
