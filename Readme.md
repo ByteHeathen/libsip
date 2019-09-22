@@ -39,9 +39,9 @@ cargo run --example udp_register
   - **[rand](https://crates.io/crates/rand) 0.7.2**
   - **[bytes](https://crates.io/crates/bytes) 0.4.12**
   - **[md5](https://crates.io/crates/md5) 0.6.1**
-  ##### Optional
-    - **[tokio](https://crates.io/crates/tokio) 0.2.0-alpha.4**
-    - **[tokio-codec](https://crates.io/crates/tokio-codec) 0.2.0-alpha.5**
+##### Optional
+  - **[tokio](https://crates.io/crates/tokio) 0.2.0-alpha.4**
+  - **[tokio-codec](https://crates.io/crates/tokio-codec) 0.2.0-alpha.5**
 
 #### Alternatives
   - **[parsip](https://crates/crates/parsip)**
