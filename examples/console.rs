@@ -21,7 +21,7 @@ const PASSWORD: &'static str = "program";
 const SOCKET_ADDRESS: &'static str = "192.168.1.76:5060";
 const SERVER_SOCK_ADDRESS: &'static str = "192.168.1.123:5060";
 
-async fn registration_process(reg: &mut RegistrationManager, sock: &mut UdpSocket, verbose: bool) -> Result<(), failure::Error>{
+async fn registration_process(reg: &mut RegistrationManager, sock: &mut UdpSocket, verbose: bool) -> Result<(), io::Error>{
     let mut buf = vec![0; 65535];
     let request = reg.get_request()?;
     if verbose {
@@ -59,7 +59,7 @@ async fn registration_process(reg: &mut RegistrationManager, sock: &mut UdpSocke
 }
 
 #[tokio::main]
-async fn main() -> Result<(), failure::Error> {
+async fn main() -> Result<(), io::Error> {
     let verbose = get_verbose();
     let mut sock = UdpSocket::bind(SOCKET_ADDRESS).await?;
     let mut registrar = RegistrationManager::new(account_uri(), local_uri(), Default::default());

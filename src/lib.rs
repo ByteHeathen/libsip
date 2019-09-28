@@ -26,7 +26,6 @@
 
 #[macro_use]
 extern crate nom;
-extern crate failure;
 #[cfg(feature = "tokio")]
 extern crate tokio_codec;
 

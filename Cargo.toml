@@ -16,7 +16,6 @@ async = ["tokio", "tokio-codec"]
 
 [dependencies]
 nom = "5.0.1"
-failure = "0.1.5"
 #TODO: Find a better crate/method for generating md5 hash's
 md5 = "0.6.1"
 rand = "0.7.2"

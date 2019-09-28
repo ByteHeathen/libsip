@@ -12,6 +12,7 @@ use crate::headers::auth::Schema;
 use crate::headers::auth::AuthHeader;
 use crate::headers::via::ViaHeader;
 use std::collections::HashMap;
+use std::io;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Config {
@@ -92,7 +93,7 @@ impl RegistrationManager {
         self.cfg.pass = Some(p.into());
     }
 
-    pub fn get_request(&mut self) -> Result<SipMessage, failure::Error> {
+    pub fn get_request(&mut self) -> Result<SipMessage, io::Error> {
         self.cseq_counter += 1;
         let to_header = self.account_uri.clone();
         let from_header = self.account_uri.clone();
@@ -132,7 +133,7 @@ impl RegistrationManager {
         })
     }
 
-    pub fn set_challenge(&mut self, msg: SipMessage) -> Result<(), failure::Error> {
+    pub fn set_challenge(&mut self, msg: SipMessage) -> Result<(), io::Error> {
         if let SipMessage::Response { headers, .. } = msg {
             for item in headers {
                 match item {
@@ -147,7 +148,7 @@ impl RegistrationManager {
         }
     }
 
-    pub fn set_auth_vars(&mut self, d: AuthHeader) -> Result<(), failure::Error> {
+    pub fn set_auth_vars(&mut self, d: AuthHeader) -> Result<(), io::Error> {
         if let Some(realm) = d.1.get("realm") {
             self.cfg.realm = Some(realm.into());
         }
@@ -163,7 +164,7 @@ impl RegistrationManager {
         self.cfg.expires_header.unwrap_or(60)
     }
 
-    fn handle_md5_auth(&mut self) -> Result<(), failure::Error> {
+    fn handle_md5_auth(&mut self) -> Result<(), io::Error> {
         if let Some(realm) = &self.cfg.realm {
             if let Some(nonce) = &self.cfg.nonce {
                 if let Some(user) = &self.cfg.user {

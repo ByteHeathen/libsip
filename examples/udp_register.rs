@@ -14,6 +14,7 @@ use libsip::uri::parse_uri;
 use libsip::core::message::parse_response;
 use libsip::registration::RegistrationManager;
 
+use std::io;
 use std::net::UdpSocket;
 
 fn get_our_uri() -> Uri {
@@ -22,7 +23,7 @@ fn get_our_uri() -> Uri {
         .parameter(Param::Transport(Transport::Udp))
 }
 
-fn send_request_get_response(req: SipMessage) -> Result<SipMessage, failure::Error> {
+fn send_request_get_response(req: SipMessage) -> Result<SipMessage, io::Error> {
     let addr = "0.0.0.0:5060";
     let sock = UdpSocket::bind(addr)?;
     sock.send_to(&format!("{}", req).as_ref(), "192.168.1.123:5060")?;
@@ -36,7 +37,7 @@ fn send_request_get_response(req: SipMessage) -> Result<SipMessage, failure::Err
 }
 
 
-fn main() -> Result<(), failure::Error>{
+fn main() -> Result<(), io::Error>{
     let acc_url = parse_uri(b"sip:20@192.168.1.123 ").unwrap().1
             .parameter(Param::Transport(Transport::Udp));
     let mut builder = RegistrationManager::new(acc_url, get_our_uri(), Default::default());

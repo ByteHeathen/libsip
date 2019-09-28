@@ -1,4 +1,5 @@
 use std::fmt;
+use std::io;
 
 pub mod schema;
 pub use self::schema::Schema;
@@ -81,12 +82,12 @@ impl Uri {
         format!("{}", self.host)
     }
 
-    pub fn host_and_params(&self) -> Result<String, fmt::Error> {
-        let mut auth = format!("{}", self.host);
+    pub fn host_and_params(&self) -> Result<String, io::Error> {
+        let mut host = self.host();
         for param in &self.parameters {
-            auth += &format!("{}", param);
+            host += &format!("{}", param);
         }
-        Ok(auth)
+        Ok(host)
     }
 }
 
