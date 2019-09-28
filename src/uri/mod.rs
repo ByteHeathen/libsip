@@ -76,6 +76,11 @@ impl Uri {
         self.schema = None;
         self
     }
+
+    pub fn host(&self) -> String {
+        format!("{}", self.host)
+    }
+
     pub fn host_and_params(&self) -> Result<String, fmt::Error> {
         let mut auth = format!("{}", self.host);
         for param in &self.parameters {

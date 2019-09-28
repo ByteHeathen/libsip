@@ -65,7 +65,9 @@ pub struct RegistrationManager {
     /// The Finished computed auth header.
     auth_header: Option<AuthHeader>,
     /// The branch to use for registration.
-    branch: String
+    branch: String,
+
+    call_id: String
 }
 
 impl RegistrationManager {
@@ -77,7 +79,8 @@ impl RegistrationManager {
             auth_header: None,
             nonce_c: 1,
             c_nonce: None,
-            branch: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>()))
+            branch: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>())),
+            call_id: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>()))
         }
     }
 
@@ -109,7 +112,7 @@ impl RegistrationManager {
             Header::Contact(NamedHeader::new(contact_header)),
             Header::CSeq(self.cseq_counter, Method::Register),
             Header::Via(ViaHeader { uri: via_uri, version: Default::default(), transport: Transport::Udp}),
-            Header::CallId("kjh34asdfasdfasdfasdf@192.168.1.123".into())
+            Header::CallId(format!("{}@{}", self.call_id, self.account_uri.host()))
         ];
 
         if let Some(exp) = self.cfg.expires_header {
