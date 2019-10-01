@@ -26,15 +26,15 @@
 
 #[macro_use]
 extern crate nom;
-#[cfg(feature = "tokio")]
+#[cfg(feature = "async")]
 extern crate tokio_codec;
 
 #[macro_use]
 mod macros;
 
-#[cfg(feature = "tokio")]
+#[cfg(feature = "async")]
 mod codec;
-#[cfg(feature = "tokio")]
+#[cfg(feature = "async")]
 pub use self::codec::SipCodec;
 
 pub mod core;

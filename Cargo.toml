@@ -10,6 +10,10 @@ homepage = "https://github.com/Bytebuddha/libsip"
 repository = "https://github.com/Bytebuddha/libsip"
 description = "SIP protocol Implementation, with a focus towords softphone clients."
 
+[[example]]
+name = "console"
+required-features = ["async"]
+
 [features]
 default = []
 async = ["tokio", "tokio-codec"]
