@@ -46,6 +46,7 @@ pub(crate) mod parse;
 pub use crate::core::Version;
 pub use crate::core::Method;
 pub use crate::headers::Header;
+pub use crate::headers::Headers;
 
 pub use crate::uri::Uri;
 pub use crate::uri::Domain;

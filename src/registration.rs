@@ -7,6 +7,7 @@ use crate::uri::UriAuth;
 use crate::core::SipMessage;
 use crate::core::Transport;
 use crate::headers::Header;
+use crate::headers::Headers;
 use crate::headers::NamedHeader;
 use crate::headers::auth::Schema;
 use crate::headers::auth::AuthHeader;
@@ -106,7 +107,7 @@ impl RegistrationManager {
                     .authless()
                     .schemaless();
         //let via_uri = format!("{}", uri.host_and_params()?);
-        let mut headers = vec![
+        let mut headers = Headers(vec![
             Header::ContentLength(0),
             Header::To(NamedHeader::new(to_header)),
             Header::From(NamedHeader::new(from_header)),
@@ -114,7 +115,7 @@ impl RegistrationManager {
             Header::CSeq(self.cseq_counter, Method::Register),
             Header::Via(ViaHeader { uri: via_uri, version: Default::default(), transport: Transport::Udp}),
             Header::CallId(format!("{}@{}", self.call_id, self.account_uri.host()))
-        ];
+        ]);
 
         if let Some(exp) = self.cfg.expires_header {
             headers.push(Header::Expires(exp));
@@ -135,10 +136,10 @@ impl RegistrationManager {
 
     pub fn set_challenge(&mut self, msg: SipMessage) -> Result<(), io::Error> {
         if let SipMessage::Response { headers, .. } = msg {
-            for item in headers {
+            for item in headers.iter() {
                 match item {
                     Header::WwwAuthenticate(auth) => self.set_auth_vars(auth)?,
-                    Header::Expires(expire) => { self.cfg.expires_header = Some(expire); },
+                    Header::Expires(expire) => { self.cfg.expires_header = Some(expire.clone()); },
                     _ => {}
                 }
             }
@@ -148,7 +149,7 @@ impl RegistrationManager {
         }
     }
 
-    pub fn set_auth_vars(&mut self, d: AuthHeader) -> Result<(), io::Error> {
+    pub fn set_auth_vars(&mut self, d: &AuthHeader) -> Result<(), io::Error> {
         if let Some(realm) = d.1.get("realm") {
             self.cfg.realm = Some(realm.into());
         }
@@ -162,6 +163,10 @@ impl RegistrationManager {
 
     pub fn expires(&self) -> u32 {
         self.cfg.expires_header.unwrap_or(60)
+    }
+
+    pub fn cseq(&self) -> u32 {
+        self.cseq_counter
     }
 
     fn handle_md5_auth(&mut self) -> Result<(), io::Error> {
@@ -196,7 +201,7 @@ impl RegistrationManager {
         md5::compute(rand::random::<[u8 ; 16]>())
     }
 
-    fn add_auth_header(&self, headers: &mut Vec<Header>) {
+    fn add_auth_header(&self, headers: &mut Headers) {
         if let Some(header) = self.auth_header.clone() {
             headers.push(Header::Authorization(header));
         }

@@ -8,7 +8,7 @@ fn read_message() {
         method: Method::Register,
         version: Version::default(),
         uri,
-        headers: vec![],
+        headers: Headers::new(),
         body: vec![]
     };
     assert_eq!(Ok((remains.as_ref(), req)), parse_message(b"REGISTER sip:example.com SIP/2.0\r\n\r\n"));
@@ -22,10 +22,10 @@ fn read_complex() {
         method: Method::Register,
         version: Version::default(),
         uri,
-        headers: vec![
+        headers: Headers(vec![
            Header::Expires(10),
            Header::ContentLength(5)
-        ],
+        ]),
         body: vec![b'6'; 5]
     };
     assert_eq!(Ok((remains.as_ref(), req)), parse_message(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));

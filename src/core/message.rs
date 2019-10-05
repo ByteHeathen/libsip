@@ -19,13 +19,13 @@ pub enum SipMessage {
         method: Method,
         uri: Uri,
         version: Version,
-        headers: Vec<Header>,
+        headers: Headers,
         body: Vec<u8>
     },
     Response {
         code: u32,
         version: Version,
-        headers: Vec<Header>,
+        headers: Headers,
         body: Vec<u8>
     }
 }
@@ -54,14 +54,14 @@ impl SipMessage {
         }
     }
 
-    pub fn headers(&self) -> &Vec<Header> {
+    pub fn headers(&self) -> &Headers {
         match self {
             SipMessage::Request { headers, .. } => headers,
             SipMessage::Response { headers, .. } => headers
         }
     }
 
-    pub fn headers_mut(&mut self) -> &mut Vec<Header> {
+    pub fn headers_mut(&mut self) -> &mut Headers {
         match self {
             SipMessage::Request { headers, .. } => headers,
             SipMessage::Response { headers, .. } => headers
@@ -88,7 +88,7 @@ impl fmt::Display for SipMessage {
     }
 }
 
-pub fn display_headers_and_body(f: &mut fmt::Formatter, headers: &[Header], body: &[u8]) -> Result<(), fmt::Error> {
+pub fn display_headers_and_body(f: &mut fmt::Formatter, headers: &Headers, body: &[u8]) -> Result<(), fmt::Error> {
     for header in headers.iter() {
         writeln!(f, "{}\r", header)?;
     }
@@ -97,8 +97,8 @@ pub fn display_headers_and_body(f: &mut fmt::Formatter, headers: &[Header], body
     Ok(())
 }
 
-pub fn parse_headers(input: &[u8]) -> ParserResult<Vec<Header>> {
-    let mut headers = vec![];
+pub fn parse_headers(input: &[u8]) -> ParserResult<Headers> {
+    let mut headers = Headers(vec![]);
     let mut input = input;
     while let Ok((data, value)) = parse_header(input) {
         headers.push(value);

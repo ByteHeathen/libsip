@@ -9,7 +9,7 @@ fn write_simple() {
         method: Method::Register,
         version: Version::default(),
         uri,
-        headers: vec![],
+        headers: Headers(vec![]),
         body: vec![]
     };
     assert_eq!("REGISTER sip:user@example.com SIP/2.0\r\n\r\n".to_string(), format!("{}", req));
@@ -22,10 +22,10 @@ fn write_complex() {
         method: Method::Register,
         version: Version::default(),
         uri,
-        headers: vec![
+        headers: Headers(vec![
             Header::Expires(10),
             Header::ContentLength(5)
-        ],
+        ]),
         body: vec![b'5'; 5]
     };
     assert_eq!("REGISTER sip:example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555".to_string(), format!("{}", req));
@@ -39,7 +39,7 @@ fn read_simple() {
         method: Method::Register,
         version: Version::default(),
         uri,
-        headers: vec![],
+        headers: Headers(vec![]),
         body: vec![]
     };
     assert_eq!(Ok((remains.as_ref(), req)), parse_request(b"REGISTER sip:user@example.com SIP/2.0\r\n\r\n"));
@@ -53,10 +53,10 @@ fn read_complex() {
         method: Method::Register,
         version: Version::default(),
         uri,
-        headers: vec![
+        headers: Headers(vec![
            Header::Expires(10),
            Header::ContentLength(5)
-        ],
+        ]),
         body: vec![b'6' ; 5]
     };
     assert_eq!(Ok((remains.as_ref(), req)), parse_request(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));
