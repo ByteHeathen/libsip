@@ -10,19 +10,13 @@ homepage = "https://github.com/Bytebuddha/libsip"
 repository = "https://github.com/Bytebuddha/libsip"
 description = "SIP protocol Implementation, with a focus towords softphone clients."
 
-[[example]]
-name = "console"
-required-features = ["async"]
-
-[features]
-default = []
-async = ["tokio", "tokio-codec"]
-
 [dependencies]
 nom = "5.0.1"
 #TODO: Find a better crate/method for generating md5 hash's
 md5 = "0.6.1"
 rand = "0.7.2"
 bytes = "0.4.12"
-tokio = { version = "0.2.0-alpha.4", optional = true }
-tokio-codec = { version = "0.2.0-alpha.5", optional = true }
+
+[dev-dependencies]
+tokio = { version = "0.2.0-alpha.4" }
+tokio-codec = { version = "0.2.0-alpha.5" }

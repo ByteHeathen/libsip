@@ -51,6 +51,8 @@ impl Default for Config {
 }
 
 /// Handle's the SIP registration process.
+/// This structure is designed to handle the authentication
+/// process from a SoftPhone's point of view.
 #[derive(Debug, PartialEq, Clone)]
 pub struct RegistrationManager {
     /// Uri representing the account to attempt to register.
@@ -68,12 +70,15 @@ pub struct RegistrationManager {
     auth_header: Option<AuthHeader>,
     /// The branch to use for registration.
     branch: String,
-
+    /// The Call Id to use for register requests.
     call_id: String
 }
 
 impl RegistrationManager {
 
+    /// Create a new Registration Manager typically this will happen once in a program's
+    /// lifecycle. `account_uri` is the sip uri used to authenticate with and `local_uri`
+    /// is the sip uri of the listening socket.
     pub fn new(account_uri: Uri, local_uri: Uri, cfg: Config) -> RegistrationManager {
         RegistrationManager {
             account_uri, local_uri, cfg,
@@ -86,14 +91,19 @@ impl RegistrationManager {
         }
     }
 
+    /// Set the username used in the authentication process.
     pub fn username<S: Into<String>>(&mut self, s: S) {
         self.cfg.user = Some(s.into());
     }
 
+    /// Set the password used in the authentication process.
     pub fn password<S: Into<String>>(&mut self, p: S) {
         self.cfg.pass = Some(p.into());
     }
 
+    /// Get the register request. if this method is called before `set_challenge`
+    /// then no authentication header will be set, if called after `set_challenge`
+    /// then the Authorization header will be set.
     pub fn get_request(&mut self) -> Result<SipMessage, io::Error> {
         self.cseq_counter += 1;
         let to_header = self.account_uri.clone();
@@ -130,6 +140,8 @@ impl RegistrationManager {
         })
     }
 
+    /// After the first register request is sent. pass the received sip response
+    /// to this function to perform compute the hashed password.
     pub fn set_challenge(&mut self, msg: SipMessage) -> Result<(), io::Error> {
         if let SipMessage::Response { headers, .. } = msg {
             for item in headers.iter() {
@@ -145,7 +157,7 @@ impl RegistrationManager {
         }
     }
 
-    pub fn set_auth_vars(&mut self, d: &AuthHeader) -> Result<(), io::Error> {
+    fn set_auth_vars(&mut self, d: &AuthHeader) -> Result<(), io::Error> {
         if let Some(realm) = d.1.get("realm") {
             self.cfg.realm = Some(realm.into());
         }

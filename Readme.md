@@ -35,7 +35,7 @@ cd /libsip
 cargo run --example udp_register
 # This example expects a server with the credentials in examples/console.rs
 # to be running without it will fail. It prints all requests received to the terminal
-cargo run --example console --features async
+cargo run --example console
 ```
 
 #### dependencies
@@ -43,9 +43,6 @@ cargo run --example console --features async
   - **[rand](https://crates.io/crates/rand) 0.7.2**
   - **[bytes](https://crates.io/crates/bytes) 0.4.12**
   - **[md5](https://crates.io/crates/md5) 0.6.1**
-##### Optional
-  - **[tokio](https://crates.io/crates/tokio) 0.2.0-alpha.4**
-  - **[tokio-codec](https://crates.io/crates/tokio-codec) 0.2.0-alpha.5**
 
 #### Alternatives
   - **[parsip](https://crates/crates/parsip)**
