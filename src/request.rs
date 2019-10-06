@@ -4,6 +4,8 @@ use std::io::Result as IoResult;
 use std::io::Error as IoError;
 use std::io::ErrorKind as IoErrorKind;
 
+/// Sip Request Generator. When build is called the struct
+/// is consumed and produces a SipMessage::Request variant.
 pub struct RequestGenerator {
     method: Option<Method>,
     uri: Option<Uri>,
@@ -24,11 +26,13 @@ impl RequestGenerator {
         }
     }
 
+    /// Set the sip request method.
     pub fn method(mut self, m: Method) -> RequestGenerator {
         self.method = Some(m);
         self
     }
 
+    /// Set the sip request uri.
     pub fn uri(mut self, u: Uri) -> RequestGenerator {
         self.uri = Some(u);
         self
@@ -46,11 +50,13 @@ impl RequestGenerator {
         self
     }
 
+    /// Set the sip request body.
     pub fn body(mut self, b: Vec<u8>) -> RequestGenerator {
         self.body = b;
         self
     }
 
+    /// Build the sip request.
     pub fn build(self) -> IoResult<SipMessage> {
         if let Some(method) = self.method {
             if let Some(uri) = self.uri {

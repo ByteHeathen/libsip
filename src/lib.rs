@@ -35,7 +35,7 @@ pub mod uri;
 pub mod headers;
 pub mod response;
 pub mod request;
-pub mod registration;
+pub mod client;
 pub(crate) mod parse;
 
 pub use crate::core::Version;
@@ -48,7 +48,6 @@ pub use crate::uri::Domain;
 
 pub use crate::core::SipMessage;
 pub use crate::core::message::parse_message;
-pub use crate::registration::RegistrationManager;
 pub use crate::response::ResponseGenerator;
 pub use crate::request::RequestGenerator;
 

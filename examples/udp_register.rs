@@ -12,7 +12,7 @@ use libsip::uri::Param;
 use libsip::core::Transport;
 use libsip::uri::parse_uri;
 use libsip::core::message::parse_response;
-use libsip::registration::RegistrationManager;
+use libsip::client::RegistrationManager;
 
 use std::io;
 use std::net::UdpSocket;

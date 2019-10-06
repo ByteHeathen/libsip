@@ -13,8 +13,10 @@ use libsip::*;
 use libsip::uri::Param;
 use libsip::core::Transport;
 use libsip::parse_message;
+use libsip::client::RegistrationManager;
 use tokio::net::UdpSocket;
 use tokio::future::FutureExt;
+
 
 const USERNAME: &'static str = "20";
 const PASSWORD: &'static str = "program";
