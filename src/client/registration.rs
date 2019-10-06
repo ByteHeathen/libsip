@@ -65,6 +65,8 @@ pub struct RegistrationManager {
     c_nonce: Option<String>,
     /// The Finished computed auth header.
     auth_header: Option<AuthHeader>,
+    /// The authentication schema in use.
+    schema: Option<Schema>,
     /// The branch to use for registration.
     branch: String,
     /// The Call Id to use for register requests.
@@ -83,6 +85,7 @@ impl RegistrationManager {
             auth_header: None,
             nonce_c: 1,
             c_nonce: None,
+            schema: None,
             branch: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>())),
             call_id: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>()))
         }
@@ -126,8 +129,14 @@ impl RegistrationManager {
         if let Some(agent) = &self.cfg.user_agent {
             headers.push(Header::UserAgent(agent.clone()));
         }
+        match self.schema {
+            Some(Schema::Digest) => {
+                self.nonce_c = self.nonce_c+1;
+                self.handle_md5_auth()?
+            },
+            _ => {}
+        }
         self.add_auth_header(&mut headers);
-
         Ok(
             RequestGenerator::new()
                 .method(Method::Register)
@@ -161,9 +170,8 @@ impl RegistrationManager {
         if let Some(nonce) = d.1.get("nonce") {
             self.cfg.nonce = Some(nonce.into());
         }
-        match d.0 {
-            Schema::Digest => self.handle_md5_auth()
-        }
+        self.schema = Some(d.0);
+        Ok(())
     }
 
     /// Retreive the expires header value.

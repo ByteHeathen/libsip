@@ -22,9 +22,21 @@ impl fmt::Display for AuthHeader {
         write!(f, "{}", self.0)?;
         for (index, (key, value)) in self.1.iter().enumerate() {
             if index == 0 {
-                write!(f, " {}=\"{}\"", key, value)?;
+                if key == &"qop".to_string() {
+                    write!(f, "{}={}", key, value)?;
+                } else if key == &"auth".to_string() {
+                    write!(f, "{}={:08}", key, value)?;
+                } else {
+                    write!(f, " {}=\"{}\"", key, value)?;
+                }
             } else {
-                write!(f, ", {}=\"{}\"", key, value)?;
+                if key == &"qop".to_string() {
+                    write!(f, ", {}={}", key, value)?;
+                } else if key == &"auth".to_string() {
+                    write!(f, ", {}={:08}", key, value)?;
+                } else {
+                    write!(f, ", {}=\"{}\"", key, value)?;
+                }
             }
         }
         Ok(())

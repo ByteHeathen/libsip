@@ -40,6 +40,22 @@ impl SipMessage {
         }
     }
 
+    pub fn is_response(&self) -> bool {
+        if let SipMessage::Response { .. } = self {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn status_code(&self) -> Option<u32> {
+        if let &SipMessage::Response { code, .. } = self {
+            Some(code)
+        } else {
+            None
+        }
+    }
+
     pub fn body(&self) -> &Vec<u8> {
         match self {
             SipMessage::Request { body, .. } => body,

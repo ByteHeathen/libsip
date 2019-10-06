@@ -26,7 +26,7 @@ fn get_our_uri() -> Uri {
 fn send_request_get_response(req: SipMessage) -> Result<SipMessage, io::Error> {
     let addr = "0.0.0.0:5060";
     let sock = UdpSocket::bind(addr)?;
-    sock.send_to(&format!("{}", req).as_ref(), "192.168.1.123:5060")?;
+    sock.send_to(&format!("{}", req).as_ref(), "192.168.1.120:5060")?;
     let mut buf = vec![0; 65535];
     let (amt, _src) = sock.recv_from(&mut buf)?;
     if let Err(nom::Err::Error((data, _))) = parse_response(&buf[..amt]) {
@@ -38,7 +38,7 @@ fn send_request_get_response(req: SipMessage) -> Result<SipMessage, io::Error> {
 
 
 fn main() -> Result<(), io::Error>{
-    let acc_url = parse_uri(b"sip:20@192.168.1.123 ").unwrap().1
+    let acc_url = parse_uri(b"sip:20@192.168.1.120 ").unwrap().1
             .parameter(Param::Transport(Transport::Udp));
     let mut builder = RegistrationManager::new(acc_url, get_our_uri(), Default::default());
     builder.username("20");

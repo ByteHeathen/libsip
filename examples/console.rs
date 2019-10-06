@@ -21,7 +21,7 @@ use tokio::future::FutureExt;
 const USERNAME: &'static str = "20";
 const PASSWORD: &'static str = "program";
 const SOCKET_ADDRESS: &'static str = "192.168.1.76:5060";
-const SERVER_SOCK_ADDRESS: &'static str = "192.168.1.123:5060";
+const SERVER_SOCK_ADDRESS: &'static str = "192.168.1.120:5060";
 
 async fn registration_process(reg: &mut RegistrationManager, sock: &mut UdpSocket, verbose: bool) -> Result<(), io::Error>{
     let mut buf = vec![0; 65535];
@@ -34,6 +34,9 @@ async fn registration_process(reg: &mut RegistrationManager, sock: &mut UdpSocke
     let (_, msg) = parse_message(&buf[..amt]).unwrap();
     if verbose {
         print_sip_message_recv(&msg);
+    }
+    if msg.is_response() && msg.status_code() == Some(200) {
+        return Ok(());
     }
     reg.set_challenge(msg)?;
     let auth_request = reg.get_request()?;
@@ -96,7 +99,7 @@ async fn main() -> Result<(), io::Error> {
 }
 
 fn account_uri() -> Uri {
-    Uri::sip(ip_domain!(192, 168, 1, 123)).auth(uri_auth!("20"))
+    Uri::sip(ip_domain!(192, 168, 1, 120)).auth(uri_auth!("20"))
 }
 
 fn local_uri() -> Uri {
