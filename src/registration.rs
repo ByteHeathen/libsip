@@ -1,20 +1,17 @@
-
-use crate::Uri;
-use crate::Version;
-use crate::Method;
+use crate::*;
 use crate::uri::Param;
 use crate::uri::UriAuth;
-use crate::core::SipMessage;
 use crate::core::Transport;
-use crate::headers::Header;
-use crate::headers::Headers;
 use crate::headers::NamedHeader;
 use crate::headers::auth::Schema;
 use crate::headers::auth::AuthHeader;
 use crate::headers::via::ViaHeader;
+use crate::RequestGenerator;
+
 use std::collections::HashMap;
 use std::io;
 
+/// Configuration used to build the register request.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Config {
     /// Whether to append the `Content-Length` header
@@ -30,9 +27,9 @@ pub struct Config {
     pub user: Option<String>,
     /// The password to use for login.
     pub pass: Option<String>,
-
+    /// Authentication realm
     realm: Option<String>,
-
+    /// Authentication nonce
     nonce: Option<String>
 }
 
@@ -112,8 +109,8 @@ impl RegistrationManager {
         if let Some(name) = &self.cfg.user {
             contact_header = contact_header.auth(UriAuth::new(name));
         }
-        //let via_uri = format!("{}", uri.host_and_params()?);
-        let mut headers = Headers(vec![
+
+        let mut headers = vec![
             Header::ContentLength(0),
             Header::To(NamedHeader::new(to_header)),
             Header::From(NamedHeader::new(from_header)),
@@ -121,7 +118,7 @@ impl RegistrationManager {
             Header::CSeq(self.cseq_counter, Method::Register),
             Header::CallId(format!("{}@{}", self.call_id, self.account_uri.host())),
             self.via_header()
-        ]);
+        ];
 
         if let Some(exp) = self.cfg.expires_header {
             headers.push(Header::Expires(exp));
@@ -131,13 +128,13 @@ impl RegistrationManager {
         }
         self.add_auth_header(&mut headers);
 
-        Ok(SipMessage::Request {
-            method: Method::Register,
-            uri: self.account_uri.clone(),
-            version: Version::default(),
-            body: vec![],
-            headers,
-        })
+        Ok(
+            RequestGenerator::new()
+                .method(Method::Register)
+                .uri(self.account_uri.clone())
+                .headers(headers)
+                .build()?
+        )
     }
 
     /// After the first register request is sent. pass the received sip response
@@ -169,14 +166,18 @@ impl RegistrationManager {
         }
     }
 
+    /// Retreive the expires header value.
     pub fn expires(&self) -> u32 {
         self.cfg.expires_header.unwrap_or(60)
     }
 
+    /// Retreive the current cseq counter.
     pub fn cseq(&self) -> u32 {
         self.cseq_counter
     }
 
+    /// Retreive the via header being used to represent the local
+    /// listening socket.
     pub fn via_header(&self) -> Header {
         let via_uri = self.account_uri.clone()
                     .parameter(Param::Branch(self.branch.clone()))
@@ -217,7 +218,7 @@ impl RegistrationManager {
         md5::compute(rand::random::<[u8 ; 16]>())
     }
 
-    fn add_auth_header(&self, headers: &mut Headers) {
+    fn add_auth_header(&self, headers: &mut Vec<Header>) {
         if let Some(header) = self.auth_header.clone() {
             headers.push(Header::Authorization(header));
         }

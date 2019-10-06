@@ -34,6 +34,7 @@ pub mod core;
 pub mod uri;
 pub mod headers;
 pub mod response;
+pub mod request;
 pub mod registration;
 pub(crate) mod parse;
 
@@ -49,6 +50,7 @@ pub use crate::core::SipMessage;
 pub use crate::core::message::parse_message;
 pub use crate::registration::RegistrationManager;
 pub use crate::response::ResponseGenerator;
+pub use crate::request::RequestGenerator;
 
 #[cfg(test)]
 mod tests {
