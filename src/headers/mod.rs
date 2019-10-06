@@ -13,6 +13,8 @@ pub use self::parse::parse_header;
 
 use crate::core::Method;
 
+/// Wrapper around a Vec<Header> to simplify creating
+/// and a list of headers
 #[derive(Debug, PartialEq, Clone)]
 pub struct Headers(pub Vec<Header>);
 
@@ -22,18 +24,22 @@ impl Headers {
         Headers(vec![])
     }
 
+    /// Push a new Header onto the stack.
     pub fn push(&mut self, h: Header) {
         self.0.push(h)
     }
 
+    /// Access the underlying vec iterator.
     pub fn iter(&self) -> impl Iterator<Item=&Header> {
         self.0.iter()
     }
 
+    /// Add the Headers onto the interior Vec<Header>.
     pub fn extend(&mut self, i: Vec<Header>) {
         self.0.extend(i)
     }
 
+    /// Return An Expires header if one is present.
     pub fn expires(&self) -> Option<Header> {
         for h in &self.0 {
             if let Header::Expires(i) = h {
@@ -43,6 +49,7 @@ impl Headers {
         None
     }
 
+    /// Return the CSeq header if one is present.
     pub fn cseq(&self) -> Option<Header> {
         for h in &self.0 {
             if let Header::CSeq(a, b) = h {

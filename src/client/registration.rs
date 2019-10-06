@@ -50,6 +50,8 @@ impl Default for Config {
 /// Handle's the SIP registration process.
 /// This structure is designed to handle the authentication
 /// process from a SoftPhone's point of view.
+///
+/// Currently only Digest auth authentication is implemented.
 #[derive(Debug, PartialEq, Clone)]
 pub struct RegistrationManager {
     /// Uri representing the account to attempt to register.
@@ -131,7 +133,7 @@ impl RegistrationManager {
         }
         match self.schema {
             Some(Schema::Digest) => {
-                self.nonce_c = self.nonce_c+1;
+                self.nonce_c += 1;
                 self.handle_md5_auth()?
             },
             _ => {}
@@ -208,10 +210,10 @@ impl RegistrationManager {
                         map.insert("qop".into(), "auth".into());
                         map.insert("algorithm".into(), "MD5".into());
                         map.insert("cnonce".into(), format!("{:x}", cnonce));
-                        map.insert("nc".into(), format!("{}", self.nonce_c));
+                        map.insert("nc".into(), format!("{:08}", self.nonce_c));
                         let ha1 = md5::compute(&format!("{}:{}:{}", user, realm, pass));
                         let ha2 = md5::compute(format!("REGISTER:{}", self.account_uri.clone()));
-                        let digest = format!("{:x}:{}:{:x}:{:x}:auth:{:x}", ha1, nonce, self.nonce_c, cnonce, ha2);
+                        let digest = format!("{:x}:{}:{:08}:{:x}:auth:{:x}", ha1, nonce, self.nonce_c, cnonce, ha2);
                         let pass = md5::compute(digest);
                         map.insert("response".into(), format!("{:x}", pass));
                         self.auth_header = Some(AuthHeader(Schema::Digest, map));

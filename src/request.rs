@@ -6,6 +6,8 @@ use std::io::ErrorKind as IoErrorKind;
 
 /// Sip Request Generator. When build is called the struct
 /// is consumed and produces a SipMessage::Request variant.
+/// Calling the `method` & `uri` methods before the `build`
+/// method is required.
 pub struct RequestGenerator {
     method: Option<Method>,
     uri: Option<Uri>,
@@ -27,32 +29,35 @@ impl RequestGenerator {
     }
 
     /// Set the sip request method.
-    pub fn method(mut self, m: Method) -> RequestGenerator {
-        self.method = Some(m);
+    pub fn method(mut self, method: Method) -> RequestGenerator {
+        self.method = Some(method);
         self
     }
 
     /// Set the sip request uri.
-    pub fn uri(mut self, u: Uri) -> RequestGenerator {
-        self.uri = Some(u);
+    pub fn uri(mut self, uri: Uri) -> RequestGenerator {
+        self.uri = Some(uri);
         self
     }
 
     /// Add multiple headers to the request header list.
-    pub fn headers(mut self, h: Vec<Header>) -> RequestGenerator {
-        self.headers.extend(h);
+    /// This use's Vec::extend so that the current items
+    /// in the header list are kept.
+    pub fn headers(mut self, headers: Vec<Header>) -> RequestGenerator {
+        self.headers.extend(headers);
         self
     }
 
     /// Add a single header to the request header list.
-    pub fn header(mut self, h: Header) -> RequestGenerator {
-        self.headers.push(h);
+    pub fn header(mut self, header: Header) -> RequestGenerator {
+        self.headers.push(header);
         self
     }
 
-    /// Set the sip request body.
-    pub fn body(mut self, b: Vec<u8>) -> RequestGenerator {
-        self.body = b;
+    /// Set the sip request body. This completely replaces
+    /// the current request body.
+    pub fn body(mut self, body: Vec<u8>) -> RequestGenerator {
+        self.body = body;
         self
     }
 

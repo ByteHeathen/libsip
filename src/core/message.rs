@@ -32,6 +32,7 @@ pub enum SipMessage {
 
 impl SipMessage {
 
+    /// Determine if this is a SIP request.
     pub fn is_request(&self) -> bool {
         if let SipMessage::Request { .. } = self {
             true
@@ -40,6 +41,7 @@ impl SipMessage {
         }
     }
 
+    /// Determine if this is a SIP response.
     pub fn is_response(&self) -> bool {
         if let SipMessage::Response { .. } = self {
             true
@@ -48,6 +50,8 @@ impl SipMessage {
         }
     }
 
+    /// Retreive the SIP response's status code.
+    /// Returns None for requests.
     pub fn status_code(&self) -> Option<u32> {
         if let &SipMessage::Response { code, .. } = self {
             Some(code)
@@ -56,6 +60,7 @@ impl SipMessage {
         }
     }
 
+    /// Retreive the body of this SIP Message.
     pub fn body(&self) -> &Vec<u8> {
         match self {
             SipMessage::Request { body, .. } => body,
@@ -63,6 +68,7 @@ impl SipMessage {
         }
     }
 
+    /// Retreive a mutable reference to the SIP Messages body.
     pub fn body_mut(&mut self) -> &mut Vec<u8> {
         match self {
             SipMessage::Request { body, .. } => body,
@@ -70,6 +76,7 @@ impl SipMessage {
         }
     }
 
+    /// Retreive headers from the SIP message.
     pub fn headers(&self) -> &Headers {
         match self {
             SipMessage::Request { headers, .. } => headers,
@@ -77,6 +84,7 @@ impl SipMessage {
         }
     }
 
+    /// Retreive a mutable reference to the SIP Message's header list.
     pub fn headers_mut(&mut self) -> &mut Headers {
         match self {
             SipMessage::Request { headers, .. } => headers,

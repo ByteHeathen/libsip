@@ -11,20 +11,6 @@ common use cases.
 [![Build Status](https://travis-ci.org/bytebuddha/libsip.svg?branch=master)](https://travis-ci.org/bytebuddha/libsip)
 [![Crates.io](https://img.shields.io/crates/v/libsip.svg)](https://crates.io/crates/libsip)
 [![Docs.rs](https://docs.rs/libsip/badge.svg)](https://docs.rs/libsip)
-#### Parsing
-
-```rust
-extern crate libsip;
-
-use libsip::parse_message;
-
-const SIP_MESSAGE: &'static str "SIP/2.0 200 OK\r\n\r\n";
-
-fn main() {
-  let res = parse_message(SIP_MESSAGE.as_ref());
-  println!("{:?}", res);
-}
-```
 
 #### Running the examples
 ```bash
@@ -51,7 +37,7 @@ cargo run --example console
   - **[sip-codec](https://crates/crates/sip-codec)**
   I attempted to use this library first, lots of features are not implemented like writing
   sip requests and a few other fairly common things. I also wanted SIP Headers to be in the form of an enum witch would have required
-  basically rewriting this crate.
+  basically rewriting the whole crate.
   - **[sip](https://crates/crates/sip)**
   This crate appears to be empty
   - **[tokio-sip](https://crates.io/crates/tokio-sip)**

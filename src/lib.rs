@@ -5,24 +5,46 @@
 //!
 //! ### Parsing
 //! libsip exposes many parsing function though only one `parse_message` is needed.
-//! ```rust,compile_fail
+//! ```rust
+//!   extern crate libsip;
+//!
+//!   use libsip::parse_message;
+//!
 //!   let packet = "SIP/2.0 200 OK\r\n\r\n";
-//!   let output = parse_message(packet)?;
+//!   let output = libsip::parse_message(packet.as_ref()).unwrap();
 //! ```
+//!
+//! ### Creating Messages
+//! This crate provides 2 abstraction's to aid in building sip messages.
+//! The `ResponseGenerator` is used to create sip response's and the
+//! `RequestGenerator` is used to generate sip requests.
+//!  ```rust
+//!     extern crate libsip;
+//!
+//!     use libsip::ResponseGenerator;
+//!     use libsip::RequestGenerator;
+//!     use libsip::Method;
+//!     use libsip::uri::parse_uri;
+//!
+//!     let _res = ResponseGenerator::new()
+//!                         .code(200)
+//!                         .build()
+//!                         .unwrap();
+//!
+//!     let uri = parse_uri("sip:1@0.0.0.0:5060;transport=UDP".as_ref()).unwrap().1;
+//!     let _req = RequestGenerator::new()
+//!                         .method(Method::Invite)
+//!                         .uri(uri)
+//!                         .build()
+//!                         .unwrap();
+//!  ```
 //!
 //! ### Registration
 //! The registration manager is used to generate REGISTER requests. Once
 //! that is sent to the server you must wait for the Challange response pass
 //! it to the `set_challenge` method of the RegistrationManager.
-//! ```rust,compile_fail
-//!    let manager = RegistrationManager::new(account_uri, local_uri, Default::default());
-//!    let req = manager.get_request()?;
-//!    // send request
-//!    // get response as res
-//!    manager.set_challenge(res)?;
-//!    let final_req = manager.get_request()?;
-//!    // send request and expect 200 Ok.
-//! ```
+//! reqpeatedly calling the `get_request` method will cause the c_nonce
+//! counter to be incremented and a new hash computed.
 
 #[macro_use]
 extern crate nom;

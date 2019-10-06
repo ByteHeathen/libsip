@@ -6,6 +6,8 @@ use std::io::ErrorKind as IoErrorKind;
 
 /// Sip Response Generator. When build is called the struct
 /// is consumed and produces a SipMessage::Response variant.
+/// Calling the `code` method before the `build` method is
+/// required.
 pub struct ResponseGenerator {
     code: Option<u32>,
     version: Version,
@@ -31,19 +33,23 @@ impl ResponseGenerator {
     }
 
     /// Add multiple headers to the response header list.
-    pub fn headers(mut self, h: Vec<Header>) -> ResponseGenerator {
-        self.headers.extend(h);
+    /// This use's Vec::extend so that the current items
+    /// in the header list are kept.
+    pub fn headers(mut self, headers: Vec<Header>) -> ResponseGenerator {
+        self.headers.extend(headers);
         self
     }
 
     /// Add a single header to the response header list.
-    pub fn header(mut self, h: Header) -> ResponseGenerator {
-        self.headers.push(h);
+    pub fn header(mut self, header: Header) -> ResponseGenerator {
+        self.headers.push(header);
         self
     }
 
-    pub fn body(mut self, b: Vec<u8>) -> ResponseGenerator {
-        self.body = b;
+    /// Set the sip response body. This completely replaces
+    /// the current response body.
+    pub fn body(mut self, body: Vec<u8>) -> ResponseGenerator {
+        self.body = body;
         self
     }
 
