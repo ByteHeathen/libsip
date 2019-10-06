@@ -1,6 +1,6 @@
 [package]
 name = "libsip"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Bytebuddha <pmg41494@protonmail.com>"]
 edition = "2018"
 readme = "Readme.md"
@@ -18,5 +18,5 @@ rand = "0.7.2"
 bytes = "0.4.12"
 
 [dev-dependencies]
-tokio = { version = "0.2.0-alpha.4" }
+tokio = { version = "0.2.0-alpha.6" }
 tokio-codec = { version = "0.2.0-alpha.5" }
