@@ -40,6 +40,7 @@ pub use self::codec::SipCodec;
 pub mod core;
 pub mod uri;
 pub mod headers;
+pub mod response;
 pub mod registration;
 pub(crate) mod parse;
 
@@ -54,6 +55,7 @@ pub use crate::uri::Domain;
 pub use crate::core::SipMessage;
 pub use crate::core::message::parse_message;
 pub use crate::registration::RegistrationManager;
+pub use crate::response::ResponseGenerator;
 
 #[cfg(test)]
 mod tests {

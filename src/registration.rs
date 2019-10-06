@@ -102,10 +102,6 @@ impl RegistrationManager {
         if let Some(name) = &self.cfg.user {
             contact_header = contact_header.auth(UriAuth::new(name));
         }
-        let via_uri = self.account_uri.clone()
-                    .parameter(Param::Branch(self.branch.clone()))
-                    .authless()
-                    .schemaless();
         //let via_uri = format!("{}", uri.host_and_params()?);
         let mut headers = Headers(vec![
             Header::ContentLength(0),
@@ -113,8 +109,8 @@ impl RegistrationManager {
             Header::From(NamedHeader::new(from_header)),
             Header::Contact(NamedHeader::new(contact_header)),
             Header::CSeq(self.cseq_counter, Method::Register),
-            Header::Via(ViaHeader { uri: via_uri, version: Default::default(), transport: Transport::Udp}),
-            Header::CallId(format!("{}@{}", self.call_id, self.account_uri.host()))
+            Header::CallId(format!("{}@{}", self.call_id, self.account_uri.host())),
+            self.via_header()
         ]);
 
         if let Some(exp) = self.cfg.expires_header {
@@ -167,6 +163,14 @@ impl RegistrationManager {
 
     pub fn cseq(&self) -> u32 {
         self.cseq_counter
+    }
+
+    pub fn via_header(&self) -> Header {
+        let via_uri = self.account_uri.clone()
+                    .parameter(Param::Branch(self.branch.clone()))
+                    .authless()
+                    .schemaless();
+        Header::Via(ViaHeader { uri: via_uri, version: Default::default(), transport: Transport::Udp})
     }
 
     fn handle_md5_auth(&mut self) -> Result<(), io::Error> {

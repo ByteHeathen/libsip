@@ -30,6 +30,10 @@ impl Headers {
         self.0.iter()
     }
 
+    pub fn extend(&mut self, i: Vec<Header>) {
+        self.0.extend(i)
+    }
+
     pub fn expires(&self) -> Option<Header> {
         for h in &self.0 {
             if let Header::Expires(i) = h {
