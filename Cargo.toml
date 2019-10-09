@@ -16,7 +16,7 @@ nom = "5.0.1"
 md5 = "0.6.1"
 rand = "0.7.2"
 bytes = "0.4.12"
+serde = { version = "1.0.101", features = ["derive"] }
 
 [dev-dependencies]
 tokio = { version = "0.2.0-alpha.6" }
-tokio-codec = { version = "0.2.0-alpha.5" }

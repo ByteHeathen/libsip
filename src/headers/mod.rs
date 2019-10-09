@@ -58,6 +58,66 @@ impl Headers {
         }
         None
     }
+
+    /// Return the From header if one is present.
+    pub fn from(&self) -> Option<Header> {
+        for h in &self.0 {
+            if let Header::From(a) = h {
+                return Some(Header::From(a.clone()));
+            }
+        }
+        None
+    }
+
+    /// Return the To header if one is present.
+    pub fn to(&self) -> Option<Header> {
+        for h in &self.0 {
+            if let Header::To(a) = h {
+                return Some(Header::To(a.clone()));
+            }
+        }
+        None
+    }
+
+    /// Return the Contact header if one is present.
+    pub fn contact(&self) -> Option<Header> {
+        for h in &self.0 {
+            if let Header::Contact(a) = h {
+                return Some(Header::Contact(a.clone()));
+            }
+        }
+        None
+    }
+
+    /// Return the Contact header if one is present.
+    pub fn call_id(&self) -> Option<Header> {
+        for h in &self.0 {
+            if let Header::CallId(a) = h {
+                return Some(Header::CallId(a.clone()));
+            }
+        }
+        None
+    }
+
+    /// Return the Contact header if one is present.
+    pub fn via(&self) -> Option<Header> {
+        for h in &self.0 {
+            if let Header::Via(a) = h {
+                return Some(Header::Via(a.clone()));
+            }
+        }
+        None
+    }
+
+    /// Return the Contact header if one is present.
+    pub fn xfs_sending_message(&self) -> Option<Header> {
+        for h in &self.0 {
+            if let Header::XFsSendingMessage(a) = h {
+                return Some(Header::XFsSendingMessage(a.clone()));
+            }
+        }
+        None
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -106,5 +166,6 @@ pub enum Header {
     Via(via::ViaHeader),
     Priority(String),
     WwwAuthenticate(auth::AuthHeader),
+    XFsSendingMessage(String),
     Other(String, String)
 }

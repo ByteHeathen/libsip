@@ -1,6 +1,8 @@
+use serde::{ Serialize, Deserialize };
+
 use std::fmt;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub enum Schema {
     Sip,
     Sips

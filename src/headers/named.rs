@@ -23,6 +23,11 @@ impl NamedHeader {
             uri
         }
     }
+
+    pub fn name<S: Into<String>>(mut self, name: S) -> NamedHeader {
+        self.display_name = Some(name.into());
+        self
+    }
 }
 
 impl fmt::Display for NamedHeader {

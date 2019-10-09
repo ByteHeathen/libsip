@@ -1,3 +1,5 @@
+use serde::{ Serialize, Deserialize };
+
 use std::fmt;
 use std::io;
 
@@ -17,12 +19,12 @@ pub mod auth;
 pub use self::auth::UriAuth;
 pub use self::auth::parse_uriauth;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Uri {
-    schema: Option<Schema>,
-    host: Domain,
-    auth: Option<UriAuth>,
-    parameters: Vec<Param>
+    pub schema: Option<Schema>,
+    pub host: Domain,
+    pub auth: Option<UriAuth>,
+    pub parameters: Vec<Param>
 }
 
 impl Uri {
@@ -75,6 +77,11 @@ impl Uri {
 
     pub fn schemaless(mut self) -> Uri {
         self.schema = None;
+        self
+    }
+
+    pub fn schema(mut self, schema: Schema) -> Uri {
+        self.schema = Some(schema);
         self
     }
 

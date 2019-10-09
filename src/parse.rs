@@ -19,6 +19,13 @@ pub fn slice_to_string(slice: &[u8]) -> Result<String, IoError> {
 	}
 }
 
+pub fn slice_to_string_nullable(slice: &[u8]) -> Result<String, IoError> {
+	Ok(
+		String::from_utf8(Vec::from(slice))
+		.map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse utf8 string"))?
+	)
+}
+
 pub fn parse_u16(slice: &[u8]) -> Result<u16, IoError> {
 	Ok(
 		::std::str::from_utf8(slice)
@@ -80,7 +87,7 @@ named!(pub parse_possibly_quoted_string<String>, alt!(
 
 named!(pub parse_quoted_string<String>, do_parse!(
     char!('\"') >>
-    out: map_res!(take_until!("\""), slice_to_string) >>
+    out: map_res!(take_until!("\""), slice_to_string_nullable) >>
     char!('\"') >>
     (out)
 ));

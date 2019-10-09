@@ -1,9 +1,17 @@
+use serde::{ Serialize, Deserialize };
+
 use std::fmt;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub enum Transport {
     Udp,
     Tcp
+}
+
+impl Default for Transport {
+    fn default() -> Transport {
+        Transport::Udp
+    }
 }
 
 impl fmt::Display for Transport {

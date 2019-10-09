@@ -1,11 +1,11 @@
 use nom::character::is_alphanumeric;
-
+use serde::{ Serialize, Deserialize };
 use crate::parse::slice_to_string;
 
 use std::fmt;
 
 /// URI Credentials
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct UriAuth {
     username: String,
     password: Option<String>

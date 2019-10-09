@@ -1,5 +1,6 @@
 use nom::character::is_digit;
 use nom::character::is_alphanumeric;
+use serde::{ Deserialize, Serialize };
 
 use std::fmt;
 use std::net::Ipv4Addr;
@@ -9,7 +10,7 @@ use crate::parse::slice_to_string;
 use crate::parse::parse_ip_address;
 
 /// Domain address for a URI.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Domain {
     Ipv4(Ipv4Addr, Option<u16>),
     Domain(String, Option<u16>)

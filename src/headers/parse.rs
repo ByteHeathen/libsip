@@ -12,7 +12,14 @@ use crate::core::parse_version;
 
 use std::collections::HashMap;
 
-named!(pub parse_header<Header>, alt!(
+named!(pub parse_header<Header>, do_parse!(
+    opt!(tag!("\r\n")) >>
+    opt!(take_while!(is_space)) >>
+    header: _parse_header >>
+    (header)
+));
+
+named!(pub _parse_header<Header>, alt!(
     parse_accept_encoding_header |
     parse_accept_header |
     parse_accept_language_header |
@@ -56,6 +63,7 @@ named!(pub parse_header<Header>, alt!(
     parse_useragent_header |
     parse_via_header |
     parse_warning_header |
+    parse_xfs_sending_message_header |
     parse_www_authenticate_header |
     parse_other_header
 ));
@@ -63,7 +71,6 @@ named!(pub parse_header<Header>, alt!(
 macro_rules! impl_u32_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
         named!(pub $name<Header>, do_parse!(
-            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -77,7 +84,6 @@ macro_rules! impl_u32_parser {
 macro_rules! impl_f32_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
         named!(pub $name<Header>, do_parse!(
-            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -91,7 +97,6 @@ macro_rules! impl_f32_parser {
 macro_rules! impl_string_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
         named!(pub $name<Header>, do_parse!(
-            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -106,7 +111,6 @@ macro_rules! impl_string_parser {
 macro_rules! impl_array_parser {
     ($name:tt, $tag:tt, $variant:ident, $func:ident) => {
         named!(pub $name<Header>, do_parse!(
-            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -121,7 +125,6 @@ macro_rules! impl_array_parser {
 macro_rules! impl_named_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
         named!(pub $name<Header>, do_parse!(
-            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -137,7 +140,6 @@ macro_rules! impl_named_parser {
 macro_rules! impl_type_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
         named!(pub $name<Header>, do_parse!(
-            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -151,7 +153,6 @@ macro_rules! impl_type_parser {
 macro_rules! impl_lang_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
         named!(pub $name<Header>, do_parse!(
-            opt!(tag!("\r\n")) >>
             tag!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
@@ -188,6 +189,7 @@ impl_string_parser!(parse_record_route_header, "Record-Route", RecordRoute);
 impl_string_parser!(parse_server_header, "Server", Server);
 impl_string_parser!(parse_unsupported_header, "Unsupported", Unsupported);
 impl_string_parser!(parse_warning_header, "Warning", Warning);
+impl_string_parser!(parse_xfs_sending_message_header, "X-FS-Sending-Message", XFsSendingMessage);
 //impl_string_parser!(parse_via_header, "Via", Via);
 impl_string_parser!(parse_priority_header, "Priority", Priority);
 impl_u32_parser!(parse_timestamp_header, "Timestamp", Timestamp);
@@ -227,7 +229,6 @@ named!(pub parse_cseq_header<Header>, do_parse!(
 ));
 
 named!(pub parse_via_header<Header>, do_parse!(
-    opt!(tag!("\r\n")) >>
     tag!("Via") >>
     opt!(take_while!(is_space)) >>
     char!(':') >>
@@ -235,7 +236,7 @@ named!(pub parse_via_header<Header>, do_parse!(
     version: parse_version >>
     char!('/') >>
     transport: parse_transport >>
-    char!(' ') >>
+    opt!(take_while!(is_space)) >>
     uri: parse_uri >>
     tag!("\r\n") >>
     (Header::Via(via::ViaHeader { version, transport, uri }))

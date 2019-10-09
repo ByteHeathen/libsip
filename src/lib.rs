@@ -48,6 +48,7 @@
 
 #[macro_use]
 extern crate nom;
+extern crate serde;
 
 #[macro_use]
 mod macros;
