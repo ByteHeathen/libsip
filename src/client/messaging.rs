@@ -1,9 +1,6 @@
 use std::io::Result as IoResult;
-use std::io::Error as IoError;
-use std::io::ErrorKind as IoErrorKind;
 
 use crate::core::Method;
-use crate::core::Transport;
 use crate::headers::ContentType;
 use crate::headers::Headers;
 use crate::headers::Header;
@@ -14,7 +11,6 @@ use crate::uri::Schema;
 use crate::SipMessage;
 use crate::ResponseGenerator;
 use crate::RequestGenerator;
-use super::RegistrationManager;
 
 macro_rules! impl_simple_header_method {
     ($name:ident, $variant:ident, $ty: ident) => {
@@ -68,7 +64,8 @@ impl MessageHelper {
 pub struct MessageWriter {
     cseq: u32,
     uri: Uri,
-    call_id: String
+    call_id: String,
+    user_agent: Option<String>,
 }
 
 impl MessageWriter {
@@ -78,29 +75,54 @@ impl MessageWriter {
         let call_id = format!("{:x}@{}", _call_id, uri.host);
         MessageWriter {
             cseq: 0,
+            user_agent: None,
             uri, call_id
         }
     }
 
-    pub fn write_message(&mut self, body: Vec<u8>, to: Uri, reg: Header) -> IoResult<SipMessage> {
+    pub fn write_message(&mut self, body: Vec<u8>, to: Uri, via_header: Header) -> IoResult<SipMessage> {
         RequestGenerator::new()
             .method(Method::Message)
             .uri(to.clone().schema(Schema::Sip))
-            .header(reg)
-            .header(Header::MaxForwards(70))
+            .header(via_header)
             .header(Header::To(NamedHeader::new(to)))
-            .header(Header::From(NamedHeader::new(self.uri.clone())))
-            .header(Header::CallId(self.call_id.clone()))
+            .header(self.from())
             .header(self.cseq())
-            .header(Header::UserAgent(format!("libsip {}", env!("CARGO_PKG_VERSION"))))
-            .header(Header::ContentType(ContentType::PlainText))
+            .header(self.call_id())
+            .header(self.user_agent())
+            .header(self.max_forwards())
+            .header(self.content_type())
             .header(Header::ContentLength(body.len() as u32))
             .body(body)
             .build()
 
     }
 
-    fn cseq(&self) -> Header {
+    pub fn cseq(&self) -> Header {
         Header::CSeq(self.cseq, Method::Message)
+    }
+
+    pub fn content_type(&self) -> Header {
+        Header::ContentType(ContentType::PlainText)
+    }
+
+    pub fn max_forwards(&self) -> Header {
+        Header::MaxForwards(70)
+    }
+
+    pub fn user_agent(&self) -> Header {
+        if let Some(agent) = &self.user_agent {
+            Header::UserAgent(agent.clone())
+        } else {
+            Header::UserAgent(format!("libsip {}", env!("CARGO_PKG_VERSION")))
+        }
+    }
+
+    pub fn call_id(&self) -> Header {
+        Header::CallId(self.call_id.clone())
+    }
+
+    pub fn from(&self) -> Header {
+        Header::From(NamedHeader::new(self.uri.clone()))
     }
 }
