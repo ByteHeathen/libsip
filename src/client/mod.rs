@@ -11,8 +11,8 @@ use crate::SipMessage;
 use std::io::Result as IoResult;
 
 pub struct SoftPhone {
-    msg: MessageWriter,
-    reg: RegistrationManager
+    pub msg: MessageWriter,
+    pub reg: RegistrationManager
 }
 
 impl SoftPhone {
@@ -49,8 +49,7 @@ impl SoftPhone {
         Ok(())
     }
 
-    pub fn write_message(&mut self, b: Vec<u8>, uri: Uri) -> IoResult<()> {
-        self.msg.write_message(b, uri, self.reg.via_header())?;
-        Ok(())
+    pub fn write_message(&mut self, b: Vec<u8>, uri: Uri) -> IoResult<SipMessage> {
+        Ok(self.msg.write_message(b, uri, self.reg.via_header())?)
     }
 }
