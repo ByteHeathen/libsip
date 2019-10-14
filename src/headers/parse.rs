@@ -238,7 +238,6 @@ named!(pub parse_via_header<Header>, do_parse!(
     transport: parse_transport >>
     opt!(take_while!(is_space)) >>
     uri: parse_uri >>
-    tag!("\r\n") >>
     (Header::Via(via::ViaHeader { version, transport, uri }))
 ));
 

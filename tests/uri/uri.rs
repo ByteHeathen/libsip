@@ -11,6 +11,9 @@ fn read_uri() {
     assert_eq!(Ok((expected_remains.as_ref(), Uri::new_schemaless(domain!("hostname")))), parse_uri(b"hostname "));
 
     let expected_remains = vec![b' '];
+    assert_eq!(Ok((expected_remains.as_ref(), Uri::new_schemaless(domain!("hostname")))), parse_uri(b"hostname "));
+
+    let expected_remains = vec![b' '];
     assert_eq!(Ok((expected_remains.as_ref(), Uri::sip(ip_domain!(10, 1, 10, 1)))), parse_uri(b"sip:10.1.10.1 "));
 
     let expected_remains = vec![b' '];

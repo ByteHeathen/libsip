@@ -14,6 +14,7 @@ pub use self::domain::parse_domain;
 pub mod params;
 pub use self::params::Param;
 pub use self::params::parse_params;
+pub use self::params::parse_param;
 
 pub mod auth;
 pub use self::auth::UriAuth;
