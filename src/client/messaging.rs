@@ -81,6 +81,7 @@ impl MessageWriter {
     }
 
     pub fn write_message(&mut self, body: Vec<u8>, to: Uri, via_header: Header) -> IoResult<SipMessage> {
+        self.cseq += 1;
         RequestGenerator::new()
             .method(Method::Message)
             .uri(to.clone().schema(Schema::Sip))
