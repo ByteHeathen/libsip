@@ -13,10 +13,10 @@ description = "SIP protocol Implementation, with a focus towords softphone clien
 [dependencies]
 nom = "5.0.1"
 #TODO: Find a better crate/method for generating md5 hash's
-md5 = "0.6.1"
+md5 = "0.7.0"
 rand = "0.7.2"
 bytes = "0.4.12"
-serde = { version = "1.0.101", features = ["derive"] }
+serde = { version = "1.0.102", features = ["derive"] }
 
 [dev-dependencies]
 tokio = { version = "0.2.0-alpha.6" }
