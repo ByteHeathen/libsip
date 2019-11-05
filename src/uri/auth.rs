@@ -13,10 +13,12 @@ pub struct UriAuth {
 
 impl UriAuth {
 
+    /// Create new UriAuth from `username`.
     pub fn new<S: Into<String>>(username: S) -> UriAuth {
         UriAuth { username: username.into(), password: None }
     }
 
+    /// Set the uri password.
     pub fn password<S: Into<String>>(mut self, p: S) -> UriAuth {
         self.password = Some(p.into());
         self

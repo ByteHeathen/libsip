@@ -13,6 +13,7 @@ use crate::parse::parse_u32;
 use crate::parse::parse_byte_vec;
 use crate::parse::slice_to_string;
 
+/// Sip Protocol Message.
 #[derive(Debug, PartialEq, Clone)]
 pub enum SipMessage {
     Request {

@@ -1,5 +1,7 @@
 /// Generate a URI domain from an domain name.
-/// ```rust,compile_fail
+/// ```rust
+///    #[macro_use] extern crate libsip;
+///
 ///    let domain = domain!("example.com");
 ///    let domain = domain!("example.com", 5060);
 /// ```
@@ -14,7 +16,9 @@ macro_rules! domain {
 }
 
 /// Generate a URI domain from an ip address.
-/// ```rust,compile_fail
+/// ```rust
+///    #[macro_use] extern crate libsip;
+///
 ///    let domain = ip_domain!(192, 168, 0, 1);
 ///    let domain = ip_domain!(192, 168, 0, 1, 5060);
 /// ```
@@ -30,7 +34,9 @@ macro_rules! ip_domain {
 }
 
 /// Generate a URI authentication from credentials.
-/// ```rust,compile_fail
+/// ```rust
+///    #[macro_use] extern crate libsip;
+///
 ///    let auth = uri_auth!("user");
 ///    let auth = uri_auth!("user", "pass");
 /// ```
@@ -45,8 +51,11 @@ macro_rules! uri_auth {
 }
 
 /// Generate `NamedHeader` from a uri;
-/// ```rust,compile_fail
-///    let domain = named_header!(Uri::sip("example.com"));
+/// ```rust
+///    #[macro_use] extern crate libsip;
+///
+///    let uri = libsip::Uri::sip(domain!("example.com"));
+///    let domain = named_header!(uri);
 /// ```
 #[macro_export]
 macro_rules! named_header {

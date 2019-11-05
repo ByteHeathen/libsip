@@ -1,5 +1,8 @@
 use std::fmt;
 
+/// Sip Protocol languages.
+///
+/// TODO: Finish this enum
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Language {
     English

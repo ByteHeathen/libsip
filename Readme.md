@@ -20,7 +20,7 @@ cd /libsip
 # to be running without it will fail.
 cargo run --example udp_register
 # This example expects a server with the credentials in examples/console.rs
-# to be running without it will fail. It prints all requests received to the terminal
+# to be running without it will fail. It prints all requests received to the terminal.
 cargo run --example console
 ```
 

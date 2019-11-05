@@ -1,5 +1,8 @@
 use std::fmt;
 
+/// Sip protocol Content-Type value.
+///
+/// TODO: Finish this enum.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum ContentType {
     Sdp,

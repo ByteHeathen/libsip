@@ -14,6 +14,7 @@ use crate::RequestGenerator;
 
 macro_rules! impl_simple_header_method {
     ($name:ident, $variant:ident, $ty: ident) => {
+        /// Retrieve value of the $variant header.
         pub fn $name(&self) -> IoResult<$ty> {
             if let Some(Header::$variant(header)) = self.headers.$name() {
                 Ok(header)
@@ -24,6 +25,7 @@ macro_rules! impl_simple_header_method {
     }
 }
 
+/// Structure to ease getting data from a Sip Message request.
 pub struct MessageHelper {
     pub uri: Uri,
     pub headers: Headers,
@@ -32,6 +34,8 @@ pub struct MessageHelper {
 
 impl MessageHelper {
 
+    /// Create a new MessageHelper from variables of a sip message.
+    /// `uri` is the uri from the request line of the received sip message.
     pub fn new(uri: Uri, headers: Headers, body: Vec<u8>) -> IoResult<MessageHelper> {
         Ok(MessageHelper { uri, headers, body })
     }
@@ -43,10 +47,17 @@ impl MessageHelper {
     impl_simple_header_method!(xfs_sending_message, XFsSendingMessage, String);
     impl_simple_header_method!(via, Via, ViaHeader);
 
+    /// Retrieve the data of this message, currently this
+    /// just clone's the message body.
+    ///
+    /// TODO: Return no more than the Content-Length header amount.
     pub fn data(&self) -> Vec<u8> {
         self.body.clone()
     }
 
+    /// Generate an OK response. Send this mesesage to the server
+    /// immediatly after receiving the message to tell it to stop
+    /// transmiting.
     pub fn received(&self) -> IoResult<SipMessage> {
         ResponseGenerator::new()
             .code(200)
@@ -61,6 +72,8 @@ impl MessageHelper {
     }
 }
 
+/// Structure to help when sending Sip messages. Handles the message CSeq,
+/// Call-Id and User-Agent headers.
 pub struct MessageWriter {
     cseq: u32,
     uri: Uri,
@@ -70,6 +83,8 @@ pub struct MessageWriter {
 
 impl MessageWriter {
 
+    /// Create a new MessageWriter. `uri` is the account uri that will
+    /// be placed in the `From` header.
     pub fn new(uri: Uri) -> MessageWriter {
         let _call_id = md5::compute(rand::random::<[u8 ; 16]>());
         let call_id = format!("{:x}@{}", _call_id, uri.host);
@@ -99,18 +114,22 @@ impl MessageWriter {
 
     }
 
+    /// Get a new CSeq header.
     pub fn cseq(&self) -> Header {
         Header::CSeq(self.cseq, Method::Message)
     }
 
+    /// Get a new Content-Type header.
     pub fn content_type(&self) -> Header {
         Header::ContentType(ContentType::PlainText)
     }
 
+    /// Get a new Max-Forwards header.
     pub fn max_forwards(&self) -> Header {
         Header::MaxForwards(70)
     }
 
+    /// Get a new User-Agent header.
     pub fn user_agent(&self) -> Header {
         if let Some(agent) = &self.user_agent {
             Header::UserAgent(agent.clone())
@@ -119,10 +138,12 @@ impl MessageWriter {
         }
     }
 
+    /// Get a new Call-Id header.
     pub fn call_id(&self) -> Header {
         Header::CallId(self.call_id.clone())
     }
 
+    /// Get a new From header.
     pub fn from(&self) -> Header {
         Header::From(NamedHeader::new(self.uri.clone()))
     }

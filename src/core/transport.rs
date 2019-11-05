@@ -2,6 +2,7 @@ use serde::{ Serialize, Deserialize };
 
 use std::fmt;
 
+/// SIP protocol transport.
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub enum Transport {
     Udp,

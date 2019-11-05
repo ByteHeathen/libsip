@@ -10,6 +10,9 @@ use crate::core::parse_transport;
 use crate::uri::Domain;
 use crate::uri::parse_domain;
 
+/// Uri Parameters.
+///
+/// TODO: Expand this enum. Similar to `libsip::Header`
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Param {
     Transport(Transport),
@@ -20,6 +23,7 @@ pub enum Param {
 
 impl Param {
 
+    /// Create `Param` from a key value pair.
     pub fn from_key<'a>(key: &'a [u8], value: &'a [u8]) -> Result<Param, nom::Err<(&'a [u8], ErrorKind)>> {
         match key {
             b"transport" => Ok(Param::Transport(parse_transport(&value)?.1)),
@@ -63,6 +67,7 @@ named!(parse_named_param<Param>, do_parse!(
     (Param::from_key(key, value)?)
 ));
 
+/// Parse multiple uri parameters.
 pub fn parse_params(input: &[u8]) -> ParserResult<Vec<Param>> {
     let mut results = vec![];
     let mut data = input;

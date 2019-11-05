@@ -20,6 +20,7 @@ pub mod auth;
 pub use self::auth::UriAuth;
 pub use self::auth::parse_uriauth;
 
+/// Universal Rescource Identifier for libsip.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Uri {
     pub schema: Option<Schema>,
@@ -39,6 +40,7 @@ impl Uri {
         }
     }
 
+    /// Create a new Uri without schema.
     pub fn new_schemaless(host: Domain) -> Uri {
         Uri {
             schema: None,
@@ -48,48 +50,60 @@ impl Uri {
         }
     }
 
+    /// Create a new Uri With schema set to `Schema::Sip`.
     pub fn sip(host: Domain) -> Uri {
         Uri::new(Schema::Sip, host)
     }
 
+    /// Create a new Uri With schema set to `Schema::Sips`.
     pub fn sips(host: Domain) -> Uri {
         Uri::new(Schema::Sips, host)
     }
 
+    /// Add a `UriAuth` section to this Uri.
     pub fn auth(mut self, auth: UriAuth) -> Uri {
         self.auth = Some(auth);
         self
     }
 
+    /// Remove authentication if there is any.
     pub fn authless(mut self) -> Uri {
         self.auth = None;
         self
     }
 
+    /// Add a new parameter to the parameter list.
     pub fn parameter(mut self, p: Param) -> Uri {
         self.parameters.push(p);
         self
     }
 
+    /// Add a list of new parameters. This will remove
+    /// all old parameters.
     pub fn parameters(mut self, p: Vec<Param>) -> Uri {
         self.parameters = p;
         self
     }
 
+    /// Remove the Schema if there is any.
     pub fn schemaless(mut self) -> Uri {
         self.schema = None;
         self
     }
 
+    /// Set a new Schema.
     pub fn schema(mut self, schema: Schema) -> Uri {
         self.schema = Some(schema);
         self
     }
 
+    /// Set the host value.
     pub fn host(&self) -> String {
         format!("{}", self.host)
     }
 
+    /// Retrieve a formatted string containing host and parameters.
+    /// This can be used in the Via header.
     pub fn host_and_params(&self) -> Result<String, io::Error> {
         let mut host = self.host();
         for param in &self.parameters {
