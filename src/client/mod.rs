@@ -5,8 +5,14 @@ mod messaging;
 pub use self::messaging::MessageHelper;
 pub use self::messaging::MessageWriter;
 
+mod invite;
+pub use self::invite::InviteHelper;
+
 use crate::Uri;
+use crate::Header;
+use crate::Headers;
 use crate::SipMessage;
+use crate::ResponseGenerator;
 
 use std::io::Result as IoResult;
 
@@ -64,5 +70,31 @@ impl SoftPhone {
     /// Send a new Message to `uri`.
     pub fn write_message(&mut self, b: Vec<u8>, uri: Uri) -> IoResult<SipMessage> {
         Ok(self.msg.write_message(b, uri, self.reg.via_header())?)
+    }
+
+    pub fn cancel_response(&mut self, headers: &Headers) -> IoResult<(SipMessage, SipMessage)> {
+        let mut out_headers = vec![];
+        for header in headers.iter() {
+            match header {
+                Header::CSeq(a, b) => out_headers.push(Header::CSeq(a.clone(), b.clone())),
+                Header::CallId(call) => out_headers.push(Header::CallId(call.clone())),
+                Header::From(from) => out_headers.push(Header::From(from.clone())),
+                Header::To(to) => out_headers.push(Header::To(to.clone())),
+                Header::Via(via) => out_headers.push(Header::Via(via.clone())),
+                _ => {}
+            }
+        }
+
+        Ok((ResponseGenerator::new()
+            .code(200)
+            .headers(out_headers.clone())
+            .header(Header::ContentLength(0))
+            .build()?,
+         ResponseGenerator::new()
+             .code(487)
+             .headers(out_headers)
+             .header(Header::ContentLength(0))
+             .build()?
+        ))
     }
 }
