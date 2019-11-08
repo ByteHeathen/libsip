@@ -1,16 +1,12 @@
 use std::io::Result as IoResult;
 
-use crate::core::Method;
-use crate::headers::ContentType;
 use crate::headers::Headers;
 use crate::headers::Header;
 use crate::headers::NamedHeader;
 use crate::headers::via::ViaHeader;
 use crate::uri::Uri;
-use crate::uri::Schema;
 use crate::SipMessage;
 use crate::ResponseGenerator;
-use crate::RequestGenerator;
 
 macro_rules! impl_simple_header_method {
     ($name:ident, $variant:ident, $ty: ident) => {

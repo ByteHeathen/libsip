@@ -2,6 +2,7 @@ use serde::{ Serialize, Deserialize };
 
 use std::fmt;
 use std::io;
+use std::str::FromStr;
 
 pub mod schema;
 pub use self::schema::Schema;
@@ -137,3 +138,19 @@ named!(pub parse_uri<Uri>, do_parse!(
     parameters: parse_params >>
     (Uri { schema: schema.map(|item|item.0), host, parameters, auth })
 ));
+
+impl FromStr for Uri {
+    type Err = nom::Err<nom::error::ErrorKind>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(parse_uri(s.as_bytes()).map_err(map_error)?.1)
+    }
+}
+
+fn map_error<'a>(n: nom::Err<(&'a [u8], nom::error::ErrorKind)>) -> nom::Err<nom::error::ErrorKind> {
+    match n {
+        nom::Err::Error((_, a)) => nom::Err::Error(a),
+        nom::Err::Failure((_, b)) => nom::Err::Failure(b),
+        nom::Err::Incomplete(a) => nom::Err::Incomplete(a)
+    }
+}
