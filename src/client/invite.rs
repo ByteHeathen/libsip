@@ -40,10 +40,12 @@ impl InviteHelper {
     impl_simple_header_method!(call_id, CallId, String);
     impl_simple_header_method!(via, Via, ViaHeader);
 
+    /// Return a clone of the body of this message.
     pub fn data(&self) -> Vec<u8> {
         self.body.clone()
     }
 
+    /// Get A Ringing(180) request to answer this invite.
     pub fn ringing(&self) -> IoResult<SipMessage> {
         ResponseGenerator::new()
             .code(180)
@@ -55,6 +57,18 @@ impl InviteHelper {
             .header(Header::ContentLength(0))
             .build()
 
+    }
+
+    /// Generate a response that will accept the invite with the sdp as the body.
+    pub fn accept(&self, sdp: Vec<u8>) -> IoResult<SipMessage> {
+        ResponseGenerator::new()
+            .code(200)
+            .header(self.headers.cseq().unwrap())
+            .header(self.headers.via().unwrap())
+            .header(self.headers.to().unwrap())
+            .header(self.headers.from().unwrap())
+            .body(sdp)
+            .build()
     }
 
     pub fn check_cseq(&self, id: u32) -> IoResult<bool> {
