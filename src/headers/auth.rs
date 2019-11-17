@@ -55,7 +55,7 @@ pub struct AuthContext<'a> {
 
 impl AuthHeader {
 
-    pub fn response_header<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+    pub fn authenticate<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         match self.0 {
             Schema::Digest => self.handle_digest_auth(ctx)
         }

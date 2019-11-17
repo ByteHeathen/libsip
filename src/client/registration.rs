@@ -120,7 +120,7 @@ impl RegistrationManager {
                         nc: self.nonce_c,
                         uri: &self.account_uri
                     };
-                    headers.push(Header::Authorization(auth_header.response_header(ctx)?));
+                    headers.push(Header::Authorization(auth_header.authenticate(ctx)?));
                 }
             }
         }
@@ -153,7 +153,7 @@ impl RegistrationManager {
         if let SipMessage::Response { headers, .. } = msg {
             for item in headers.iter() {
                 match item {
-                    Header::WwwAuthenticate(auth) => self.set_auth_vars(auth.clone())?,
+                    Header::WwwAuthenticate(auth) => { self.auth_header = Some(d); },
                     Header::Expires(expire) => { self.cfg.expires_header = Some(expire.clone()); },
                     _ => {}
                 }
@@ -162,11 +162,6 @@ impl RegistrationManager {
         } else {
             unreachable!()
         }
-    }
-
-    fn set_auth_vars(&mut self, d: AuthHeader) -> Result<(), io::Error> {
-        self.auth_header = Some(d);
-        Ok(())
     }
 
     /// Retreive the expires header value.
