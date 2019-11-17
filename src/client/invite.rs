@@ -6,7 +6,9 @@ use crate::headers::NamedHeader;
 use crate::headers::via::ViaHeader;
 use crate::uri::Uri;
 use crate::SipMessage;
+use crate::core::Method;
 use crate::ResponseGenerator;
+use crate::RequestGenerator;
 
 macro_rules! impl_simple_header_method {
     ($name:ident, $variant:ident, $ty: ident) => {
@@ -67,7 +69,20 @@ impl InviteHelper {
             .header(self.headers.via().unwrap())
             .header(self.headers.to().unwrap())
             .header(self.headers.from().unwrap())
+            .header(self.headers.call_id().unwrap())
             .body(sdp)
+            .build()
+    }
+
+    pub fn bye(&self) -> IoResult<SipMessage> {
+        RequestGenerator::new()
+            .method(Method::Bye)
+            .uri(self.uri.clone())
+            .header(self.headers.cseq().unwrap())
+            .header(self.headers.via().unwrap())
+            .header(self.headers.to().unwrap())
+            .header(self.headers.from().unwrap())
+            .header(self.headers.call_id().unwrap())
             .build()
     }
 
