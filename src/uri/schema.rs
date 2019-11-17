@@ -20,6 +20,6 @@ impl fmt::Display for Schema {
 
 
 named!(pub parse_schema<Schema>, alt!(
-    map!(tag!("sip"), |_| Schema::Sip) |
-    map!(tag!("sips"), |_| Schema::Sips)
+    map!(tag_no_case!("sip"), |_| Schema::Sip) |
+    map!(tag_no_case!("sips"), |_| Schema::Sips)
 ));

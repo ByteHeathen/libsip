@@ -17,5 +17,5 @@ impl fmt::Display for Language {
 }
 
 named!(pub parse_language<Language>, alt!(
-    map!(tag!("en"), |_| Language::English)
+    map!(tag_no_case!("en"), |_| Language::English)
 ));

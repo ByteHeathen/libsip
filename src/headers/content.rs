@@ -19,6 +19,6 @@ impl fmt::Display for ContentType {
 }
 
 named!(pub parse_content_type<ContentType>, alt!(
-    map!(tag!("application/sdp"), |_| ContentType::Sdp) |
-    map!(tag!("text/plain"), |_| ContentType::PlainText)
+    map!(tag_no_case!("application/sdp"), |_| ContentType::Sdp) |
+    map!(tag_no_case!("text/plain"), |_| ContentType::PlainText)
 ));

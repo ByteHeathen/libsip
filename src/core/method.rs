@@ -63,18 +63,18 @@ impl fmt::Display for Method {
 }
 
 named!(pub parse_method<Method>, alt!(
-    map!(tag!("INVITE"), |_| Method::Invite) |
-    map!(tag!("ACK"), |_| Method::Ack) |
-    map!(tag!("BYE"), |_| Method::Bye) |
-    map!(tag!("CANCEL"), |_| Method::Cancel) |
-    map!(tag!("REGISTER"), |_| Method::Register) |
-    map!(tag!("OPTIONS"), |_| Method::Options) |
-    map!(tag!("PRACK"), |_| Method::PRack) |
-    map!(tag!("SUBSCRIBE"), |_| Method::Subscribe) |
-    map!(tag!("NOTIFY"), |_| Method::Notify) |
-    map!(tag!("PUBLISH"), |_| Method::Publish) |
-    map!(tag!("INFO"), |_| Method::Info) |
-    map!(tag!("REFER"), |_| Method::Refer) |
-    map!(tag!("MESSAGE"), |_| Method::Message) |
-    map!(tag!("UPDATE"), |_| Method::Update)
+    map!(tag_no_case!("INVITE"), |_| Method::Invite) |
+    map!(tag_no_case!("ACK"), |_| Method::Ack) |
+    map!(tag_no_case!("BYE"), |_| Method::Bye) |
+    map!(tag_no_case!("CANCEL"), |_| Method::Cancel) |
+    map!(tag_no_case!("REGISTER"), |_| Method::Register) |
+    map!(tag_no_case!("OPTIONS"), |_| Method::Options) |
+    map!(tag_no_case!("PRACK"), |_| Method::PRack) |
+    map!(tag_no_case!("SUBSCRIBE"), |_| Method::Subscribe) |
+    map!(tag_no_case!("NOTIFY"), |_| Method::Notify) |
+    map!(tag_no_case!("PUBLISH"), |_| Method::Publish) |
+    map!(tag_no_case!("INFO"), |_| Method::Info) |
+    map!(tag_no_case!("REFER"), |_| Method::Refer) |
+    map!(tag_no_case!("MESSAGE"), |_| Method::Message) |
+    map!(tag_no_case!("UPDATE"), |_| Method::Update)
 ));

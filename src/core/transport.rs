@@ -25,6 +25,6 @@ impl fmt::Display for Transport {
 }
 
 named!(pub parse_transport<Transport>, alt!(
-    map!(tag!("TCP"), |_| Transport::Tcp) |
-    map!(tag!("UDP"), |_| Transport::Udp)
+    map!(tag_no_case!("TCP"), |_| Transport::Tcp) |
+    map!(tag_no_case!("UDP"), |_| Transport::Udp)
 ));

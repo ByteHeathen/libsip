@@ -84,7 +84,7 @@ macro_rules! impl_u32_parser {
 macro_rules! impl_f32_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
         named!(pub $name<Header>, do_parse!(
-            tag!($tag) >>
+            tag_no_case!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
             opt!(take_while!(is_space)) >>
@@ -97,7 +97,7 @@ macro_rules! impl_f32_parser {
 macro_rules! impl_string_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
         named!(pub $name<Header>, do_parse!(
-            tag!($tag) >>
+            tag_no_case!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
             opt!(take_while!(is_space)) >>
@@ -111,7 +111,7 @@ macro_rules! impl_string_parser {
 macro_rules! impl_array_parser {
     ($name:tt, $tag:tt, $variant:ident, $func:ident) => {
         named!(pub $name<Header>, do_parse!(
-            tag!($tag) >>
+            tag_no_case!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
             opt!(take_while!(is_space)) >>
@@ -125,7 +125,7 @@ macro_rules! impl_array_parser {
 macro_rules! impl_named_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
         named!(pub $name<Header>, do_parse!(
-            tag!($tag) >>
+            tag_no_case!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
             opt!(take_while!(is_space)) >>
@@ -140,7 +140,7 @@ macro_rules! impl_named_parser {
 macro_rules! impl_type_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
         named!(pub $name<Header>, do_parse!(
-            tag!($tag) >>
+            tag_no_case!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
             opt!(take_while!(is_space)) >>
@@ -153,7 +153,7 @@ macro_rules! impl_type_parser {
 macro_rules! impl_lang_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
         named!(pub $name<Header>, do_parse!(
-            tag!($tag) >>
+            tag_no_case!($tag) >>
             opt!(take_while!(is_space)) >>
             char!(':') >>
             opt!(take_while!(is_space)) >>
@@ -217,7 +217,7 @@ named!(pub parse_other_header<Header>, do_parse!(
 
 named!(pub parse_cseq_header<Header>, do_parse!(
     opt!(tag!("\r\n")) >>
-    tag!("CSeq") >>
+    tag_no_case!("CSeq") >>
     opt!(take_while!(is_space)) >>
     char!(':') >>
     opt!(take_while!(is_space)) >>
@@ -229,7 +229,7 @@ named!(pub parse_cseq_header<Header>, do_parse!(
 ));
 
 named!(pub parse_via_header<Header>, do_parse!(
-    tag!("Via") >>
+    tag_no_case!("Via") >>
     opt!(take_while!(is_space)) >>
     char!(':') >>
     opt!(take_while!(is_space)) >>
@@ -243,7 +243,7 @@ named!(pub parse_via_header<Header>, do_parse!(
 
 named!(pub parse_www_authenticate_header<Header>, do_parse!(
     opt!(tag!("\r\n")) >>
-    tag!("WWW-Authenticate") >>
+    tag_no_case!("WWW-Authenticate") >>
     opt!(take_while!(is_space)) >>
     char!(':') >>
     opt!(take_while!(is_space)) >>
@@ -257,7 +257,7 @@ named!(pub parse_www_authenticate_header<Header>, do_parse!(
 
 named!(pub parse_authorization_header<Header>, do_parse!(
     opt!(tag!("\r\n")) >>
-    tag!("Authorization") >>
+    tag_no_case!("Authorization") >>
     opt!(take_while!(is_space)) >>
     char!(':') >>
     opt!(take_while!(is_space)) >>
@@ -288,5 +288,5 @@ named!(parse_key_value_pair<(String, String)>, do_parse!(
 ));
 
 named!(parse_auth_schema<auth::Schema>, alt!(
-    map!(tag!("Digest"), |_| auth::Schema::Digest)
+    map!(tag_no_case!("Digest"), |_| auth::Schema::Digest)
 ));
