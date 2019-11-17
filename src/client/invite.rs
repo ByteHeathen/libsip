@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::io::Result as IoResult;
 
 use crate::headers::Headers;
@@ -98,8 +99,7 @@ impl InviteHelper {
     }
 }
 
-pub struct CallId(pub String);
-
+#[derive(Debug)]
 pub struct InviteWriter {
     cseq: u32,
     uri: Uri,
@@ -130,6 +130,7 @@ impl InviteWriter {
             .header(Header::From(__named_header!(me_uri)))
             .header(Header::To(__named_header!(uri)))
             .header(Header::CallId(self.generate_call_id()))
+            .body(sdp)
             .build()
     }
 

@@ -3,12 +3,11 @@ use crate::uri::Param;
 use crate::uri::UriAuth;
 use crate::core::Transport;
 use crate::headers::NamedHeader;
-use crate::headers::auth::Schema;
 use crate::headers::auth::AuthHeader;
+use crate::headers::auth::AuthContext;
 use crate::headers::via::ViaHeader;
 use crate::RequestGenerator;
 
-use std::collections::HashMap;
 use std::io;
 
 /// Configuration used to build the register request.
@@ -67,8 +66,6 @@ pub struct RegistrationManager {
     c_nonce: Option<String>,
     /// The Finished computed auth header.
     auth_header: Option<AuthHeader>,
-    /// The authentication schema in use.
-    schema: Option<Schema>,
     /// The branch to use for registration.
     branch: String,
     /// The Call Id to use for register requests.
@@ -87,7 +84,6 @@ impl RegistrationManager {
             auth_header: None,
             nonce_c: 1,
             c_nonce: None,
-            schema: None,
             branch: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>())),
             call_id: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>()))
         }
@@ -108,22 +104,33 @@ impl RegistrationManager {
     /// then the Authorization header will be set.
     pub fn get_request(&mut self) -> Result<SipMessage, io::Error> {
         self.cseq_counter += 1;
+        self.nonce_c += 1;
         let to_header = self.account_uri.clone();
         let from_header = self.account_uri.clone();
         let mut contact_header = self.local_uri.clone();
+        let mut headers = vec![];
+
         if let Some(name) = &self.cfg.user {
             contact_header = contact_header.auth(UriAuth::new(name));
+            if let Some(auth_header) = &self.auth_header {
+                if let Some(pass) = &self.cfg.pass {
+                    let ctx = AuthContext {
+                        user: &name,
+                        pass: pass,
+                        nc: self.nonce_c,
+                        uri: &self.account_uri
+                    };
+                    headers.push(Header::Authorization(auth_header.response_header(ctx)?));
+                }
+            }
         }
-
-        let mut headers = vec![
-            Header::ContentLength(0),
-            Header::To(NamedHeader::new(to_header)),
-            Header::From(NamedHeader::new(from_header)),
-            Header::Contact(NamedHeader::new(contact_header)),
-            Header::CSeq(self.cseq_counter, Method::Register),
-            Header::CallId(format!("{}@{}", self.call_id, self.account_uri.host())),
-            self.via_header()
-        ];
+        headers.push(Header::ContentLength(0));
+        headers.push(Header::To(NamedHeader::new(to_header)));
+        headers.push(Header::From(NamedHeader::new(from_header)));
+        headers.push(Header::Contact(NamedHeader::new(contact_header)));
+        headers.push(Header::CSeq(self.cseq_counter, Method::Register));
+        headers.push(Header::CallId(format!("{}@{}", self.call_id, self.account_uri.host())));
+        headers.push(self.via_header());
 
         if let Some(exp) = self.cfg.expires_header {
             headers.push(Header::Expires(exp));
@@ -131,14 +138,6 @@ impl RegistrationManager {
         if let Some(agent) = &self.cfg.user_agent {
             headers.push(Header::UserAgent(agent.clone()));
         }
-        match self.schema {
-            Some(Schema::Digest) => {
-                self.nonce_c += 1;
-                self.handle_md5_auth()?
-            },
-            _ => {}
-        }
-        self.add_auth_header(&mut headers);
         Ok(
             RequestGenerator::new()
                 .method(Method::Register)
@@ -154,7 +153,7 @@ impl RegistrationManager {
         if let SipMessage::Response { headers, .. } = msg {
             for item in headers.iter() {
                 match item {
-                    Header::WwwAuthenticate(auth) => self.set_auth_vars(auth)?,
+                    Header::WwwAuthenticate(auth) => self.set_auth_vars(auth.clone())?,
                     Header::Expires(expire) => { self.cfg.expires_header = Some(expire.clone()); },
                     _ => {}
                 }
@@ -165,14 +164,8 @@ impl RegistrationManager {
         }
     }
 
-    fn set_auth_vars(&mut self, d: &AuthHeader) -> Result<(), io::Error> {
-        if let Some(realm) = d.1.get("realm") {
-            self.cfg.realm = Some(realm.into());
-        }
-        if let Some(nonce) = d.1.get("nonce") {
-            self.cfg.nonce = Some(nonce.into());
-        }
-        self.schema = Some(d.0);
+    fn set_auth_vars(&mut self, d: AuthHeader) -> Result<(), io::Error> {
+        self.auth_header = Some(d);
         Ok(())
     }
 
@@ -194,43 +187,5 @@ impl RegistrationManager {
                     .authless()
                     .schemaless();
         Header::Via(ViaHeader { uri: via_uri, version: Default::default(), transport: Transport::Udp})
-    }
-
-    fn handle_md5_auth(&mut self) -> Result<(), io::Error> {
-        if let Some(realm) = &self.cfg.realm {
-            if let Some(nonce) = &self.cfg.nonce {
-                if let Some(user) = &self.cfg.user {
-                    if let Some(pass) = &self.cfg.pass {
-                        let mut map = HashMap::new();
-                        let cnonce = self.generate_cnonce();
-                        map.insert("username".into(), user.clone());
-                        map.insert("nonce".into(), format!("{}", nonce));
-                        map.insert("realm".into(), realm.clone());
-                        map.insert("uri".into(), format!("{}", self.account_uri));
-                        map.insert("qop".into(), "auth".into());
-                        map.insert("algorithm".into(), "MD5".into());
-                        map.insert("cnonce".into(), format!("{:x}", cnonce));
-                        map.insert("nc".into(), format!("{:08}", self.nonce_c));
-                        let ha1 = md5::compute(&format!("{}:{}:{}", user, realm, pass));
-                        let ha2 = md5::compute(format!("REGISTER:{}", self.account_uri.clone()));
-                        let digest = format!("{:x}:{}:{:08}:{:x}:auth:{:x}", ha1, nonce, self.nonce_c, cnonce, ha2);
-                        let pass = md5::compute(digest);
-                        map.insert("response".into(), format!("{:x}", pass));
-                        self.auth_header = Some(AuthHeader(Schema::Digest, map));
-                    }
-                }
-            }
-        }
-        Ok(())
-    }
-
-    fn generate_cnonce(&self) -> md5::Digest {
-        md5::compute(rand::random::<[u8 ; 16]>())
-    }
-
-    fn add_auth_header(&self, headers: &mut Vec<Header>) {
-        if let Some(header) = self.auth_header.clone() {
-            headers.push(Header::Authorization(header));
-        }
     }
 }

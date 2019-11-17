@@ -17,6 +17,7 @@ md5 = "0.7.0"
 rand = "0.7.2"
 bytes = "0.4.12"
 serde = { version = "1.0.102", features = ["derive"] }
+ring = "0.16.9"
 
 [dev-dependencies]
 tokio = { version = "0.2.0-alpha.6" }
