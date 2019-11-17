@@ -1,9 +1,5 @@
 # libsip
 
- **WARNING**: In A few weeks when i have more time, this crate will be
-  moved and renamed to nirah-sip and moved into that cargo workspace.
- All versions will be yanked once the move is complete.
-
 libsip is a library implementation of the sip protocol as described in
 [rfc3261](https://tools.ietf.org/html/rfc3261). libsip intends to implement
 parsing the entire SIP Protocol, but will only provide helpers for certain
