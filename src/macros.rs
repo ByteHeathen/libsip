@@ -63,3 +63,9 @@ macro_rules! named_header {
         libsip::headers::NamedHeader { display_name: None, uri: $u, params: ::std::collections::HashMap::new() }
     }
 }
+
+macro_rules! __named_header {
+    ($u:tt) => {
+        crate::headers::NamedHeader { display_name: None, uri: $u, params: ::std::collections::HashMap::new() }
+    }
+}

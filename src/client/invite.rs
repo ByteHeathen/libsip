@@ -97,3 +97,48 @@ impl InviteHelper {
         Ok(false)
     }
 }
+
+pub struct CallId(pub String);
+
+pub struct InviteWriter {
+    cseq: u32,
+    uri: Uri,
+    user_agent: Option<String>
+}
+
+impl InviteWriter {
+
+    pub fn new(uri: Uri) -> InviteWriter {
+        InviteWriter {
+            cseq: 0,
+            uri,
+            user_agent: None
+        }
+    }
+
+    pub fn set_user_agent<S: Into<String>>(&mut self, s: S) {
+        self.user_agent = Some(s.into());
+    }
+
+    pub fn generate_invite(&mut self, uri: Uri, sdp: Vec<u8>) -> IoResult<SipMessage> {
+        self.cseq += 1;
+        let me_uri = self.uri.clone();
+        RequestGenerator::new()
+            .method(Method::Invite)
+            .uri(uri.clone())
+            .header(self.cseq()?)
+            .header(Header::From(__named_header!(me_uri)))
+            .header(Header::To(__named_header!(uri)))
+            .header(Header::CallId(self.generate_call_id()))
+            .build()
+    }
+
+    pub fn cseq(&self) -> IoResult<Header> {
+        let h = Header::CSeq(self.cseq, Method::Invite);
+        Ok(h)
+    }
+
+    pub fn generate_call_id(&self) -> String {
+        format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>()))
+    }
+}
