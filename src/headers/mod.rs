@@ -34,6 +34,10 @@ impl Headers {
         self.0.iter()
     }
 
+    pub fn into_iter(self) -> impl Iterator<Item=Header> {
+        self.0.into_iter()
+    }
+
     /// Add the Headers onto the interior Vec<Header>.
     pub fn extend(&mut self, i: Vec<Header>) {
         self.0.extend(i)

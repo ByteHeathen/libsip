@@ -151,9 +151,9 @@ impl RegistrationManager {
     /// to this function to perform compute the hashed password.
     pub fn set_challenge(&mut self, msg: SipMessage) -> Result<(), io::Error> {
         if let SipMessage::Response { headers, .. } = msg {
-            for item in headers.iter() {
+            for item in headers.into_iter() {
                 match item {
-                    Header::WwwAuthenticate(auth) => { self.auth_header = Some(d); },
+                    Header::WwwAuthenticate(auth) => { self.auth_header = Some(auth); },
                     Header::Expires(expire) => { self.cfg.expires_header = Some(expire.clone()); },
                     _ => {}
                 }

@@ -1,3 +1,8 @@
+use sha::utils::Digest;
+use sha::utils::DigestExt;
+use sha::sha256::Sha256;
+use sha::sha512::Sha512;
+
 use std::fmt;
 use std::collections::HashMap;
 use std::io::Result as IoResult;
@@ -75,6 +80,8 @@ impl AuthHeader {
             .unwrap_or("md5".to_string());
         match alg.as_ref() {
             "md5" | "MD5" => self.handle_md5_digest_auth(ctx),
+            "sha-256" | "SHA-256" => self.handle_sha256_digest_auth(ctx),
+            "sha-512-256" | "SHA-512-256" => self.handle_sha512_digest_auth(ctx),
             alg => panic!("Unknown Auth alogirithm: {}", alg)
         }
     }
@@ -95,6 +102,56 @@ impl AuthHeader {
         let ha1 = md5::compute(&format!("{}:{}:{}", ctx.user, realm, ctx.pass));
         let ha2 = md5::compute(format!("REGISTER:{}", ctx.uri));
         let digest = format!("{:x}:{}:{:08}:{:x}:auth:{:x}", ha1, nonce, ctx.nc, cnonce, ha2);
+        let pass = md5::compute(digest);
+        map.insert("response".into(), format!("{:x}", pass));
+        Ok(AuthHeader(Schema::Digest, map))
+    }
+
+    fn handle_sha256_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+        let realm = self.1.get("realm").expect("Auth header does not contain a realm");
+        let nonce = self.1.get("nonce").expect("Auth header does not contain a nonce");
+        let opaque = self.1.get("opaque").expect("Auth header does not contain a opaque");
+        let mut map: HashMap<String, String> = HashMap::new();
+        let cnonce = self.generate_cnonce();
+        map.insert("username".into(), ctx.user.to_string());
+        map.insert("nonce".into(), format!("{}", nonce));
+        map.insert("realm".into(), realm.clone());
+        map.insert("uri".into(), format!("{}", ctx.uri));
+        map.insert("qop".into(), self.1.get("qop").unwrap().clone());
+        map.insert("algorithm".into(), "SHA-512-256".into());
+        map.insert("cnonce".into(), format!("{:x}", cnonce));
+        map.insert("nc".into(), format!("{:08}", ctx.nc));
+        map.insert("opaque".into(), opaque.into());
+        let mut ha1_hasher = Sha256::default();
+        let ha1 = ha1_hasher.digest(format!("{}:{}:{}", ctx.user, realm, ctx.pass).as_ref());
+        let mut ha2_hasher = Sha256::default();
+        let ha2 = ha2_hasher.digest(format!("REGISTER:{}", ctx.uri).as_ref());
+        let digest = format!("{}:{}:{:08}:{:x}:auth:{}", ha1.to_hex(), nonce, ctx.nc, cnonce, ha2.to_hex());
+        let pass = md5::compute(digest);
+        map.insert("response".into(), format!("{:x}", pass));
+        Ok(AuthHeader(Schema::Digest, map))
+    }
+
+    fn handle_sha512_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
+        let realm = self.1.get("realm").expect("Auth header does not contain a realm");
+        let nonce = self.1.get("nonce").expect("Auth header does not contain a nonce");
+        let opaque = self.1.get("opaque").expect("Auth header does not contain a opaque");
+        let mut map: HashMap<String, String> = HashMap::new();
+        let cnonce = self.generate_cnonce();
+        map.insert("username".into(), ctx.user.to_string());
+        map.insert("nonce".into(), format!("{}", nonce));
+        map.insert("realm".into(), realm.clone());
+        map.insert("uri".into(), format!("{}", ctx.uri));
+        map.insert("qop".into(), self.1.get("qop").unwrap().clone());
+        map.insert("algorithm".into(), "SHA-512".into());
+        map.insert("cnonce".into(), format!("{:x}", cnonce));
+        map.insert("nc".into(), format!("{:08}", ctx.nc));
+        map.insert("opaque".into(), opaque.into());
+        let mut ha1_hasher = Sha512::default();
+        let ha1 = ha1_hasher.digest(format!("{}:{}:{}", ctx.user, realm, ctx.pass).as_ref());
+        let mut ha2_hasher = Sha512::default();
+        let ha2 = ha2_hasher.digest(format!("REGISTER:{}", ctx.uri).as_ref());
+        let digest = format!("{}:{}:{:08}:{:x}:auth:{}", ha1.to_hex(), nonce, ctx.nc, cnonce, ha2.to_hex());
         let pass = md5::compute(digest);
         map.insert("response".into(), format!("{:x}", pass));
         Ok(AuthHeader(Schema::Digest, map))
