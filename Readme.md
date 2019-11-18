@@ -8,9 +8,10 @@ common use cases.
 **WIP** This library is still very much under construction.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://travis-ci.org/bytebuddha/libsip.svg?branch=master)](https://travis-ci.org/bytebuddha/libsip)
 [![Crates.io](https://img.shields.io/crates/v/libsip.svg)](https://crates.io/crates/libsip)
 [![Docs.rs](https://docs.rs/libsip/badge.svg)](https://docs.rs/libsip)
+[![Build Status](https://travis-ci.org/bytebuddha/libsip.svg?branch=master)](https://travis-ci.org/bytebuddha/libsip)
+[![Build status](https://ci.appveyor.com/api/projects/status/8x26kisw2h6o1ox8?svg=true)](https://ci.appveyor.com/project/bytebuddha/libsip)
 
 #### Running the examples
 ```bash
@@ -27,7 +28,6 @@ cargo run --example console
 #### dependencies
   - **[nom](https://crates.io/crates/nom) 5.0.1**
   - **[rand](https://crates.io/crates/rand) 0.7.2**
-  - **[bytes](https://crates.io/crates/bytes) 0.4.12**
   - **[md5](https://crates.io/crates/md5) 0.7.0**
   - **[sha](https://crates.io/crates/sha) 1.0.3**
   - **[serde](https://crates.io/crates/serde) 1.0.102**

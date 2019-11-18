@@ -11,14 +11,11 @@ repository = "https://github.com/Bytebuddha/libsip"
 description = "SIP protocol Implementation, with a focus towords softphone clients."
 
 [dependencies]
-nom = "5.0.1"
-#TODO: Find a better crate/method for generating md5 hash's
-md5 = "0.7.0"
-rand = "0.7.2"
-bytes = "0.4.12"
 serde = { version = "1.0.102", features = ["derive"] }
-ring = "0.16.9"
+nom = "5.0.1"
+rand = "0.7.2"
 sha = "1.0.3"
+md5 = "0.7.0"
 
 [dev-dependencies]
 tokio = { version = "0.2.0-alpha.6" }
