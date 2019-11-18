@@ -1,3 +1,4 @@
+#![recursion_limit="256"]
 //! [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 //! [![Build Status](https://travis-ci.org/bytebuddha/libsip.svg?branch=master)](https://travis-ci.org/bytebuddha/libsip)
 //! [![Crates.io](https://img.shields.io/crates/v/libsip.svg)](https://crates.io/crates/libsip)
