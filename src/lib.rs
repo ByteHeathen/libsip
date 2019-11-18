@@ -1,9 +1,4 @@
 #![recursion_limit="256"]
-//! [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-//! [![Build Status](https://travis-ci.org/bytebuddha/libsip.svg?branch=master)](https://travis-ci.org/bytebuddha/libsip)
-//! [![Crates.io](https://img.shields.io/crates/v/libsip.svg)](https://crates.io/crates/libsip)
-//! [![Docs.rs](https://docs.rs/libsip/badge.svg)](https://docs.rs/libsip)
-//!
 //! libsip has three basic components a parser and managers.
 //!
 //! Managers are utility struct's meant to ease one specifc asspect of the sip protocol,

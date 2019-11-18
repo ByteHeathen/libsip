@@ -8,6 +8,7 @@ use std::io::ErrorKind as IoErrorKind;
 /// is consumed and produces a SipMessage::Request variant.
 /// Calling the `method` & `uri` methods before the `build`
 /// method is required.
+#[derive(Default)]
 pub struct RequestGenerator {
     method: Option<Method>,
     uri: Option<Uri>,

@@ -8,6 +8,7 @@ use std::io::ErrorKind as IoErrorKind;
 /// is consumed and produces a SipMessage::Response variant.
 /// Calling the `code` method before the `build` method is
 /// required.
+#[derive(Default)]
 pub struct ResponseGenerator {
     code: Option<u32>,
     version: Version,
@@ -58,7 +59,7 @@ impl ResponseGenerator {
         if let Some(code) = self.code {
 
             let res = SipMessage::Response {
-                code: code,
+                code,
                 version: self.version,
                 headers: self.headers,
                 body: self.body

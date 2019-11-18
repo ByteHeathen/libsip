@@ -76,7 +76,7 @@ impl SoftPhone {
         let mut out_headers = vec![];
         for header in headers.iter() {
             match header {
-                Header::CSeq(a, b) => out_headers.push(Header::CSeq(a.clone(), b.clone())),
+                Header::CSeq(a, b) => out_headers.push(Header::CSeq(*a, *b)),
                 Header::CallId(call) => out_headers.push(Header::CallId(call.clone())),
                 Header::From(from) => out_headers.push(Header::From(from.clone())),
                 Header::To(to) => out_headers.push(Header::To(to.clone())),

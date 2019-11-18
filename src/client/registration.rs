@@ -116,7 +116,7 @@ impl RegistrationManager {
                 if let Some(pass) = &self.cfg.pass {
                     let ctx = AuthContext {
                         user: &name,
-                        pass: pass,
+                        pass,
                         nc: self.nonce_c,
                         uri: &self.account_uri
                     };
@@ -154,7 +154,7 @@ impl RegistrationManager {
             for item in headers.into_iter() {
                 match item {
                     Header::WwwAuthenticate(auth) => { self.auth_header = Some(auth); },
-                    Header::Expires(expire) => { self.cfg.expires_header = Some(expire.clone()); },
+                    Header::Expires(expire) => { self.cfg.expires_header = Some(expire); },
                     _ => {}
                 }
             }

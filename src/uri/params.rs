@@ -30,7 +30,7 @@ impl Param {
             b"branch" => Ok(Param::Branch(String::from_utf8(value.to_vec()).expect("Utf-8 Error"))),
             b"received" => {
                 let mut data = value.to_vec();
-                data.push(' ' as u8);
+                data.push(b' ');
                 match parse_domain(&data) {
                     Ok((_, domain)) => Ok(Param::Received(domain)),
                     Err(nom::Err::Error((_, ty))) => Err(nom::Err::Error((value, ty))),
@@ -63,7 +63,7 @@ named!(parse_named_param<Param>, do_parse!(
     tag!(";") >>
     key: take_while!(is_alphabetic) >>
     tag!("=") >>
-    value: take_while!(|item| is_alphanumeric(item) || '.' as u8 == item) >>
+    value: take_while!(|item| is_alphanumeric(item) || b'.' == item) >>
     (Param::from_key(key, value)?)
 ));
 

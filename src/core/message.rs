@@ -54,8 +54,8 @@ impl SipMessage {
     /// Retreive the SIP response's status code.
     /// Returns None for requests.
     pub fn status_code(&self) -> Option<u32> {
-        if let &SipMessage::Response { code, .. } = self {
-            Some(code)
+        if let SipMessage::Response { code, .. } = self {
+            Some(*code)
         } else {
             None
         }

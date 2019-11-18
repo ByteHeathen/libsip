@@ -147,7 +147,7 @@ impl FromStr for Uri {
     }
 }
 
-fn map_error<'a>(n: nom::Err<(&'a [u8], nom::error::ErrorKind)>) -> nom::Err<nom::error::ErrorKind> {
+fn map_error(n: nom::Err<(&[u8], nom::error::ErrorKind)>) -> nom::Err<nom::error::ErrorKind> {
     match n {
         nom::Err::Error((_, a)) => nom::Err::Error(a),
         nom::Err::Failure((_, b)) => nom::Err::Failure(b),

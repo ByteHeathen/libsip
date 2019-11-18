@@ -15,7 +15,7 @@ use crate::core::Method;
 
 /// Wrapper around a Vec<Header> to simplify creating
 /// and a list of headers
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct Headers(pub Vec<Header>);
 
 impl Headers {
@@ -34,10 +34,6 @@ impl Headers {
         self.0.iter()
     }
 
-    pub fn into_iter(self) -> impl Iterator<Item=Header> {
-        self.0.into_iter()
-    }
-
     /// Add the Headers onto the interior Vec<Header>.
     pub fn extend(&mut self, i: Vec<Header>) {
         self.0.extend(i)
@@ -47,7 +43,7 @@ impl Headers {
     pub fn expires(&self) -> Option<Header> {
         for h in &self.0 {
             if let Header::Expires(i) = h {
-                return Some(Header::Expires(i.clone()));
+                return Some(Header::Expires(*i));
             }
         }
         None
@@ -57,7 +53,7 @@ impl Headers {
     pub fn cseq(&self) -> Option<Header> {
         for h in &self.0 {
             if let Header::CSeq(a, b) = h {
-                return Some(Header::CSeq(a.clone(), b.clone()));
+                return Some(Header::CSeq(*a, *b));
             }
         }
         None
@@ -121,6 +117,15 @@ impl Headers {
             }
         }
         None
+    }
+}
+
+impl IntoIterator for Headers {
+    type Item = Header;
+    type IntoIter = ::std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 

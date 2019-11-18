@@ -29,22 +29,18 @@ impl fmt::Display for AuthHeader {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)?;
         for (index, (key, value)) in self.1.iter().enumerate() {
-            if index == 0 {
-                if key == &"qop".to_string() {
-                    write!(f, "{}={}", key, value)?;
-                } else if key == &"auth".to_string() {
-                    write!(f, "{}={:08}", key, value)?;
-                } else {
-                    write!(f, " {}=\"{}\"", key, value)?;
-                }
+            if index == 0 && key == &"qop".to_string() {
+                write!(f, "{}={}", key, value)?;
+            } else if index == 0 && key == &"auth".to_string() {
+                write!(f, "{}={:08}", key, value)?;
+            } else if index == 0 {
+                write!(f, " {}=\"{}\"", key, value)?;
+            } else if key == &"qop".to_string() {
+                write!(f, ", {}={}", key, value)?;
+            } else if key == &"auth".to_string() {
+                write!(f, ", {}={:08}", key, value)?;
             } else {
-                if key == &"qop".to_string() {
-                    write!(f, ", {}={}", key, value)?;
-                } else if key == &"auth".to_string() {
-                    write!(f, ", {}={:08}", key, value)?;
-                } else {
-                    write!(f, ", {}=\"{}\"", key, value)?;
-                }
+                write!(f, ", {}=\"{}\"", key, value)?;
             }
         }
         Ok(())
@@ -77,7 +73,7 @@ impl AuthHeader {
     fn handle_digest_qop_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         let alg = self.1.get("algorithm")
             .map(|item| item.to_string())
-            .unwrap_or("md5".to_string());
+            .unwrap_or_else(|| "md5".to_string());
         match alg.as_ref() {
             "md5" | "MD5" => self.handle_md5_digest_auth(ctx),
             "sha-256" | "SHA-256" => self.handle_sha256_digest_auth(ctx),
@@ -92,7 +88,7 @@ impl AuthHeader {
         let mut map: HashMap<String, String> = HashMap::new();
         let cnonce = self.generate_cnonce();
         map.insert("username".into(), ctx.user.to_string());
-        map.insert("nonce".into(), format!("{}", nonce));
+        map.insert("nonce".into(), nonce.to_string());
         map.insert("realm".into(), realm.clone());
         map.insert("uri".into(), format!("{}", ctx.uri));
         map.insert("qop".into(), self.1.get("qop").unwrap().clone());
@@ -114,7 +110,7 @@ impl AuthHeader {
         let mut map: HashMap<String, String> = HashMap::new();
         let cnonce = self.generate_cnonce();
         map.insert("username".into(), ctx.user.to_string());
-        map.insert("nonce".into(), format!("{}", nonce));
+        map.insert("nonce".into(), nonce.to_string());
         map.insert("realm".into(), realm.clone());
         map.insert("uri".into(), format!("{}", ctx.uri));
         map.insert("qop".into(), self.1.get("qop").unwrap().clone());
@@ -139,7 +135,7 @@ impl AuthHeader {
         let mut map: HashMap<String, String> = HashMap::new();
         let cnonce = self.generate_cnonce();
         map.insert("username".into(), ctx.user.to_string());
-        map.insert("nonce".into(), format!("{}", nonce));
+        map.insert("nonce".into(), nonce.to_string());
         map.insert("realm".into(), realm.clone());
         map.insert("uri".into(), format!("{}", ctx.uri));
         map.insert("qop".into(), self.1.get("qop").unwrap().clone());
