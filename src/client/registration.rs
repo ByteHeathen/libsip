@@ -160,7 +160,7 @@ impl RegistrationManager {
             }
             Ok(())
         } else {
-            unreachable!()
+            Err(io::Error::new(io::ErrorKind::InvalidInput, "Challenge Response was not a SIP response"))
         }
     }
 
