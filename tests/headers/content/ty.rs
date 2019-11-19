@@ -1,16 +1,20 @@
-use libsip::headers::Header;
-use libsip::headers::ContentType;
-use libsip::headers::parse::parse_content_type_header;
+use libsip::headers::{parse::parse_content_type_header, ContentType, Header};
 
 #[test]
 fn write() {
     let header = Header::ContentType(ContentType::Sdp);
-    assert_eq!("Content-Type: application/sdp".to_string(), format!("{}", header));
+    assert_eq!(
+        "Content-Type: application/sdp".to_string(),
+        format!("{}", header)
+    );
 }
 
 #[test]
 fn read() {
     let remains = vec![];
     let header = Header::ContentType(ContentType::Sdp);
-    assert_eq!(Ok((remains.as_ref(), header)), parse_content_type_header(b"Content-Type: application/sdp"));
+    assert_eq!(
+        Ok((remains.as_ref(), header)),
+        parse_content_type_header(b"Content-Type: application/sdp")
+    );
 }

@@ -1,12 +1,13 @@
-use crate::*;
-use crate::uri::Param;
-use crate::uri::UriAuth;
-use crate::core::Transport;
-use crate::headers::NamedHeader;
-use crate::headers::auth::AuthHeader;
-use crate::headers::auth::AuthContext;
-use crate::headers::via::ViaHeader;
-use crate::RequestGenerator;
+use crate::{
+    core::Transport,
+    headers::{
+        auth::{AuthContext, AuthHeader},
+        via::ViaHeader,
+        NamedHeader,
+    },
+    uri::{Param, UriAuth},
+    RequestGenerator, *,
+};
 
 use std::io;
 
@@ -29,7 +30,7 @@ pub struct Config {
     /// Authentication realm
     realm: Option<String>,
     /// Authentication nonce
-    nonce: Option<String>
+    nonce: Option<String>,
 }
 
 impl Default for Config {
@@ -41,7 +42,7 @@ impl Default for Config {
             user: None,
             pass: None,
             realm: None,
-            nonce: None
+            nonce: None,
         }
     }
 }
@@ -69,23 +70,24 @@ pub struct RegistrationManager {
     /// The branch to use for registration.
     branch: String,
     /// The Call Id to use for register requests.
-    call_id: String
+    call_id: String,
 }
 
 impl RegistrationManager {
-
     /// Create a new Registration Manager typically this will happen once in a program's
     /// lifecycle. `account_uri` is the sip uri used to authenticate with and `local_uri`
     /// is the sip uri of the listening socket.
     pub fn new(account_uri: Uri, local_uri: Uri, cfg: Config) -> RegistrationManager {
         RegistrationManager {
-            account_uri, local_uri, cfg,
+            account_uri,
+            local_uri,
+            cfg,
             cseq_counter: 444,
             auth_header: None,
             nonce_c: 1,
             c_nonce: None,
-            branch: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>())),
-            call_id: format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>()))
+            branch: format!("{:x}", md5::compute(rand::random::<[u8; 16]>())),
+            call_id: format!("{:x}", md5::compute(rand::random::<[u8; 16]>())),
         }
     }
 
@@ -118,7 +120,7 @@ impl RegistrationManager {
                         user: &name,
                         pass,
                         nc: self.nonce_c,
-                        uri: &self.account_uri
+                        uri: &self.account_uri,
                     };
                     headers.push(Header::Authorization(auth_header.authenticate(ctx)?));
                 }
@@ -129,7 +131,11 @@ impl RegistrationManager {
         headers.push(Header::From(NamedHeader::new(from_header)));
         headers.push(Header::Contact(NamedHeader::new(contact_header)));
         headers.push(Header::CSeq(self.cseq_counter, Method::Register));
-        headers.push(Header::CallId(format!("{}@{}", self.call_id, self.account_uri.host())));
+        headers.push(Header::CallId(format!(
+            "{}@{}",
+            self.call_id,
+            self.account_uri.host()
+        )));
         headers.push(self.via_header());
 
         if let Some(exp) = self.cfg.expires_header {
@@ -138,13 +144,11 @@ impl RegistrationManager {
         if let Some(agent) = &self.cfg.user_agent {
             headers.push(Header::UserAgent(agent.clone()));
         }
-        Ok(
-            RequestGenerator::new()
-                .method(Method::Register)
-                .uri(self.account_uri.clone().authless())
-                .headers(headers)
-                .build()?
-        )
+        Ok(RequestGenerator::new()
+            .method(Method::Register)
+            .uri(self.account_uri.clone().authless())
+            .headers(headers)
+            .build()?)
     }
 
     /// After the first register request is sent. pass the received sip response
@@ -153,14 +157,21 @@ impl RegistrationManager {
         if let SipMessage::Response { headers, .. } = msg {
             for item in headers.into_iter() {
                 match item {
-                    Header::WwwAuthenticate(auth) => { self.auth_header = Some(auth); },
-                    Header::Expires(expire) => { self.cfg.expires_header = Some(expire); },
-                    _ => {}
+                    Header::WwwAuthenticate(auth) => {
+                        self.auth_header = Some(auth);
+                    },
+                    Header::Expires(expire) => {
+                        self.cfg.expires_header = Some(expire);
+                    },
+                    _ => {},
                 }
             }
             Ok(())
         } else {
-            Err(io::Error::new(io::ErrorKind::InvalidInput, "Challenge Response was not a SIP response"))
+            Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Challenge Response was not a SIP response",
+            ))
         }
     }
 
@@ -177,10 +188,16 @@ impl RegistrationManager {
     /// Retreive the via header being used to represent the local
     /// listening socket.
     pub fn via_header(&self) -> Header {
-        let via_uri = self.local_uri.clone()
-                    .parameter(Param::Branch(self.branch.clone()))
-                    .authless()
-                    .schemaless();
-        Header::Via(ViaHeader { uri: via_uri, version: Default::default(), transport: Transport::Udp})
+        let via_uri = self
+            .local_uri
+            .clone()
+            .parameter(Param::Branch(self.branch.clone()))
+            .authless()
+            .schemaless();
+        Header::Via(ViaHeader {
+            uri: via_uri,
+            version: Default::default(),
+            transport: Transport::Udp,
+        })
     }
 }

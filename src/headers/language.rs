@@ -186,7 +186,7 @@ pub enum Language {
     Yiddish,
     Yoruba,
     Zhuang,
-    Zulu
+    Zulu,
 }
 
 impl fmt::Display for Language {
@@ -203,7 +203,7 @@ impl fmt::Display for Language {
             Language::Armenian => write!(f, "hy"),
             Language::Assamese => write!(f, "as"),
             Language::Avaric => write!(f, "av"),
-            Language::Avestan =>write!(f, "ae"),
+            Language::Avestan => write!(f, "ae"),
             Language::Aymara => write!(f, "ay"),
             Language::Azerbaijani => write!(f, "az"),
             Language::Bambara => write!(f, "bm"),
@@ -375,7 +375,7 @@ impl fmt::Display for Language {
             Language::Yiddish => write!(f, "yi"),
             Language::Yoruba => write!(f, "yo"),
             Language::Zhuang => write!(f, "za"),
-            Language::Zulu => write!(f, "zu")
+            Language::Zulu => write!(f, "zu"),
         }
     }
 }

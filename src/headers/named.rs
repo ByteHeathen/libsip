@@ -1,26 +1,22 @@
 use nom::character::*;
 
-use crate::Uri;
-use crate::parse::*;
-use crate::uri::parse_uri;
+use crate::{parse::*, uri::parse_uri, Uri};
 
-use std::fmt;
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct NamedHeader {
     pub display_name: Option<String>,
     pub uri: Uri,
-    pub params: HashMap<String, String>
+    pub params: HashMap<String, String>,
 }
 
 impl NamedHeader {
-
     pub fn new(uri: Uri) -> NamedHeader {
         NamedHeader {
             display_name: None,
             params: HashMap::new(),
-            uri
+            uri,
         }
     }
 

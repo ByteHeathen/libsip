@@ -1,15 +1,11 @@
-mod named;
-mod write;
+pub mod auth;
 mod content;
 mod language;
-pub mod auth;
+mod named;
 pub mod parse;
 pub mod via;
-pub use self::content::ContentType;
-pub use self::language::Language;
-pub use self::named::NamedHeader;
-pub use self::parse::parse_header;
-
+mod write;
+pub use self::{content::ContentType, language::Language, named::NamedHeader, parse::parse_header};
 
 use crate::core::Method;
 
@@ -19,7 +15,6 @@ use crate::core::Method;
 pub struct Headers(pub Vec<Header>);
 
 impl Headers {
-
     pub fn new() -> Headers {
         Headers(vec![])
     }
@@ -30,7 +25,7 @@ impl Headers {
     }
 
     /// Access the underlying vec iterator.
-    pub fn iter(&self) -> impl Iterator<Item=&Header> {
+    pub fn iter(&self) -> impl Iterator<Item = &Header> {
         self.0.iter()
     }
 
@@ -121,8 +116,8 @@ impl Headers {
 }
 
 impl IntoIterator for Headers {
-    type Item = Header;
     type IntoIter = ::std::vec::IntoIter<Self::Item>;
+    type Item = Header;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
@@ -176,5 +171,5 @@ pub enum Header {
     Priority(String),
     WwwAuthenticate(auth::AuthHeader),
     XFsSendingMessage(String),
-    Other(String, String)
+    Other(String, String),
 }

@@ -7,15 +7,14 @@
 
 extern crate libsip;
 
-use libsip::*;
-use libsip::uri::Param;
-use libsip::core::Transport;
-use libsip::uri::parse_uri;
-use libsip::core::message::parse_response;
-use libsip::client::RegistrationManager;
+use libsip::{
+    client::RegistrationManager,
+    core::{message::parse_response, Transport},
+    uri::{parse_uri, Param},
+    *,
+};
 
-use std::io;
-use std::net::UdpSocket;
+use std::{io, net::UdpSocket};
 
 fn get_our_uri() -> Uri {
     Uri::sip(ip_domain!(192, 168, 1, 76, 5060))
@@ -36,10 +35,11 @@ fn send_request_get_response(req: SipMessage) -> Result<SipMessage, io::Error> {
     Ok(msg)
 }
 
-
-fn main() -> Result<(), io::Error>{
-    let acc_url = parse_uri(b"sip:20@192.168.1.120 ").unwrap().1
-            .parameter(Param::Transport(Transport::Udp));
+fn main() -> Result<(), io::Error> {
+    let acc_url = parse_uri(b"sip:20@192.168.1.120 ")
+        .unwrap()
+        .1
+        .parameter(Param::Transport(Transport::Udp));
     let mut builder = RegistrationManager::new(acc_url, get_our_uri(), Default::default());
     builder.username("20");
     builder.password("program");

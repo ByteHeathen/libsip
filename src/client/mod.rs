@@ -2,17 +2,12 @@ mod registration;
 pub use self::registration::RegistrationManager;
 
 mod messaging;
-pub use self::messaging::MessageHelper;
-pub use self::messaging::MessageWriter;
+pub use self::messaging::{MessageHelper, MessageWriter};
 
 mod invite;
 pub use self::invite::InviteHelper;
 
-use crate::Uri;
-use crate::Header;
-use crate::Headers;
-use crate::SipMessage;
-use crate::ResponseGenerator;
+use crate::{Header, Headers, ResponseGenerator, SipMessage, Uri};
 
 use std::io::Result as IoResult;
 
@@ -22,17 +17,16 @@ use std::io::Result as IoResult;
 /// is an interface for sending & receiving calls.
 pub struct SoftPhone {
     pub msg: MessageWriter,
-    pub reg: RegistrationManager
+    pub reg: RegistrationManager,
 }
 
 impl SoftPhone {
-
     /// Create a new SoftPhone client. `local_uri` is the SipUri that you listen on
     /// and `account_uri` is the uri of your SIP user account.
     pub fn new(local_uri: Uri, account_uri: Uri) -> SoftPhone {
         SoftPhone {
             msg: MessageWriter::new(account_uri.clone()),
-            reg: RegistrationManager::new(account_uri, local_uri, Default::default())
+            reg: RegistrationManager::new(account_uri, local_uri, Default::default()),
         }
     }
 
@@ -81,20 +75,21 @@ impl SoftPhone {
                 Header::From(from) => out_headers.push(Header::From(from.clone())),
                 Header::To(to) => out_headers.push(Header::To(to.clone())),
                 Header::Via(via) => out_headers.push(Header::Via(via.clone())),
-                _ => {}
+                _ => {},
             }
         }
 
-        Ok((ResponseGenerator::new()
-            .code(200)
-            .headers(out_headers.clone())
-            .header(Header::ContentLength(0))
-            .build()?,
-         ResponseGenerator::new()
-             .code(487)
-             .headers(out_headers)
-             .header(Header::ContentLength(0))
-             .build()?
+        Ok((
+            ResponseGenerator::new()
+                .code(200)
+                .headers(out_headers.clone())
+                .header(Header::ContentLength(0))
+                .build()?,
+            ResponseGenerator::new()
+                .code(487)
+                .headers(out_headers)
+                .header(Header::ContentLength(0))
+                .build()?,
         ))
     }
 }

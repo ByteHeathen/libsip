@@ -22,7 +22,6 @@ impl fmt::Display for Version {
 }
 
 impl Version {
-
     pub fn new(maj: u8, min: u8) -> Version {
         Version(maj, min)
     }

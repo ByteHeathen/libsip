@@ -1,14 +1,11 @@
 use nom::character::*;
 
-use super::*;
-use crate::uri::parse_uri;
-use crate::parse::*;
-use super::named::*;
-use super::content::*;
-use super::language::*;
-use crate::core::parse_method;
-use crate::core::parse_transport;
-use crate::core::parse_version;
+use super::{content::*, language::*, named::*, *};
+use crate::{
+    core::{parse_method, parse_transport, parse_version},
+    parse::*,
+    uri::parse_uri,
+};
 
 use std::collections::HashMap;
 
@@ -172,14 +169,30 @@ impl_string_parser!(parse_useragent_header, "User-Agent", UserAgent);
 impl_string_parser!(parse_callid_header, "Call-ID", CallId);
 impl_string_parser!(parse_alert_info_header, "Alert-Info", AlertInfo);
 impl_string_parser!(parse_error_info_header, "Error-Info", ErrorInfo);
-impl_string_parser!(parse_authentication_info_header, "Authentication-Info", AuthenticationInfo);
+impl_string_parser!(
+    parse_authentication_info_header,
+    "Authentication-Info",
+    AuthenticationInfo
+);
 impl_string_parser!(parse_call_info_header, "Call-Info", CallInfo);
 impl_string_parser!(parse_in_reply_to_header, "In-Reply-To", InReplyTo);
-impl_string_parser!(parse_content_disposition_header, "Content-Disposition", ContentDisposition);
+impl_string_parser!(
+    parse_content_disposition_header,
+    "Content-Disposition",
+    ContentDisposition
+);
 impl_string_parser!(parse_date_header, "Date", Date);
 impl_string_parser!(parse_organization_header, "Organization", Organization);
-impl_string_parser!(parse_proxy_authenticate_header, "Proxy-Authenticate", ProxyAuthenticate);
-impl_string_parser!(parse_proxy_authorization_header, "Proxy-Authorization", ProxyAuthorization);
+impl_string_parser!(
+    parse_proxy_authenticate_header,
+    "Proxy-Authenticate",
+    ProxyAuthenticate
+);
+impl_string_parser!(
+    parse_proxy_authorization_header,
+    "Proxy-Authorization",
+    ProxyAuthorization
+);
 impl_string_parser!(parse_proxy_require_header, "Proxy-Require", ProxyRequire);
 impl_string_parser!(parse_require_header, "Require", Require);
 impl_string_parser!(parse_retry_after_header, "Retry-After", RetryAfter);
@@ -189,7 +202,11 @@ impl_string_parser!(parse_record_route_header, "Record-Route", RecordRoute);
 impl_string_parser!(parse_server_header, "Server", Server);
 impl_string_parser!(parse_unsupported_header, "Unsupported", Unsupported);
 impl_string_parser!(parse_warning_header, "Warning", Warning);
-impl_string_parser!(parse_xfs_sending_message_header, "X-FS-Sending-Message", XFsSendingMessage);
+impl_string_parser!(
+    parse_xfs_sending_message_header,
+    "X-FS-Sending-Message",
+    XFsSendingMessage
+);
 //impl_string_parser!(parse_via_header, "Via", Via);
 impl_string_parser!(parse_priority_header, "Priority", Priority);
 impl_u32_parser!(parse_timestamp_header, "Timestamp", Timestamp);
@@ -201,10 +218,26 @@ impl_named_parser!(parse_from_header, "From", From);
 impl_named_parser!(parse_contact_header, "Contact", Contact);
 impl_named_parser!(parse_reply_to_header, "Reply-To", ReplyTo);
 impl_type_parser!(parse_content_type_header, "Content-Type", ContentType);
-impl_type_parser!(parse_content_encoding_header, "Content-Encoding", ContentEncoding);
-impl_type_parser!(parse_accept_encoding_header, "Accept-Encoding", AcceptEncoding);
-impl_lang_parser!(parse_content_language_header, "Content-Language", ContentLanguage);
-impl_lang_parser!(parse_accept_language_header, "Accept-Language", AcceptLanguage);
+impl_type_parser!(
+    parse_content_encoding_header,
+    "Content-Encoding",
+    ContentEncoding
+);
+impl_type_parser!(
+    parse_accept_encoding_header,
+    "Accept-Encoding",
+    AcceptEncoding
+);
+impl_lang_parser!(
+    parse_content_language_header,
+    "Content-Language",
+    ContentLanguage
+);
+impl_lang_parser!(
+    parse_accept_language_header,
+    "Accept-Language",
+    AcceptLanguage
+);
 
 named!(pub parse_other_header<Header>, do_parse!(
     opt!(tag!("\r\n")) >>
@@ -278,15 +311,19 @@ fn parse_auth_header_vars(input: &[u8]) -> ParserResult<HashMap<String, String>>
     }
     Ok((data, map))
 }
-named!(parse_key_value_pair<(String, String)>, do_parse!(
-    opt!(char!(',')) >>
-    opt!(char!(' ')) >>
-    key: map_res!(take_while!(is_alphanumeric), slice_to_string) >>
-    char!('=') >>
-    value: parse_possibly_quoted_string >>
-    ((key, value))
-));
+named!(
+    parse_key_value_pair<(String, String)>,
+    do_parse!(
+        opt!(char!(','))
+            >> opt!(char!(' '))
+            >> key: map_res!(take_while!(is_alphanumeric), slice_to_string)
+            >> char!('=')
+            >> value: parse_possibly_quoted_string
+            >> ((key, value))
+    )
+);
 
-named!(parse_auth_schema<auth::Schema>, alt!(
-    map!(tag_no_case!("Digest"), |_| auth::Schema::Digest)
-));
+named!(
+    parse_auth_schema<auth::Schema>,
+    alt!(map!(tag_no_case!("Digest"), |_| auth::Schema::Digest))
+);

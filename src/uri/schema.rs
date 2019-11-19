@@ -1,4 +1,4 @@
-use serde::{ Serialize, Deserialize };
+use serde::{Deserialize, Serialize};
 
 use std::fmt;
 
@@ -6,18 +6,17 @@ use std::fmt;
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub enum Schema {
     Sip,
-    Sips
+    Sips,
 }
 
 impl fmt::Display for Schema {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Schema::Sip => write!(f, "sip"),
-            Schema::Sips => write!(f, "sips")
+            Schema::Sips => write!(f, "sips"),
         }
     }
 }
-
 
 named!(pub parse_schema<Schema>, alt!(
     map!(tag_no_case!("sip"), |_| Schema::Sip) |

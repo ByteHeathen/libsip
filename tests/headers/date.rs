@@ -1,5 +1,4 @@
-use libsip::Header;
-use libsip::headers::parse::parse_date_header;
+use libsip::{headers::parse::parse_date_header, Header};
 
 #[test]
 fn write() {
@@ -11,5 +10,8 @@ fn write() {
 fn read() {
     let remains = vec![];
     let header = Header::Date("wed 1 2001".into());
-    assert_eq!(Ok((remains.as_ref(), header)), parse_date_header(b"Date: wed 1 2001\r\n"));
+    assert_eq!(
+        Ok((remains.as_ref(), header)),
+        parse_date_header(b"Date: wed 1 2001\r\n")
+    );
 }

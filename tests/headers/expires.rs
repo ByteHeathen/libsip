@@ -1,5 +1,4 @@
-use libsip::Header;
-use libsip::headers::parse::parse_expires_header;
+use libsip::{headers::parse::parse_expires_header, Header};
 
 #[test]
 fn write() {
@@ -11,5 +10,8 @@ fn write() {
 fn read() {
     let remains = vec![];
     let header = Header::Expires(60);
-    assert_eq!(Ok((remains.as_ref(), header)), parse_expires_header(b"Expires: 60\r\n"));
+    assert_eq!(
+        Ok((remains.as_ref(), header)),
+        parse_expires_header(b"Expires: 60\r\n")
+    );
 }

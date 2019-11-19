@@ -1,19 +1,15 @@
-use nom::character::is_digit;
-use nom::character::is_alphanumeric;
-use serde::{ Deserialize, Serialize };
+use nom::character::{is_alphanumeric, is_digit};
+use serde::{Deserialize, Serialize};
 
-use std::fmt;
-use std::net::Ipv4Addr;
+use std::{fmt, net::Ipv4Addr};
 
-use crate::parse::parse_u16;
-use crate::parse::slice_to_string;
-use crate::parse::parse_ip_address;
+use crate::parse::{parse_ip_address, parse_u16, slice_to_string};
 
 /// Domain address for a URI.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Domain {
     Ipv4(Ipv4Addr, Option<u16>),
-    Domain(String, Option<u16>)
+    Domain(String, Option<u16>),
 }
 
 impl fmt::Display for Domain {
@@ -25,14 +21,14 @@ impl fmt::Display for Domain {
                 } else {
                     write!(f, "{}", addr)
                 }
-            }
+            },
             Domain::Domain(domain, port) => {
                 if let Some(port) = port {
                     write!(f, "{}:{}", domain, port)
                 } else {
                     write!(f, "{}", domain)
                 }
-            }
+            },
         }
     }
 }

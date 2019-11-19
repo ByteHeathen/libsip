@@ -1,5 +1,4 @@
-use libsip::{ Header, Method };
-use libsip::headers::parse::parse_cseq_header;
+use libsip::{headers::parse::parse_cseq_header, Header, Method};
 
 #[test]
 fn write() {
@@ -11,5 +10,8 @@ fn write() {
 fn read() {
     let remains = vec![];
     let header = Header::CSeq(60, Method::Register);
-    assert_eq!(Ok((remains.as_ref(), header)), parse_cseq_header(b"CSeq: 60 REGISTER\r\n"));
+    assert_eq!(
+        Ok((remains.as_ref(), header)),
+        parse_cseq_header(b"CSeq: 60 REGISTER\r\n")
+    );
 }

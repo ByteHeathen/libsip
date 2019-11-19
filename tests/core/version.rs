@@ -1,5 +1,4 @@
-use libsip::Version;
-use libsip::core::parse_version;
+use libsip::{core::parse_version, Version};
 
 #[test]
 fn write_version() {
@@ -10,6 +9,12 @@ fn write_version() {
 #[test]
 fn read_version() {
     let remains = vec![b' '];
-    assert_eq!(Ok((remains.as_ref(), Version::default())), parse_version(b"SIP/2.0 "));
-    assert_eq!(Ok((remains.as_ref(), Version::new(1, 1))), parse_version(b"SIP/1.1 "));
+    assert_eq!(
+        Ok((remains.as_ref(), Version::default())),
+        parse_version(b"SIP/2.0 ")
+    );
+    assert_eq!(
+        Ok((remains.as_ref(), Version::new(1, 1))),
+        parse_version(b"SIP/1.1 ")
+    );
 }

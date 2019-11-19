@@ -1,7 +1,7 @@
 use std::fmt;
 
-use crate::core::Method;
 use super::Header;
+use crate::core::Method;
 
 impl fmt::Display for Header {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -51,14 +51,13 @@ impl fmt::Display for Header {
             Header::Priority(data) => write_simple_field("Priority", data, f),
             Header::WwwAuthenticate(data) => write_auth_header("WWW-Authenticate", data, f),
             Header::XFsSendingMessage(data) => write_simple_field("X-FS-Sending-Message", data, f),
-            Header::Other(key, value) => write!(f, "{}: {}", key, value)
+            Header::Other(key, value) => write!(f, "{}: {}", key, value),
         }
     }
 }
 
-
 macro_rules! write_array_header {
-    ($name:ident, $item: ident) => {
+    ($name:ident, $item:ident) => {
         fn $name(name: &str, f: &mut fmt::Formatter, v: &[$item]) -> fmt::Result {
             write!(f, "{}: ", name)?;
             for (index, item) in v.iter().enumerate() {
@@ -70,14 +69,22 @@ macro_rules! write_array_header {
             }
             Ok(())
         }
-    }
+    };
 }
 
 write_array_header!(write_method_array_header, Method);
 write_array_header!(write_string_array_header, String);
-fn write_simple_field<D: fmt::Display>(header: &str, data: D, f: &mut fmt::Formatter) -> fmt::Result {
+fn write_simple_field<D: fmt::Display>(
+    header: &str,
+    data: D,
+    f: &mut fmt::Formatter,
+) -> fmt::Result {
     write!(f, "{}: {}", header, data)
 }
-fn write_auth_header<D: fmt::Display>(header: &str, data: D, f: &mut fmt::Formatter) -> fmt::Result {
+fn write_auth_header<D: fmt::Display>(
+    header: &str,
+    data: D,
+    f: &mut fmt::Formatter,
+) -> fmt::Result {
     write!(f, "{}: {}", header, data)
 }

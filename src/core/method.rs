@@ -16,11 +16,10 @@ pub enum Method {
     Info,
     Refer,
     Message,
-    Update
+    Update,
 }
 
 impl Method {
-
     pub fn all() -> Vec<Method> {
         vec![
             Method::Invite,
@@ -36,7 +35,7 @@ impl Method {
             Method::Info,
             Method::Refer,
             Method::Message,
-            Method::Update
+            Method::Update,
         ]
     }
 }
@@ -57,7 +56,7 @@ impl fmt::Display for Method {
             Method::Info => write!(f, "INFO"),
             Method::Refer => write!(f, "REFER"),
             Method::Message => write!(f, "MESSAGE"),
-            Method::Update => write!(f, "UPDATE")
+            Method::Update => write!(f, "UPDATE"),
         }
     }
 }

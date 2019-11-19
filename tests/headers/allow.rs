@@ -1,5 +1,4 @@
-use libsip::*;
-use libsip::headers::parse::parse_allow_header;
+use libsip::{headers::parse::parse_allow_header, *};
 
 #[test]
 fn write() {
@@ -11,5 +10,8 @@ fn write() {
 fn read() {
     let remains = vec![];
     let header = Header::Allow(vec![Method::Register, Method::Invite]);
-    assert_eq!(Ok((remains.as_ref(), header)), parse_allow_header(b"Allow: REGISTER,INVITE\r\n"));
+    assert_eq!(
+        Ok((remains.as_ref(), header)),
+        parse_allow_header(b"Allow: REGISTER,INVITE\r\n")
+    );
 }

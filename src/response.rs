@@ -1,8 +1,6 @@
 use crate::*;
 
-use std::io::Result as IoResult;
-use std::io::Error as IoError;
-use std::io::ErrorKind as IoErrorKind;
+use std::io::{Error as IoError, ErrorKind as IoErrorKind, Result as IoResult};
 
 /// Sip Response Generator. When build is called the struct
 /// is consumed and produces a SipMessage::Response variant.
@@ -13,17 +11,16 @@ pub struct ResponseGenerator {
     code: Option<u32>,
     version: Version,
     headers: Headers,
-    body: Vec<u8>
+    body: Vec<u8>,
 }
 
 impl ResponseGenerator {
-
     pub fn new() -> ResponseGenerator {
         ResponseGenerator {
             code: None,
             version: Version::default(),
             headers: Headers::new(),
-            body: vec![]
+            body: vec![],
         }
     }
 
@@ -57,16 +54,18 @@ impl ResponseGenerator {
     /// Create the Sip response.
     pub fn build(self) -> IoResult<SipMessage> {
         if let Some(code) = self.code {
-
             let res = SipMessage::Response {
                 code,
                 version: self.version,
                 headers: self.headers,
-                body: self.body
+                body: self.body,
             };
             Ok(res)
         } else {
-            Err(IoError::new(IoErrorKind::InvalidInput, "ResponseGenerator requires `code` method be called."))
+            Err(IoError::new(
+                IoErrorKind::InvalidInput,
+                "ResponseGenerator requires `code` method be called.",
+            ))
         }
     }
 }

@@ -1,6 +1,6 @@
-use nom::character::is_alphanumeric;
-use serde::{ Serialize, Deserialize };
 use crate::parse::slice_to_string;
+use nom::character::is_alphanumeric;
+use serde::{Deserialize, Serialize};
 
 use std::fmt;
 
@@ -8,14 +8,16 @@ use std::fmt;
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct UriAuth {
     username: String,
-    password: Option<String>
+    password: Option<String>,
 }
 
 impl UriAuth {
-
     /// Create new UriAuth from `username`.
     pub fn new<S: Into<String>>(username: S) -> UriAuth {
-        UriAuth { username: username.into(), password: None }
+        UriAuth {
+            username: username.into(),
+            password: None,
+        }
     }
 
     /// Set the uri password.
@@ -43,8 +45,11 @@ named!(pub parse_uriauth<UriAuth>, do_parse!(
     (UriAuth { username, password })
 ));
 
-named!(parse_password<String>, do_parse!(
-    char!(':') >>
-    password: map_res!(take_while!(is_alphanumeric), slice_to_string) >>
-    (password)
-));
+named!(
+    parse_password<String>,
+    do_parse!(
+        char!(':')
+            >> password: map_res!(take_while!(is_alphanumeric), slice_to_string)
+            >> (password)
+    )
+);

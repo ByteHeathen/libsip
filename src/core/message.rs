@@ -2,16 +2,13 @@ use nom::character::*;
 
 use std::fmt;
 
-use crate::*;
-use crate::parse::*;
-use crate::uri::parse_uri;
-use crate::core::code::error_code_to_str;
-use crate::core::version::parse_version;
-use crate::core::method::parse_method;
-use crate::headers::parse_header;
-use crate::parse::parse_u32;
-use crate::parse::parse_byte_vec;
-use crate::parse::slice_to_string;
+use crate::{
+    core::{code::error_code_to_str, method::parse_method, version::parse_version},
+    headers::parse_header,
+    parse::{parse_byte_vec, parse_u32, slice_to_string, *},
+    uri::parse_uri,
+    *,
+};
 
 /// Sip Protocol Message.
 #[derive(Debug, PartialEq, Clone)]
@@ -21,18 +18,17 @@ pub enum SipMessage {
         uri: Uri,
         version: Version,
         headers: Headers,
-        body: Vec<u8>
+        body: Vec<u8>,
     },
     Response {
         code: u32,
         version: Version,
         headers: Headers,
-        body: Vec<u8>
-    }
+        body: Vec<u8>,
+    },
 }
 
 impl SipMessage {
-
     /// Determine if this is a SIP request.
     pub fn is_request(&self) -> bool {
         if let SipMessage::Request { .. } = self {
@@ -65,7 +61,7 @@ impl SipMessage {
     pub fn body(&self) -> &Vec<u8> {
         match self {
             SipMessage::Request { body, .. } => body,
-            SipMessage::Response { body, .. } => body
+            SipMessage::Response { body, .. } => body,
         }
     }
 
@@ -73,7 +69,7 @@ impl SipMessage {
     pub fn body_mut(&mut self) -> &mut Vec<u8> {
         match self {
             SipMessage::Request { body, .. } => body,
-            SipMessage::Response { body, .. } => body
+            SipMessage::Response { body, .. } => body,
         }
     }
 
@@ -81,7 +77,7 @@ impl SipMessage {
     pub fn headers(&self) -> &Headers {
         match self {
             SipMessage::Request { headers, .. } => headers,
-            SipMessage::Response { headers, .. } => headers
+            SipMessage::Response { headers, .. } => headers,
         }
     }
 
@@ -89,7 +85,7 @@ impl SipMessage {
     pub fn headers_mut(&mut self) -> &mut Headers {
         match self {
             SipMessage::Request { headers, .. } => headers,
-            SipMessage::Response { headers, .. } => headers
+            SipMessage::Response { headers, .. } => headers,
         }
     }
 }
@@ -97,23 +93,38 @@ impl SipMessage {
 impl fmt::Display for SipMessage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            SipMessage::Request { method, uri, version, headers, body } => {
+            SipMessage::Request {
+                method,
+                uri,
+                version,
+                headers,
+                body,
+            } => {
                 writeln!(f, "{} {} {}\r", method, uri, version)?;
                 display_headers_and_body(f, headers, body)
             },
-            SipMessage::Response { code, version, headers, body } => {
+            SipMessage::Response {
+                code,
+                version,
+                headers,
+                body,
+            } => {
                 if let Some(desc) = error_code_to_str(*code) {
                     writeln!(f, "{} {} {}\r", version, code, desc)?;
                 } else {
                     writeln!(f, "{} {}\r", version, code)?;
                 }
                 display_headers_and_body(f, headers, body)
-            }
+            },
         }
     }
 }
 
-pub fn display_headers_and_body(f: &mut fmt::Formatter, headers: &Headers, body: &[u8]) -> Result<(), fmt::Error> {
+pub fn display_headers_and_body(
+    f: &mut fmt::Formatter,
+    headers: &Headers,
+    body: &[u8],
+) -> Result<(), fmt::Error> {
     for header in headers.iter() {
         writeln!(f, "{}\r", header)?;
     }

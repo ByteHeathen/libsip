@@ -1,6 +1,4 @@
-use libsip::*;
-use libsip::Domain;
-use libsip::uri::parse_domain;
+use libsip::{uri::parse_domain, Domain, *};
 
 use std::net::Ipv4Addr;
 
@@ -8,11 +6,17 @@ use std::net::Ipv4Addr;
 fn read_domain() {
     let remains = vec![b' '];
     let domain = domain!("example.com");
-    assert_eq!(Ok((remains.as_ref(), domain)), parse_domain(b"example.com "));
+    assert_eq!(
+        Ok((remains.as_ref(), domain)),
+        parse_domain(b"example.com ")
+    );
 
     let remains = vec![b' '];
     let domain = domain!("example.com", 8080);
-    assert_eq!(Ok((remains.as_ref(), domain)), parse_domain(b"example.com:8080 "));
+    assert_eq!(
+        Ok((remains.as_ref(), domain)),
+        parse_domain(b"example.com:8080 ")
+    );
 }
 
 #[test]
@@ -23,7 +27,10 @@ fn read_ip_address() {
 
     let remains = vec![b' '];
     let domain = ip_domain!(10, 1, 10, 1, 8080);
-    assert_eq!(Ok((remains.as_ref(), domain)), parse_domain(b"10.1.10.1:8080 "));
+    assert_eq!(
+        Ok((remains.as_ref(), domain)),
+        parse_domain(b"10.1.10.1:8080 ")
+    );
 }
 
 #[test]

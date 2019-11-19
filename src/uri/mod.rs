@@ -1,25 +1,18 @@
-use serde::{ Serialize, Deserialize };
+use serde::{Deserialize, Serialize};
 
-use std::fmt;
-use std::io;
-use std::str::FromStr;
+use std::{fmt, io, str::FromStr};
 
 pub mod schema;
-pub use self::schema::Schema;
-pub use self::schema::parse_schema;
+pub use self::schema::{parse_schema, Schema};
 
 pub mod domain;
-pub use self::domain::Domain;
-pub use self::domain::parse_domain;
+pub use self::domain::{parse_domain, Domain};
 
 pub mod params;
-pub use self::params::Param;
-pub use self::params::parse_params;
-pub use self::params::parse_param;
+pub use self::params::{parse_param, parse_params, Param};
 
 pub mod auth;
-pub use self::auth::UriAuth;
-pub use self::auth::parse_uriauth;
+pub use self::auth::{parse_uriauth, UriAuth};
 
 /// Universal Rescource Identifier for libsip.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -27,17 +20,16 @@ pub struct Uri {
     pub schema: Option<Schema>,
     pub host: Domain,
     pub auth: Option<UriAuth>,
-    pub parameters: Vec<Param>
+    pub parameters: Vec<Param>,
 }
 
 impl Uri {
-
     pub fn new(schema: Schema, host: Domain) -> Uri {
         Uri {
             schema: Some(schema),
             host,
             auth: None,
-            parameters: vec![]
+            parameters: vec![],
         }
     }
 
@@ -47,7 +39,7 @@ impl Uri {
             schema: None,
             host,
             auth: None,
-            parameters: vec![]
+            parameters: vec![],
         }
     }
 
@@ -151,6 +143,6 @@ fn map_error(n: nom::Err<(&[u8], nom::error::ErrorKind)>) -> nom::Err<nom::error
     match n {
         nom::Err::Error((_, a)) => nom::Err::Error(a),
         nom::Err::Failure((_, b)) => nom::Err::Failure(b),
-        nom::Err::Incomplete(a) => nom::Err::Incomplete(a)
+        nom::Err::Incomplete(a) => nom::Err::Incomplete(a),
     }
 }

@@ -1,5 +1,4 @@
-use libsip::Header;
-use libsip::headers::parse::parse_subject_header;
+use libsip::{headers::parse::parse_subject_header, Header};
 
 #[test]
 fn write() {
@@ -11,5 +10,8 @@ fn write() {
 fn read() {
     let remains = vec![];
     let header = Header::Subject("Softphone 1.0".into());
-    assert_eq!(Ok((remains.as_ref(), header)), parse_subject_header(b"Subject: Softphone 1.0\r\n"));
+    assert_eq!(
+        Ok((remains.as_ref(), header)),
+        parse_subject_header(b"Subject: Softphone 1.0\r\n")
+    );
 }

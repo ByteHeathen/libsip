@@ -1,8 +1,6 @@
 use std::fmt;
 
 /// Sip protocol Content-Type value.
-///
-/// TODO: Finish this enum.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum ContentType {
     Csv,
@@ -21,7 +19,7 @@ pub enum ContentType {
     Sql,
     Json,
     Javascript,
-    Css
+    Css,
 }
 
 impl fmt::Display for ContentType {
@@ -43,7 +41,7 @@ impl fmt::Display for ContentType {
             ContentType::Json => write!(f, "application/json"),
             ContentType::GZip => write!(f, "application/gzip"),
             ContentType::Javascript => write!(f, "application/javascript"),
-            ContentType::Css => write!(f, "application/css")
+            ContentType::Css => write!(f, "application/css"),
         }
     }
 }

@@ -1,15 +1,12 @@
 #![allow(dead_code)]
 use std::io::Result as IoResult;
 
-use crate::headers::Headers;
-use crate::headers::Header;
-use crate::headers::NamedHeader;
-use crate::headers::via::ViaHeader;
-use crate::uri::Uri;
-use crate::SipMessage;
-use crate::core::Method;
-use crate::ResponseGenerator;
-use crate::RequestGenerator;
+use crate::{
+    core::Method,
+    headers::{via::ViaHeader, Header, Headers, NamedHeader},
+    uri::Uri,
+    RequestGenerator, ResponseGenerator, SipMessage,
+};
 
 macro_rules! impl_simple_header_method {
     ($name:ident, $variant:ident, $ty: ident) => {
@@ -29,19 +26,21 @@ macro_rules! impl_simple_header_method {
 pub struct InviteHelper {
     pub uri: Uri,
     pub headers: Headers,
-    pub body: Vec<u8>
+    pub body: Vec<u8>,
 }
 
 impl InviteHelper {
+    impl_simple_header_method!(from, From, NamedHeader);
+
+    impl_simple_header_method!(to, To, NamedHeader);
+
+    impl_simple_header_method!(call_id, CallId, String);
+
+    impl_simple_header_method!(via, Via, ViaHeader);
 
     pub fn new(uri: Uri, headers: Headers, body: Vec<u8>) -> IoResult<InviteHelper> {
         Ok(InviteHelper { uri, headers, body })
     }
-
-    impl_simple_header_method!(from, From, NamedHeader);
-    impl_simple_header_method!(to, To, NamedHeader);
-    impl_simple_header_method!(call_id, CallId, String);
-    impl_simple_header_method!(via, Via, ViaHeader);
 
     /// Return a clone of the body of this message.
     pub fn data(&self) -> Vec<u8> {
@@ -59,7 +58,6 @@ impl InviteHelper {
             .header(self.headers.via().unwrap())
             .header(Header::ContentLength(0))
             .build()
-
     }
 
     /// Generate a response that will accept the invite with the sdp as the body.
@@ -103,16 +101,15 @@ impl InviteHelper {
 pub struct InviteWriter {
     cseq: u32,
     uri: Uri,
-    user_agent: Option<String>
+    user_agent: Option<String>,
 }
 
 impl InviteWriter {
-
     pub fn new(uri: Uri) -> InviteWriter {
         InviteWriter {
             cseq: 0,
             uri,
-            user_agent: None
+            user_agent: None,
         }
     }
 
@@ -140,6 +137,6 @@ impl InviteWriter {
     }
 
     pub fn generate_call_id(&self) -> String {
-        format!("{:x}", md5::compute(rand::random::<[u8 ; 16]>()))
+        format!("{:x}", md5::compute(rand::random::<[u8; 16]>()))
     }
 }

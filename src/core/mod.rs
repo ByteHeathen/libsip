@@ -1,17 +1,13 @@
 pub mod code;
 
 pub mod method;
-pub use self::method::Method;
-pub use self::method::parse_method;
+pub use self::method::{parse_method, Method};
 
 pub mod transport;
-pub use self::transport::Transport;
-pub use self::transport::parse_transport;
+pub use self::transport::{parse_transport, Transport};
 
 pub mod version;
-pub use self::version::Version;
-pub use self::version::parse_version;
+pub use self::version::{parse_version, Version};
 
 pub mod message;
-pub use self::message::SipMessage;
-pub use self::message::parse_message;
+pub use self::message::{parse_message, SipMessage};

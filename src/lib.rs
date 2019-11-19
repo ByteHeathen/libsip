@@ -1,4 +1,4 @@
-#![recursion_limit="256"]
+#![recursion_limit = "256"]
 //! libsip has three basic components a parser and managers.
 //!
 //! Managers are utility struct's meant to ease one specifc asspect of the sip protocol,
@@ -7,12 +7,12 @@
 //! ### Parsing
 //! libsip exposes many parsing function though only one `parse_message` is needed.
 //! ```rust
-//!   extern crate libsip;
+//! extern crate libsip;
 //!
-//!   use libsip::parse_message;
+//! use libsip::parse_message;
 //!
-//!   let packet = "SIP/2.0 200 OK\r\n\r\n";
-//!   let output = libsip::parse_message(packet.as_ref()).unwrap();
+//! let packet = "SIP/2.0 200 OK\r\n\r\n";
+//! let output = libsip::parse_message(packet.as_ref()).unwrap();
 //! ```
 //!
 //! ### Creating Messages
@@ -54,26 +54,26 @@ extern crate serde;
 #[macro_use]
 mod macros;
 
-pub mod core;
-pub mod uri;
-pub mod headers;
-pub mod response;
-pub mod request;
 pub mod client;
+pub mod core;
+pub mod headers;
 pub(crate) mod parse;
+pub mod request;
+pub mod response;
+pub mod uri;
 
-pub use crate::core::Version;
-pub use crate::core::Method;
-pub use crate::headers::Header;
-pub use crate::headers::Headers;
+pub use crate::{
+    core::{Method, Version},
+    headers::{Header, Headers},
+};
 
-pub use crate::uri::Uri;
-pub use crate::uri::Domain;
+pub use crate::uri::{Domain, Uri};
 
-pub use crate::core::SipMessage;
-pub use crate::core::message::parse_message;
-pub use crate::response::ResponseGenerator;
-pub use crate::request::RequestGenerator;
+pub use crate::{
+    core::{message::parse_message, SipMessage},
+    request::RequestGenerator,
+    response::ResponseGenerator,
+};
 
 #[cfg(test)]
 mod tests {

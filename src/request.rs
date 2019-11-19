@@ -1,8 +1,6 @@
 use crate::*;
 
-use std::io::Result as IoResult;
-use std::io::Error as IoError;
-use std::io::ErrorKind as IoErrorKind;
+use std::io::{Error as IoError, ErrorKind as IoErrorKind, Result as IoResult};
 
 /// Sip Request Generator. When build is called the struct
 /// is consumed and produces a SipMessage::Request variant.
@@ -14,18 +12,17 @@ pub struct RequestGenerator {
     uri: Option<Uri>,
     version: Version,
     headers: Headers,
-    body: Vec<u8>
+    body: Vec<u8>,
 }
 
 impl RequestGenerator {
-
     pub fn new() -> RequestGenerator {
         RequestGenerator {
             method: None,
             uri: None,
             version: Version::default(),
             headers: Headers::new(),
-            body: vec![]
+            body: vec![],
         }
     }
 
@@ -67,16 +64,23 @@ impl RequestGenerator {
         if let Some(method) = self.method {
             if let Some(uri) = self.uri {
                 Ok(SipMessage::Request {
-                    method, uri,
+                    method,
+                    uri,
                     version: self.version,
                     headers: self.headers,
-                    body: self.body
+                    body: self.body,
                 })
             } else {
-                Err(IoError::new(IoErrorKind::InvalidInput, "`uri` method call required"))
+                Err(IoError::new(
+                    IoErrorKind::InvalidInput,
+                    "`uri` method call required",
+                ))
             }
         } else {
-            Err(IoError::new(IoErrorKind::InvalidInput, "`method` method call required"))
+            Err(IoError::new(
+                IoErrorKind::InvalidInput,
+                "`method` method call required",
+            ))
         }
     }
 }

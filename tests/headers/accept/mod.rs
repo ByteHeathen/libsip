@@ -1,9 +1,10 @@
-mod lang;
 mod encoding;
+mod lang;
 
-use libsip::headers::parse::parse_accept_header;
-use libsip::headers::Header;
-use libsip::core::Method;
+use libsip::{
+    core::Method,
+    headers::{parse::parse_accept_header, Header},
+};
 
 #[test]
 fn write() {
@@ -15,5 +16,8 @@ fn write() {
 fn read() {
     let remains = vec![];
     let header = Header::Accept(vec![Method::Register, Method::Invite]);
-    assert_eq!(Ok((remains.as_ref(), header)), parse_accept_header(b"Accept: REGISTER, INVITE\r\n"));
+    assert_eq!(
+        Ok((remains.as_ref(), header)),
+        parse_accept_header(b"Accept: REGISTER, INVITE\r\n")
+    );
 }

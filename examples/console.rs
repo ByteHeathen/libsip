@@ -1,35 +1,34 @@
 /// if the `-v` is present then the registration requests
 /// will be shown as well. This example Does not use the sip
 /// codec.
-
 extern crate libsip;
 extern crate tokio;
 
-use std::io;
-use std::time::Duration;
-use std::time::Instant;
+use std::{
+    io,
+    time::{Duration, Instant},
+};
 
-use libsip::*;
-use libsip::uri::Param;
-use libsip::core::Transport;
-use libsip::parse_message;
-use libsip::client::RegistrationManager;
-use tokio::net::UdpSocket;
-use tokio::future::FutureExt;
-
+use libsip::{client::RegistrationManager, core::Transport, parse_message, uri::Param, *};
+use tokio::{future::FutureExt, net::UdpSocket};
 
 const USERNAME: &'static str = "20";
 const PASSWORD: &'static str = "program";
 const SOCKET_ADDRESS: &'static str = "192.168.1.76:5060";
 const SERVER_SOCK_ADDRESS: &'static str = "192.168.1.120:5060";
 
-async fn registration_process(reg: &mut RegistrationManager, sock: &mut UdpSocket, verbose: bool) -> Result<(), io::Error>{
+async fn registration_process(
+    reg: &mut RegistrationManager,
+    sock: &mut UdpSocket,
+    verbose: bool,
+) -> Result<(), io::Error> {
     let mut buf = vec![0; 65535];
     let request = reg.get_request()?;
     if verbose {
         print_sip_message_send(&request);
     }
-    sock.send_to(&format!("{}", request).as_ref(), SERVER_SOCK_ADDRESS).await?;
+    sock.send_to(&format!("{}", request).as_ref(), SERVER_SOCK_ADDRESS)
+        .await?;
     let (amt, _src) = sock.recv_from(&mut buf).await?;
     let (_, msg) = parse_message(&buf[..amt]).unwrap();
     if verbose {
@@ -43,7 +42,8 @@ async fn registration_process(reg: &mut RegistrationManager, sock: &mut UdpSocke
     if verbose {
         print_sip_message_send(&auth_request);
     }
-    sock.send_to(format!("{}", auth_request).as_ref(), SERVER_SOCK_ADDRESS).await?;
+    sock.send_to(format!("{}", auth_request).as_ref(), SERVER_SOCK_ADDRESS)
+        .await?;
     let (amt, _src) = sock.recv_from(&mut buf).await.unwrap();
     let (_, msg) = parse_message(&buf[..amt]).unwrap();
     if verbose {
@@ -54,12 +54,16 @@ async fn registration_process(reg: &mut RegistrationManager, sock: &mut UdpSocke
             if code == 200 {
                 Ok(())
             } else {
-                Err(From::from(io::Error::new(io::ErrorKind::InvalidInput, "Failed to authenticate")))
+                Err(From::from(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "Failed to authenticate",
+                )))
             }
         },
-        _ => {
-            Err(From::from(io::Error::new(io::ErrorKind::InvalidInput, "Failed to authenticate")))
-        }
+        _ => Err(From::from(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Failed to authenticate",
+        ))),
     }
 }
 
@@ -81,8 +85,12 @@ async fn main() -> Result<(), io::Error> {
             expire_time = Instant::now();
             continue;
         }
-        let result = sock.recv_from(&mut buf)
-            .timeout(Duration::from_secs(expire_time.elapsed().as_secs() + timeout)).await;
+        let result = sock
+            .recv_from(&mut buf)
+            .timeout(Duration::from_secs(
+                expire_time.elapsed().as_secs() + timeout,
+            ))
+            .await;
         match result {
             Ok(Ok(value)) => {
                 let (_, msg) = parse_message(&buf[..value.0]).unwrap();
@@ -93,7 +101,7 @@ async fn main() -> Result<(), io::Error> {
             Err(_err) => {
                 registration_process(&mut registrar, &mut sock, verbose).await?;
                 expire_time = Instant::now();
-            }
+            },
         }
     }
 }
@@ -103,7 +111,9 @@ fn account_uri() -> Uri {
 }
 
 fn local_uri() -> Uri {
-    Uri::sip(ip_domain!(192, 168, 1, 76)).auth(uri_auth!("20")).parameter(Param::Transport(Transport::Udp))
+    Uri::sip(ip_domain!(192, 168, 1, 76))
+        .auth(uri_auth!("20"))
+        .parameter(Param::Transport(Transport::Udp))
 }
 
 fn print_sip_message_send(msg: &SipMessage) {

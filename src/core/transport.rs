@@ -1,4 +1,4 @@
-use serde::{ Serialize, Deserialize };
+use serde::{Deserialize, Serialize};
 
 use std::fmt;
 
@@ -6,7 +6,7 @@ use std::fmt;
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub enum Transport {
     Udp,
-    Tcp
+    Tcp,
 }
 
 impl Default for Transport {
@@ -19,7 +19,7 @@ impl fmt::Display for Transport {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Transport::Udp => write!(f, "UDP"),
-            Transport::Tcp => write!(f, "TCP")
+            Transport::Tcp => write!(f, "TCP"),
         }
     }
 }

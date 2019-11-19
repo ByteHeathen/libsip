@@ -1,16 +1,11 @@
 use std::io::Result as IoResult;
 
-use crate::core::Method;
-use crate::headers::ContentType;
-use crate::headers::Headers;
-use crate::headers::Header;
-use crate::headers::NamedHeader;
-use crate::headers::via::ViaHeader;
-use crate::uri::Uri;
-use crate::uri::Schema;
-use crate::SipMessage;
-use crate::ResponseGenerator;
-use crate::RequestGenerator;
+use crate::{
+    core::Method,
+    headers::{via::ViaHeader, ContentType, Header, Headers, NamedHeader},
+    uri::{Schema, Uri},
+    RequestGenerator, ResponseGenerator, SipMessage,
+};
 
 macro_rules! impl_simple_header_method {
     ($name:ident, $variant:ident, $ty: ident) => {
@@ -29,10 +24,21 @@ macro_rules! impl_simple_header_method {
 pub struct MessageHelper {
     pub uri: Uri,
     pub headers: Headers,
-    pub body: Vec<u8>
+    pub body: Vec<u8>,
 }
 
 impl MessageHelper {
+    impl_simple_header_method!(from, From, NamedHeader);
+
+    impl_simple_header_method!(to, To, NamedHeader);
+
+    impl_simple_header_method!(contact, Contact, NamedHeader);
+
+    impl_simple_header_method!(call_id, CallId, String);
+
+    impl_simple_header_method!(xfs_sending_message, XFsSendingMessage, String);
+
+    impl_simple_header_method!(via, Via, ViaHeader);
 
     /// Create a new MessageHelper from variables of a sip message.
     /// `uri` is the uri from the request line of the received sip message.
@@ -40,17 +46,8 @@ impl MessageHelper {
         Ok(MessageHelper { uri, headers, body })
     }
 
-    impl_simple_header_method!(from, From, NamedHeader);
-    impl_simple_header_method!(to, To, NamedHeader);
-    impl_simple_header_method!(contact, Contact, NamedHeader);
-    impl_simple_header_method!(call_id, CallId, String);
-    impl_simple_header_method!(xfs_sending_message, XFsSendingMessage, String);
-    impl_simple_header_method!(via, Via, ViaHeader);
-
     /// Retrieve the data of this message, currently this
     /// just clone's the message body.
-    ///
-    /// TODO: Return no more than the Content-Length header amount.
     pub fn data(&self) -> Vec<u8> {
         self.body.clone()
     }
@@ -68,7 +65,6 @@ impl MessageHelper {
             .header(self.headers.via().unwrap())
             .header(Header::ContentLength(0))
             .build()
-
     }
 }
 
@@ -82,20 +78,25 @@ pub struct MessageWriter {
 }
 
 impl MessageWriter {
-
     /// Create a new MessageWriter. `uri` is the account uri that will
     /// be placed in the `From` header.
     pub fn new(uri: Uri) -> MessageWriter {
-        let _call_id = md5::compute(rand::random::<[u8 ; 16]>());
+        let _call_id = md5::compute(rand::random::<[u8; 16]>());
         let call_id = format!("{:x}@{}", _call_id, uri.host);
         MessageWriter {
             cseq: 0,
             user_agent: None,
-            uri, call_id
+            uri,
+            call_id,
         }
     }
 
-    pub fn write_message(&mut self, body: Vec<u8>, to: Uri, via_header: Header) -> IoResult<SipMessage> {
+    pub fn write_message(
+        &mut self,
+        body: Vec<u8>,
+        to: Uri,
+        via_header: Header,
+    ) -> IoResult<SipMessage> {
         self.cseq += 1;
         RequestGenerator::new()
             .method(Method::Message)
@@ -111,7 +112,6 @@ impl MessageWriter {
             .header(Header::ContentLength(body.len() as u32))
             .body(body)
             .build()
-
     }
 
     /// Get a new CSeq header.
