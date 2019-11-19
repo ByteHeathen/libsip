@@ -141,7 +141,7 @@ impl RegistrationManager {
         Ok(
             RequestGenerator::new()
                 .method(Method::Register)
-                .uri(self.account_uri.clone())
+                .uri(self.account_uri.clone().authless())
                 .headers(headers)
                 .build()?
         )
@@ -177,7 +177,7 @@ impl RegistrationManager {
     /// Retreive the via header being used to represent the local
     /// listening socket.
     pub fn via_header(&self) -> Header {
-        let via_uri = self.account_uri.clone()
+        let via_uri = self.local_uri.clone()
                     .parameter(Param::Branch(self.branch.clone()))
                     .authless()
                     .schemaless();
