@@ -1,10 +1,10 @@
 use std::io::Result as IoResult;
 
 use crate::{
+    client::HeaderWriteConfig,
     core::Method,
     headers::{via::ViaHeader, ContentType, Header, Headers, NamedHeader},
     uri::{Schema, Uri},
-    client::HeaderWriteConfig,
     RequestGenerator, ResponseGenerator, SipMessage,
 };
 
@@ -75,7 +75,7 @@ impl MessageHelper {
 pub struct MessageWriter {
     cseq: u32,
     uri: Uri,
-    call_id: String
+    call_id: String,
 }
 
 impl MessageWriter {
@@ -96,7 +96,7 @@ impl MessageWriter {
         body: Vec<u8>,
         to: Uri,
         via_header: Header,
-        header_cfg: &HeaderWriteConfig
+        header_cfg: &HeaderWriteConfig,
     ) -> IoResult<SipMessage> {
         self.cseq += 1;
         let mut req = RequestGenerator::new()
@@ -113,8 +113,7 @@ impl MessageWriter {
 
         header_cfg.write_headers(req.headers_ref_mut());
 
-        req.body(body)
-           .build()
+        req.body(body).build()
     }
 
     /// Get a new CSeq header.

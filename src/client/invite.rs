@@ -2,8 +2,8 @@
 use std::io::Result as IoResult;
 
 use crate::{
-    core::Method,
     client::HeaderWriteConfig,
+    core::Method,
     headers::{via::ViaHeader, Header, Headers, NamedHeader},
     uri::Uri,
     RequestGenerator, ResponseGenerator, SipMessage,

@@ -7,17 +7,16 @@ pub use self::messaging::{MessageHelper, MessageWriter};
 mod invite;
 pub use self::invite::InviteHelper;
 
-use crate::{Header, Headers, ResponseGenerator, SipMessage, Uri, Method};
+use crate::{Header, Headers, Method, ResponseGenerator, SipMessage, Uri};
 
 use std::io::Result as IoResult;
 
 pub struct HeaderWriteConfig {
     pub user_agent: Option<String>,
-    pub allowed_methods: Option<Vec<Method>>
+    pub allowed_methods: Option<Vec<Method>>,
 }
 
 impl HeaderWriteConfig {
-
     pub fn write_headers_vec(&self, m: &mut Vec<Header>) {
         if let Some(agent) = &self.user_agent {
             m.push(Header::UserAgent(agent.into()));
@@ -42,9 +41,11 @@ impl Default for HeaderWriteConfig {
         HeaderWriteConfig {
             user_agent: Some(format!("libsip {}", env!("CARGO_PKG_VERSION"))),
             allowed_methods: Some(vec![
-                Method::Invite, Method::Cancel,
-                Method::Bye, Method::Message
-            ])
+                Method::Invite,
+                Method::Cancel,
+                Method::Bye,
+                Method::Message,
+            ]),
         }
     }
 }
@@ -111,7 +112,9 @@ impl SoftPhone {
 
     /// Send a new Message to `uri`.
     pub fn write_message(&mut self, b: Vec<u8>, uri: Uri) -> IoResult<SipMessage> {
-        Ok(self.msg.write_message(b, uri, self.reg.via_header(), &self.header_cfg)?)
+        Ok(self
+            .msg
+            .write_message(b, uri, self.reg.via_header(), &self.header_cfg)?)
     }
 
     pub fn cancel_response(&mut self, headers: &Headers) -> IoResult<(SipMessage, SipMessage)> {

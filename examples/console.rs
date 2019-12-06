@@ -21,7 +21,6 @@ async fn registration_process(
     reg: &mut RegistrationManager,
     sock: &mut UdpSocket,
     verbose: bool,
-
 ) -> Result<(), io::Error> {
     let mut buf = vec![0; 65535];
     let request = reg.get_request(&Default::default())?;
@@ -86,9 +85,7 @@ async fn main() -> Result<(), io::Error> {
             expire_time = Instant::now();
             continue;
         }
-        let timeout_duration = Duration::from_secs(
-            expire_time.elapsed().as_secs() + timeout
-        );
+        let timeout_duration = Duration::from_secs(expire_time.elapsed().as_secs() + timeout);
         let result = tokio::time::timeout(timeout_duration, sock.recv_from(&mut buf)).await;
         match result {
             Ok(Ok(value)) => {

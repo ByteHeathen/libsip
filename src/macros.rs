@@ -3,8 +3,8 @@
 /// # #[macro_use]
 /// # extern crate libsip;
 /// # fn main() {
-///     let domain = domain!("example.com");
-///     let domain = domain!("example.com", 5060);
+/// let domain = domain!("example.com");
+/// let domain = domain!("example.com", 5060);
 /// # }
 /// ```
 #[macro_export]
@@ -22,8 +22,8 @@ macro_rules! domain {
 /// # #[macro_use]
 /// # extern crate libsip;
 /// # fn main() {
-///     let domain = ip_domain!(192, 168, 0, 1);
-///     let domain = ip_domain!(192, 168, 0, 1, 5060);
+/// let domain = ip_domain!(192, 168, 0, 1);
+/// let domain = ip_domain!(192, 168, 0, 1, 5060);
 /// # }
 /// ```
 #[macro_export]
@@ -42,8 +42,8 @@ macro_rules! ip_domain {
 /// # #[macro_use]
 /// # extern crate libsip;
 /// # fn main() {
-///     let auth = uri_auth!("user");
-///     let auth = uri_auth!("user", "pass");
+/// let auth = uri_auth!("user");
+/// let auth = uri_auth!("user", "pass");
 /// # }
 /// ```
 #[macro_export]
@@ -61,8 +61,8 @@ macro_rules! uri_auth {
 /// # #[macro_use]
 /// # extern crate libsip;
 /// # fn main() {
-///     let uri = libsip::Uri::sip(domain!("example.com"));
-///     let domain = named_header!(uri);
+/// let uri = libsip::Uri::sip(domain!("example.com"));
+/// let domain = named_header!(uri);
 /// # }
 /// ```
 #[macro_export]

@@ -1,11 +1,12 @@
 [package]
 name = "libsip"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Bytebuddha <pmg41494@protonmail.com>"]
 edition = "2018"
 readme = "Readme.md"
 license-file = "License.md"
 keywords = ["sip", "voip"]
+documentation = "https://docs.rs/libsip"
 homepage = "https://github.com/Bytebuddha/libsip"
 repository = "https://github.com/Bytebuddha/libsip"
 description = "SIP protocol Implementation, with a focus towords softphone clients."

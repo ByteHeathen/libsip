@@ -1,6 +1,6 @@
 use crate::{
-    core::Transport,
     client::HeaderWriteConfig,
+    core::Transport,
     headers::{
         auth::{AuthContext, AuthHeader},
         via::ViaHeader,
@@ -65,7 +65,7 @@ impl RegistrationManager {
             user: None,
             pass: None,
             realm: None,
-            nonce: None
+            nonce: None,
         }
     }
 
