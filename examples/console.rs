@@ -21,9 +21,10 @@ async fn registration_process(
     reg: &mut RegistrationManager,
     sock: &mut UdpSocket,
     verbose: bool,
+
 ) -> Result<(), io::Error> {
     let mut buf = vec![0; 65535];
-    let request = reg.get_request()?;
+    let request = reg.get_request(&Default::default())?;
     if verbose {
         print_sip_message_send(&request);
     }
@@ -38,7 +39,7 @@ async fn registration_process(
         return Ok(());
     }
     reg.set_challenge(msg)?;
-    let auth_request = reg.get_request()?;
+    let auth_request = reg.get_request(&Default::default())?;
     if verbose {
         print_sip_message_send(&auth_request);
     }
@@ -71,7 +72,7 @@ async fn registration_process(
 async fn main() -> Result<(), io::Error> {
     let verbose = get_verbose();
     let mut sock = UdpSocket::bind(SOCKET_ADDRESS).await?;
-    let mut registrar = RegistrationManager::new(account_uri(), local_uri(), Default::default());
+    let mut registrar = RegistrationManager::new(account_uri(), local_uri());
     registrar.username(USERNAME);
     registrar.password(PASSWORD);
     registration_process(&mut registrar, &mut sock, verbose).await?;
@@ -109,7 +110,7 @@ fn account_uri() -> Uri {
 }
 
 fn local_uri() -> Uri {
-    Uri::sip(ip_domain!(192, 168, 1, 29))
+    Uri::sip(ip_domain!(192, 168, 1, 129))
         .auth(uri_auth!("20"))
         .parameter(Param::Transport(Transport::Udp))
 }

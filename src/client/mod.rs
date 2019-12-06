@@ -7,17 +7,56 @@ pub use self::messaging::{MessageHelper, MessageWriter};
 mod invite;
 pub use self::invite::InviteHelper;
 
-use crate::{Header, Headers, ResponseGenerator, SipMessage, Uri};
+use crate::{Header, Headers, ResponseGenerator, SipMessage, Uri, Method};
 
 use std::io::Result as IoResult;
+
+pub struct HeaderWriteConfig {
+    pub user_agent: Option<String>,
+    pub allowed_methods: Option<Vec<Method>>
+}
+
+impl HeaderWriteConfig {
+
+    pub fn write_headers_vec(&self, m: &mut Vec<Header>) {
+        if let Some(agent) = &self.user_agent {
+            m.push(Header::UserAgent(agent.into()));
+        }
+        if let Some(allowed) = &self.allowed_methods {
+            m.push(Header::Allow(allowed.clone()));
+        }
+    }
+
+    pub fn write_headers(&self, m: &mut Headers) {
+        if let Some(agent) = &self.user_agent {
+            m.push(Header::UserAgent(agent.into()));
+        }
+        if let Some(allowed) = &self.allowed_methods {
+            m.push(Header::Allow(allowed.clone()));
+        }
+    }
+}
+
+impl Default for HeaderWriteConfig {
+    fn default() -> HeaderWriteConfig {
+        HeaderWriteConfig {
+            user_agent: Some(format!("libsip {}", env!("CARGO_PKG_VERSION"))),
+            allowed_methods: Some(vec![
+                Method::Invite, Method::Cancel,
+                Method::Bye, Method::Message
+            ])
+        }
+    }
+}
 
 /// Simple SIP client for implementing softphones.
 /// Currently the only thing implemented is registration
 /// and sending text messages. The only other feature planned
 /// is an interface for sending & receiving calls.
 pub struct SoftPhone {
-    pub msg: MessageWriter,
-    pub reg: RegistrationManager,
+    header_cfg: HeaderWriteConfig,
+    msg: MessageWriter,
+    reg: RegistrationManager,
 }
 
 impl SoftPhone {
@@ -25,8 +64,9 @@ impl SoftPhone {
     /// and `account_uri` is the uri of your SIP user account.
     pub fn new(local_uri: Uri, account_uri: Uri) -> SoftPhone {
         SoftPhone {
+            header_cfg: HeaderWriteConfig::default(),
             msg: MessageWriter::new(account_uri.clone()),
-            reg: RegistrationManager::new(account_uri, local_uri, Default::default()),
+            reg: RegistrationManager::new(account_uri, local_uri),
         }
     }
 
@@ -50,9 +90,17 @@ impl SoftPhone {
         &mut self.msg
     }
 
+    pub fn header_cfg(&self) -> &HeaderWriteConfig {
+        &self.header_cfg
+    }
+
+    pub fn header_cfg_mut(&mut self) -> &mut HeaderWriteConfig {
+        &mut self.header_cfg
+    }
+
     /// Simple pass through method to get a registration request.
     pub fn get_register_request(&mut self) -> IoResult<SipMessage> {
-        Ok(self.reg.get_request()?)
+        Ok(self.reg.get_request(&self.header_cfg)?)
     }
 
     /// Set the received auth challenge request.
@@ -63,7 +111,7 @@ impl SoftPhone {
 
     /// Send a new Message to `uri`.
     pub fn write_message(&mut self, b: Vec<u8>, uri: Uri) -> IoResult<SipMessage> {
-        Ok(self.msg.write_message(b, uri, self.reg.via_header())?)
+        Ok(self.msg.write_message(b, uri, self.reg.via_header(), &self.header_cfg)?)
     }
 
     pub fn cancel_response(&mut self, headers: &Headers) -> IoResult<(SipMessage, SipMessage)> {

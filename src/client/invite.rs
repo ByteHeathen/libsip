@@ -3,6 +3,7 @@ use std::io::Result as IoResult;
 
 use crate::{
     core::Method,
+    client::HeaderWriteConfig,
     headers::{via::ViaHeader, Header, Headers, NamedHeader},
     uri::Uri,
     RequestGenerator, ResponseGenerator, SipMessage,
@@ -48,29 +49,32 @@ impl InviteHelper {
     }
 
     /// Get A Ringing(180) request to answer this invite.
-    pub fn ringing(&self) -> IoResult<SipMessage> {
-        ResponseGenerator::new()
+    pub fn ringing(&self, header_cfg: &HeaderWriteConfig) -> IoResult<SipMessage> {
+        let mut req = ResponseGenerator::new()
             .code(180)
             .header(self.headers.from().unwrap())
             .header(self.headers.to().unwrap())
             .header(self.headers.call_id().unwrap())
             .header(self.headers.cseq().unwrap())
             .header(self.headers.via().unwrap())
-            .header(Header::ContentLength(0))
-            .build()
+            .header(Header::ContentLength(0));
+        header_cfg.write_headers(req.headers_ref_mut());
+        req.build()
     }
 
     /// Generate a response that will accept the invite with the sdp as the body.
-    pub fn accept(&self, sdp: Vec<u8>) -> IoResult<SipMessage> {
-        ResponseGenerator::new()
+    pub fn accept(&self, sdp: Vec<u8>, header_cfg: &HeaderWriteConfig) -> IoResult<SipMessage> {
+        let mut req = ResponseGenerator::new()
             .code(200)
             .header(self.headers.cseq().unwrap())
             .header(self.headers.via().unwrap())
             .header(self.headers.to().unwrap())
             .header(self.headers.from().unwrap())
             .header(self.headers.call_id().unwrap())
-            .body(sdp)
-            .build()
+            .header(Header::ContentLength(sdp.len() as u32))
+            .body(sdp);
+        header_cfg.write_headers(req.headers_ref_mut());
+        req.build()
     }
 
     pub fn bye(&self) -> IoResult<SipMessage> {

@@ -44,6 +44,14 @@ impl ResponseGenerator {
         self
     }
 
+    pub fn header_ref(&self) -> &Headers {
+        &self.headers
+    }
+
+    pub fn headers_ref_mut(&mut self) -> &mut Headers {
+        &mut self.headers
+    }
+
     /// Set the sip response body. This completely replaces
     /// the current response body.
     pub fn body(mut self, body: Vec<u8>) -> ResponseGenerator {

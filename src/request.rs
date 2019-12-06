@@ -52,6 +52,14 @@ impl RequestGenerator {
         self
     }
 
+    pub fn header_ref(&self) -> &Headers {
+        &self.headers
+    }
+
+    pub fn headers_ref_mut(&mut self) -> &mut Headers {
+        &mut self.headers
+    }
+
     /// Set the sip request body. This completely replaces
     /// the current request body.
     pub fn body(mut self, body: Vec<u8>) -> RequestGenerator {

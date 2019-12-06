@@ -1,5 +1,6 @@
 use crate::{
     core::Transport,
+    client::HeaderWriteConfig,
     headers::{
         auth::{AuthContext, AuthHeader},
         via::ViaHeader,
@@ -10,49 +11,6 @@ use crate::{
 };
 
 use std::io;
-
-/// Configuration used to build the register request.
-#[derive(Debug, PartialEq, Clone)]
-pub struct Config {
-    /// Whether to append the `Content-Length` header
-    /// default: true
-    pub content_length: bool,
-    /// The value to use for the `Expiration` header
-    /// default: 60
-    pub expires_header: Option<u32>,
-    /// The value to set for the user_agent header,
-    /// default: `libsip env!('CARGO_PKG_VERSION')`
-    pub user_agent: Option<String>,
-    /// Methods sent in the allowed methods header.
-    /// default: Invite, Cancel, Bye, Message
-    pub allowed_methods: Vec<Method>,
-    /// The username to use for login.
-    pub user: Option<String>,
-    /// The password to use for login.
-    pub pass: Option<String>,
-    /// Authentication realm
-    realm: Option<String>,
-    /// Authentication nonce
-    nonce: Option<String>,
-}
-
-impl Default for Config {
-    fn default() -> Config {
-        Config {
-            content_length: true,
-            expires_header: Some(60),
-            user_agent: Some(format!("libsip {}", env!("CARGO_PKG_VERSION"))),
-            allowed_methods: vec![
-              Method::Invite, Method::Cancel,
-              Method::Bye, Method::Message
-            ],
-            user: None,
-            pass: None,
-            realm: None,
-            nonce: None,
-        }
-    }
-}
 
 /// Handle's the SIP registration process.
 /// This structure is designed to handle the authentication
@@ -65,7 +23,6 @@ pub struct RegistrationManager {
     account_uri: Uri,
     /// Uri representing the local machine used to register.
     local_uri: Uri,
-    cfg: Config,
     /// Current REGISTER cseq count number.
     cseq_counter: u32,
     /// The computed hash nonce count.
@@ -78,40 +35,54 @@ pub struct RegistrationManager {
     branch: String,
     /// The Call Id to use for register requests.
     call_id: String,
+    // the value of the expires header.
+    expires_header: Option<u32>,
+    /// The username used for login
+    user: Option<String>,
+    /// The password to use for login.
+    pass: Option<String>,
+    /// Authentication realm
+    realm: Option<String>,
+    /// Authentication nonce
+    nonce: Option<String>,
 }
 
 impl RegistrationManager {
     /// Create a new Registration Manager typically this will happen once in a program's
     /// lifecycle. `account_uri` is the sip uri used to authenticate with and `local_uri`
     /// is the sip uri of the listening socket.
-    pub fn new(account_uri: Uri, local_uri: Uri, cfg: Config) -> RegistrationManager {
+    pub fn new(account_uri: Uri, local_uri: Uri) -> RegistrationManager {
         RegistrationManager {
             account_uri,
             local_uri,
-            cfg,
             cseq_counter: 444,
             auth_header: None,
             nonce_c: 1,
             c_nonce: None,
             branch: format!("{:x}", md5::compute(rand::random::<[u8; 16]>())),
             call_id: format!("{:x}", md5::compute(rand::random::<[u8; 16]>())),
+            expires_header: None,
+            user: None,
+            pass: None,
+            realm: None,
+            nonce: None
         }
     }
 
     /// Set the username used in the authentication process.
     pub fn username<S: Into<String>>(&mut self, s: S) {
-        self.cfg.user = Some(s.into());
+        self.user = Some(s.into());
     }
 
     /// Set the password used in the authentication process.
     pub fn password<S: Into<String>>(&mut self, p: S) {
-        self.cfg.pass = Some(p.into());
+        self.pass = Some(p.into());
     }
 
     /// Get the register request. if this method is called before `set_challenge`
     /// then no authentication header will be set, if called after `set_challenge`
     /// then the Authorization header will be set.
-    pub fn get_request(&mut self) -> Result<SipMessage, io::Error> {
+    pub fn get_request(&mut self, cfg: &HeaderWriteConfig) -> Result<SipMessage, io::Error> {
         self.cseq_counter += 1;
         self.nonce_c += 1;
         let to_header = self.account_uri.clone();
@@ -119,10 +90,10 @@ impl RegistrationManager {
         let mut contact_header = self.local_uri.clone();
         let mut headers = vec![];
 
-        if let Some(name) = &self.cfg.user {
+        if let Some(name) = &self.user {
             contact_header = contact_header.auth(UriAuth::new(name));
             if let Some(auth_header) = &self.auth_header {
-                if let Some(pass) = &self.cfg.pass {
+                if let Some(pass) = &self.pass {
                     let ctx = AuthContext {
                         user: &name,
                         pass,
@@ -144,13 +115,10 @@ impl RegistrationManager {
             self.account_uri.host()
         )));
         headers.push(self.via_header());
-        headers.push(self.allowed_methods());
+        cfg.write_headers_vec(&mut headers);
 
-        if let Some(exp) = self.cfg.expires_header {
+        if let Some(exp) = self.expires_header {
             headers.push(Header::Expires(exp));
-        }
-        if let Some(agent) = &self.cfg.user_agent {
-            headers.push(Header::UserAgent(agent.clone()));
         }
         Ok(RequestGenerator::new()
             .method(Method::Register)
@@ -169,7 +137,7 @@ impl RegistrationManager {
                         self.auth_header = Some(auth);
                     },
                     Header::Expires(expire) => {
-                        self.cfg.expires_header = Some(expire);
+                        self.expires_header = Some(expire);
                     },
                     _ => {},
                 }
@@ -185,7 +153,7 @@ impl RegistrationManager {
 
     /// Retreive the expires header value.
     pub fn expires(&self) -> u32 {
-        self.cfg.expires_header.unwrap_or(60)
+        self.expires_header.unwrap_or(60)
     }
 
     /// Retreive the current cseq counter.
@@ -207,9 +175,5 @@ impl RegistrationManager {
             version: Default::default(),
             transport: Transport::Udp,
         })
-    }
-
-    pub fn allowed_methods(&self) -> Header {
-        Header::Allow(self.cfg.allowed_methods.clone())
     }
 }

@@ -4,6 +4,7 @@ use crate::{
     core::Method,
     headers::{via::ViaHeader, ContentType, Header, Headers, NamedHeader},
     uri::{Schema, Uri},
+    client::HeaderWriteConfig,
     RequestGenerator, ResponseGenerator, SipMessage,
 };
 
@@ -55,16 +56,17 @@ impl MessageHelper {
     /// Generate an OK response. Send this mesesage to the server
     /// immediatly after receiving the message to tell it to stop
     /// transmiting.
-    pub fn received(&self) -> IoResult<SipMessage> {
-        ResponseGenerator::new()
+    pub fn received(&self, header_cfg: &HeaderWriteConfig) -> IoResult<SipMessage> {
+        let mut req = ResponseGenerator::new()
             .code(200)
             .header(self.headers.from().unwrap())
             .header(self.headers.to().unwrap())
             .header(self.headers.call_id().unwrap())
             .header(self.headers.cseq().unwrap())
             .header(self.headers.via().unwrap())
-            .header(Header::ContentLength(0))
-            .build()
+            .header(Header::ContentLength(0));
+        header_cfg.write_headers(req.headers_ref_mut());
+        req.build()
     }
 }
 
@@ -73,8 +75,7 @@ impl MessageHelper {
 pub struct MessageWriter {
     cseq: u32,
     uri: Uri,
-    call_id: String,
-    user_agent: Option<String>,
+    call_id: String
 }
 
 impl MessageWriter {
@@ -85,7 +86,6 @@ impl MessageWriter {
         let call_id = format!("{:x}@{}", _call_id, uri.host);
         MessageWriter {
             cseq: 0,
-            user_agent: None,
             uri,
             call_id,
         }
@@ -96,9 +96,10 @@ impl MessageWriter {
         body: Vec<u8>,
         to: Uri,
         via_header: Header,
+        header_cfg: &HeaderWriteConfig
     ) -> IoResult<SipMessage> {
         self.cseq += 1;
-        RequestGenerator::new()
+        let mut req = RequestGenerator::new()
             .method(Method::Message)
             .uri(to.clone().schema(Schema::Sip))
             .header(via_header)
@@ -106,12 +107,14 @@ impl MessageWriter {
             .header(self.from())
             .header(self.cseq())
             .header(self.call_id())
-            .header(self.user_agent())
-            .header(self.max_forwards())
             .header(self.content_type())
             .header(Header::ContentLength(body.len() as u32))
-            .body(body)
-            .build()
+            .header(self.max_forwards());
+
+        header_cfg.write_headers(req.headers_ref_mut());
+
+        req.body(body)
+           .build()
     }
 
     /// Get a new CSeq header.
@@ -127,15 +130,6 @@ impl MessageWriter {
     /// Get a new Max-Forwards header.
     pub fn max_forwards(&self) -> Header {
         Header::MaxForwards(70)
-    }
-
-    /// Get a new User-Agent header.
-    pub fn user_agent(&self) -> Header {
-        if let Some(agent) = &self.user_agent {
-            Header::UserAgent(agent.clone())
-        } else {
-            Header::UserAgent(format!("libsip {}", env!("CARGO_PKG_VERSION")))
-        }
     }
 
     /// Get a new Call-Id header.
