@@ -10,12 +10,12 @@ use std::{
 };
 
 use libsip::{client::RegistrationManager, core::Transport, parse_message, uri::Param, *};
-use tokio::{future::FutureExt, net::UdpSocket};
+use tokio::net::UdpSocket;
 
 const USERNAME: &'static str = "20";
 const PASSWORD: &'static str = "program";
-const SOCKET_ADDRESS: &'static str = "192.168.1.76:5060";
-const SERVER_SOCK_ADDRESS: &'static str = "192.168.1.120:5060";
+const SOCKET_ADDRESS: &'static str = "192.168.1.129:5060";
+const SERVER_SOCK_ADDRESS: &'static str = "192.168.1.133:5060";
 
 async fn registration_process(
     reg: &mut RegistrationManager,
@@ -85,12 +85,10 @@ async fn main() -> Result<(), io::Error> {
             expire_time = Instant::now();
             continue;
         }
-        let result = sock
-            .recv_from(&mut buf)
-            .timeout(Duration::from_secs(
-                expire_time.elapsed().as_secs() + timeout,
-            ))
-            .await;
+        let timeout_duration = Duration::from_secs(
+            expire_time.elapsed().as_secs() + timeout
+        );
+        let result = tokio::time::timeout(timeout_duration, sock.recv_from(&mut buf)).await;
         match result {
             Ok(Ok(value)) => {
                 let (_, msg) = parse_message(&buf[..value.0]).unwrap();
@@ -107,11 +105,11 @@ async fn main() -> Result<(), io::Error> {
 }
 
 fn account_uri() -> Uri {
-    Uri::sip(ip_domain!(192, 168, 1, 120)).auth(uri_auth!("20"))
+    Uri::sip(ip_domain!(192, 168, 1, 133)).auth(uri_auth!("20"))
 }
 
 fn local_uri() -> Uri {
-    Uri::sip(ip_domain!(192, 168, 1, 76))
+    Uri::sip(ip_domain!(192, 168, 1, 29))
         .auth(uri_auth!("20"))
         .parameter(Param::Transport(Transport::Udp))
 }

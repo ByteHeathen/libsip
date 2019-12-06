@@ -84,7 +84,7 @@ impl Headers {
         None
     }
 
-    /// Return the Contact header if one is present.
+    /// Return the CoallId header if one is present.
     pub fn call_id(&self) -> Option<Header> {
         for h in &self.0 {
             if let Header::CallId(a) = h {
@@ -94,7 +94,7 @@ impl Headers {
         None
     }
 
-    /// Return the Contact header if one is present.
+    /// Return the Via header if one is present.
     pub fn via(&self) -> Option<Header> {
         for h in &self.0 {
             if let Header::Via(a) = h {
@@ -104,7 +104,7 @@ impl Headers {
         None
     }
 
-    /// Return the Contact header if one is present.
+    /// Return XFS Sending Header if one is present.
     pub fn xfs_sending_message(&self) -> Option<Header> {
         for h in &self.0 {
             if let Header::XFsSendingMessage(a) = h {

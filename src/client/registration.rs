@@ -23,6 +23,9 @@ pub struct Config {
     /// The value to set for the user_agent header,
     /// default: `libsip env!('CARGO_PKG_VERSION')`
     pub user_agent: Option<String>,
+    /// Methods sent in the allowed methods header.
+    /// default: Invite, Cancel, Bye, Message
+    pub allowed_methods: Vec<Method>,
     /// The username to use for login.
     pub user: Option<String>,
     /// The password to use for login.
@@ -39,6 +42,10 @@ impl Default for Config {
             content_length: true,
             expires_header: Some(60),
             user_agent: Some(format!("libsip {}", env!("CARGO_PKG_VERSION"))),
+            allowed_methods: vec![
+              Method::Invite, Method::Cancel,
+              Method::Bye, Method::Message
+            ],
             user: None,
             pass: None,
             realm: None,
@@ -137,6 +144,7 @@ impl RegistrationManager {
             self.account_uri.host()
         )));
         headers.push(self.via_header());
+        headers.push(self.allowed_methods());
 
         if let Some(exp) = self.cfg.expires_header {
             headers.push(Header::Expires(exp));
@@ -199,5 +207,9 @@ impl RegistrationManager {
             version: Default::default(),
             transport: Transport::Udp,
         })
+    }
+
+    pub fn allowed_methods(&self) -> Header {
+        Header::Allow(self.cfg.allowed_methods.clone())
     }
 }
