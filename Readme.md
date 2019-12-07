@@ -30,7 +30,7 @@ cargo run --example console
   - **[rand](https://crates.io/crates/rand) 0.7.2**
   - **[md5](https://crates.io/crates/md5) 0.7.0**
   - **[sha](https://crates.io/crates/sha) 1.0.3**
-  - **[serde](https://crates.io/crates/serde) 1.0.102**
+  - **[serde](https://crates.io/crates/serde) 1.0.103**
 
 #### Alternatives
   - **[parsip](https://crates/crates/parsip)**
