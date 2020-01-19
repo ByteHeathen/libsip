@@ -11,7 +11,7 @@ common use cases.
 [![Crates.io](https://img.shields.io/crates/v/libsip.svg)](https://crates.io/crates/libsip)
 [![Docs.rs](https://docs.rs/libsip/badge.svg)](https://docs.rs/libsip)
 [![Build Status](https://travis-ci.org/byteheathen/libsip.svg?branch=master)](https://travis-ci.org/byteheathen/libsip)
-[![Build status](https://ci.appveyor.com/api/projects/status/8x26kisw2h6o1ox8?svg=true)](https://ci.appveyor.com/project/byteheathen/libsip)
+[![Build status](https://ci.appveyor.com/api/projects/status/5ritiyyl4jva3n4d?svg=true)](https://ci.appveyor.com/project/bytebuddha/libsip)
 
 #### Running the examples
 ```bash
