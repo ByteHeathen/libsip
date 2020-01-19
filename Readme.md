@@ -10,12 +10,12 @@ common use cases.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Crates.io](https://img.shields.io/crates/v/libsip.svg)](https://crates.io/crates/libsip)
 [![Docs.rs](https://docs.rs/libsip/badge.svg)](https://docs.rs/libsip)
-[![Build Status](https://travis-ci.org/bytebuddha/libsip.svg?branch=master)](https://travis-ci.org/bytebuddha/libsip)
-[![Build status](https://ci.appveyor.com/api/projects/status/8x26kisw2h6o1ox8?svg=true)](https://ci.appveyor.com/project/bytebuddha/libsip)
+[![Build Status](https://travis-ci.org/byteheathen/libsip.svg?branch=master)](https://travis-ci.org/byteheathen/libsip)
+[![Build status](https://ci.appveyor.com/api/projects/status/8x26kisw2h6o1ox8?svg=true)](https://ci.appveyor.com/project/byteheathen/libsip)
 
 #### Running the examples
 ```bash
-git clone https://github.com/Bytebuddha/libsip
+git clone https://github.com/ByteHeathen/libsip
 cd /libsip
 # This example expects a server with the credentials in examples/udp_register.rs
 # to be running without it will fail.
@@ -26,7 +26,7 @@ cargo run --example console
 ```
 
 #### dependencies
-  - **[nom](https://crates.io/crates/nom) 5.0.1**
+  - **[nom](https://crates.io/crates/nom) 5.1.0**
   - **[rand](https://crates.io/crates/rand) 0.7.2**
   - **[md5](https://crates.io/crates/md5) 0.7.0**
   - **[sha](https://crates.io/crates/sha) 1.0.3**
