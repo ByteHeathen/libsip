@@ -55,7 +55,7 @@ impl fmt::Display for Param {
             Param::Transport(trans) => write!(f, ";transport={}", trans),
             Param::Branch(branch) => write!(f, ";branch={}", branch),
             Param::Received(branch) => write!(f, ";received={}", branch),
-            Param::RPort => write!(f, "rport"),
+            Param::RPort => write!(f, ";rport"),
         }
     }
 }
