@@ -31,11 +31,13 @@ impl fmt::Display for NamedHeader {
         if let Some(name) = &self.display_name {
             if name.contains(' ') {
                 write!(f, "\"{}\" <{}>", name, self.uri)?;
+            } else if name.is_empty() {
+                write!(f, "\"\" <{}>", self.uri)?;
             } else {
                 write!(f, "{} <{}>", name, self.uri)?;
             }
         } else {
-            write!(f, "<{}>", self.uri)?;
+            write!(f, "{}", self.uri)?;
         }
         for (key, value) in (&self.params).iter() {
             write!(f, ";{}={}", key, value)?;
@@ -54,15 +56,21 @@ named!(pub parse_named_field_param<(String, String)>, do_parse!(
 
 named!(pub parse_name<String>, alt!(
         parse_quoted_string |
-        map_res!(take_while!(is_alphabetic), slice_to_string)
+        parse_unquoted_string
+));
+
+named!(pub parse_unquoted_string<String>, do_parse!(
+    string_data: map_res!(take_while!(is_alphabetic), slice_to_string) >>
+    char!(' ') >>
+    (string_data)
 ));
 
 named!(pub parse_named_field_value<(Option<String>, Uri)>, do_parse!(
     name: opt!(parse_name) >>
     opt!(take_while!(is_space)) >>
-    char!('<') >>
-    value: parse_uri>>
-    char!('>') >>
+    opt!(char!('<')) >>
+    value: parse_uri >>
+    opt!(char!('>')) >>
     ((name, value))
 ));
 

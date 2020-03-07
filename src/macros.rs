@@ -74,6 +74,13 @@ macro_rules! named_header {
             params: ::std::collections::HashMap::new(),
         }
     };
+    ($u:tt, $name:tt) => {
+        libsip::headers::NamedHeader {
+            display_name: Some($name.into()),
+            uri: $u,
+            params: ::std::collections::HashMap::new()
+        }
+    };
 }
 
 macro_rules! __named_header {
