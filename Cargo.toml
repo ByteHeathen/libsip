@@ -12,11 +12,11 @@ repository = "https://github.com/ByteHeathen/libsip"
 description = "SIP protocol Implementation, with a focus towords softphone clients."
 
 [dependencies]
-serde = { version = "1.0.104", features = ["derive"] }
-nom = "5.1.1"
+serde = { version = "1.0.106", features = ["derive"] }
+nom = "6.0.0-alpha1"
 rand = "0.7.3"
 sha = "1.0.3"
 md5 = "0.7.0"
 
 [dev-dependencies]
-tokio = { version = "0.2.13", features = ["net", "macros", "time"] }
+tokio = { version = "0.2.20", features = ["net", "macros", "time"] }

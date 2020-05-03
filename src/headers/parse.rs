@@ -112,7 +112,7 @@ macro_rules! impl_array_parser {
             opt!(take_while!(is_space)) >>
             char!(':') >>
             opt!(take_while!(is_space)) >>
-            data: separated_list!(pair!(char!(','), opt!(char!(' '))), $func) >>
+            data: separated_list0!(pair!(char!(','), opt!(char!(' '))), $func) >>
             tag!("\r\n") >>
             (Header::$variant(data))
         ));

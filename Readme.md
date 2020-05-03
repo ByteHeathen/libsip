@@ -3,7 +3,8 @@
 libsip is a library implementation of the sip protocol as described in
 [rfc3261](https://tools.ietf.org/html/rfc3261). libsip intends to implement
 parsing the entire SIP Protocol, but will only provide helpers for certain
-common use cases.
+common use cases. I begin developing this library because i was frustrated with
+many of the SIP clients / Libraries on linux.
 
 **WIP** This library is still very much under construction.
 
@@ -26,11 +27,17 @@ cargo run --example console
 ```
 
 #### dependencies
-  - **[nom](https://crates.io/crates/nom) 5.1.0**
-  - **[rand](https://crates.io/crates/rand) 0.7.2**
+  - **[nom](https://crates.io/crates/nom) 6.0.0-alpha1**
+  - **[rand](https://crates.io/crates/rand) 0.7.3**
   - **[md5](https://crates.io/crates/md5) 0.7.0**
   - **[sha](https://crates.io/crates/sha) 1.0.3**
-  - **[serde](https://crates.io/crates/serde) 1.0.103**
+  - **[serde](https://crates.io/crates/serde) 1.0.106**
+
+### Development
+  I've been using [fusionpbx](https://fusionpbx.com) as the testing server for this library.
+I use a VirtualBox virtual machine running in bridged mode to simulate a PBX server running
+on my local network. At this point i have only been able to implement Placing Calls,
+Sending Messages and SIP registration.
 
 #### Alternatives
   - **[parsip](https://crates/crates/parsip)**
