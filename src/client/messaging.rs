@@ -1,4 +1,8 @@
-use std::io::Result as IoResult;
+use std::io::{
+    Result as IoResult,
+    ErrorKind,
+    Error
+};
 
 use crate::{
     client::HeaderWriteConfig,
@@ -15,7 +19,7 @@ macro_rules! impl_simple_header_method {
             if let Some(Header::$variant(header)) = self.headers.$name() {
                 Ok(header)
             } else {
-                Err(::std::io::Error::new(::std::io::ErrorKind::InvalidInput, format!("message doesnt contain a {} header", stringify!($variant))))
+                Err(Error::new(ErrorKind::InvalidInput, format!("message doesnt contain a {} header", stringify!($variant))))
             }
         }
     }
@@ -41,9 +45,21 @@ impl MessageHelper {
 
     impl_simple_header_method!(via, Via, ViaHeader);
 
+    /// Create a message helper from a SipMessage
+    pub fn new(msg: SipMessage) -> IoResult<MessageHelper> {
+        match msg {
+            SipMessage::Request { uri, headers, body, .. } => {
+                MessageHelper::new_from_vars(uri, headers, body)
+            },
+            SipMessage::Response { .. } => {
+                Err(Error::new(ErrorKind::InvalidData, "Expected a SIP request"))
+            }
+        }
+    }
+
     /// Create a new MessageHelper from variables of a sip message.
     /// `uri` is the uri from the request line of the received sip message.
-    pub fn new(uri: Uri, headers: Headers, body: Vec<u8>) -> IoResult<MessageHelper> {
+    pub fn new_from_vars(uri: Uri, headers: Headers, body: Vec<u8>) -> IoResult<MessageHelper> {
         Ok(MessageHelper { uri, headers, body })
     }
 
@@ -91,6 +107,8 @@ impl MessageWriter {
         }
     }
 
+    /// Actually produce the SIP Message Request with
+    /// the given `body` text.
     pub fn write_message(
         &mut self,
         body: Vec<u8>,

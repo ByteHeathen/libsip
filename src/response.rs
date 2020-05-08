@@ -15,6 +15,8 @@ pub struct ResponseGenerator {
 }
 
 impl ResponseGenerator {
+
+    /// Get a new instance of the ResponseGenerator.
     pub fn new() -> ResponseGenerator {
         ResponseGenerator {
             code: None,
@@ -44,10 +46,12 @@ impl ResponseGenerator {
         self
     }
 
+    /// Get a reference to the header list.
     pub fn header_ref(&self) -> &Headers {
         &self.headers
     }
 
+    /// Get a mutable reference to the header list.
     pub fn headers_ref_mut(&mut self) -> &mut Headers {
         &mut self.headers
     }

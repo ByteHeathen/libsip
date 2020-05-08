@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 use std::io::Result as IoResult;
+use std::io::Error as IoError;
+use std::io::ErrorKind as IoErrorKind;
 
 use crate::{
     client::HeaderWriteConfig,
@@ -16,7 +18,7 @@ macro_rules! impl_simple_header_method {
             if let Some(Header::$variant(header)) = self.headers.$name() {
                 Ok(header)
             } else {
-                Err(::std::io::Error::new(::std::io::ErrorKind::InvalidInput, format!("invitiation doesnt contain a {} header", stringify!($variant))))
+                Err(IoError::new(IoErrorKind::InvalidInput, format!("invitiation doesnt contain a {} header", stringify!($variant))))
             }
         }
     }
@@ -39,7 +41,19 @@ impl InviteHelper {
 
     impl_simple_header_method!(via, Via, ViaHeader);
 
-    pub fn new(uri: Uri, headers: Headers, body: Vec<u8>) -> IoResult<InviteHelper> {
+    /// Create a InviteHelper from the given SipMessage.
+    pub fn new(msg: SipMessage) -> IoResult<InviteHelper> {
+        match msg {
+            SipMessage::Request { uri, headers, body, .. } => {
+                InviteHelper::new_from_vars(uri, headers, body)
+            },
+            SipMessage::Response { .. } => {
+                Err(IoError::new(IoErrorKind::InvalidData, "Expected a SIP request"))
+            }
+        }
+    }
+    /// Create an InviteHelper from the given variables.
+    pub fn new_from_vars(uri: Uri, headers: Headers, body: Vec<u8>) -> IoResult<InviteHelper> {
         Ok(InviteHelper { uri, headers, body })
     }
 

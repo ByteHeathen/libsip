@@ -7,6 +7,7 @@ use std::{
 
 pub type ParserResult<'a, T> = Result<(&'a [u8], T), nom::Err<(&'a [u8], ErrorKind)>>;
 
+/// Parse input as a string using `String::from_utf8`.
 pub fn slice_to_string(slice: &[u8]) -> Result<String, IoError> {
     if slice.is_empty() {
         Err(IoError::new(InvalidInput, "slice has length 0"))
@@ -21,6 +22,7 @@ pub fn slice_to_string_nullable(slice: &[u8]) -> Result<String, IoError> {
         .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse utf8 string"))?)
 }
 
+/// Parse unsigned 16 bit integer using `Parse::parse`.
 pub fn parse_u16(slice: &[u8]) -> Result<u16, IoError> {
     Ok(::std::str::from_utf8(slice)
         .map_err(|_| {
@@ -33,6 +35,7 @@ pub fn parse_u16(slice: &[u8]) -> Result<u16, IoError> {
         .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse u16 integer"))?)
 }
 
+/// Parse unsigned 8 bit integer using `Parse::parse`.
 pub fn parse_u8(slice: &[u8]) -> Result<u8, IoError> {
     Ok(::std::str::from_utf8(slice)
         .map_err(|_| {
@@ -45,6 +48,7 @@ pub fn parse_u8(slice: &[u8]) -> Result<u8, IoError> {
         .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse u8 integer"))?)
 }
 
+/// Parse unsigned 32 bit integer using `Parse::parse`.
 pub fn parse_u32(slice: &[u8]) -> Result<u32, IoError> {
     Ok(::std::str::from_utf8(slice)
         .map_err(|_| {
@@ -57,6 +61,7 @@ pub fn parse_u32(slice: &[u8]) -> Result<u32, IoError> {
         .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse u32 integer"))?)
 }
 
+/// Parse input as an f32 using `Parse::parse`.
 pub fn parse_f32(slice: &[u8]) -> Result<f32, IoError> {
     Ok(::std::str::from_utf8(slice)
         .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse utf8 f32"))?
@@ -64,6 +69,7 @@ pub fn parse_f32(slice: &[u8]) -> Result<f32, IoError> {
         .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse f32"))?)
 }
 
+/// Parse Input as a vector of bytes.
 pub fn parse_byte_vec(input: &[u8]) -> ParserResult<Vec<u8>> {
     Ok((&input[input.len()..], input.to_vec()))
 }

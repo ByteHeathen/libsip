@@ -1,3 +1,6 @@
+.vs
+.vscode
+.idea
 /target
 **/*.rs.bak
 Cargo.lock

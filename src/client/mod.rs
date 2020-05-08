@@ -11,12 +11,23 @@ use crate::{Header, Headers, Method, ResponseGenerator, SipMessage, Uri};
 
 use std::io::Result as IoResult;
 
+/// This struct is used in the client module when creating sip messages
+/// it is used to specify some common values for the generated sip
+/// headers.
 pub struct HeaderWriteConfig {
+    /// The Value to set for the User Agent header.
+    /// By default this is set to libsip {version},
+    /// Set to None to disable adding a User Agent header.
     pub user_agent: Option<String>,
+    /// The value for the Allowed Methods Header.
+    /// By default set to Invite, Cancel, Bye, Message.
+    /// Set to None to disable adding header.
     pub allowed_methods: Option<Vec<Method>>,
 }
 
 impl HeaderWriteConfig {
+
+    /// Write configured headers into the provided Vec.
     pub fn write_headers_vec(&self, m: &mut Vec<Header>) {
         if let Some(agent) = &self.user_agent {
             m.push(Header::UserAgent(agent.into()));
@@ -26,6 +37,7 @@ impl HeaderWriteConfig {
         }
     }
 
+    /// Write configured headers into the provided Headers Map.
     pub fn write_headers(&self, m: &mut Headers) {
         if let Some(agent) = &self.user_agent {
             m.push(Header::UserAgent(agent.into()));
@@ -55,8 +67,13 @@ impl Default for HeaderWriteConfig {
 /// and sending text messages. The only other feature planned
 /// is an interface for sending & receiving calls.
 pub struct SoftPhone {
+    /// Header Configuration Used when adding default
+    /// headers on generated SIP messages.
     header_cfg: HeaderWriteConfig,
+    /// Message writer instance used when generating
+    /// a SIP message.
     msg: MessageWriter,
+    /// Registration manage instance.
     reg: RegistrationManager,
 }
 
@@ -91,10 +108,12 @@ impl SoftPhone {
         &mut self.msg
     }
 
+    /// Return a reference to the used HeaderWriteConfig.
     pub fn header_cfg(&self) -> &HeaderWriteConfig {
         &self.header_cfg
     }
 
+    /// Return a mutable reference to the used HeaderWriteConfig.
     pub fn header_cfg_mut(&mut self) -> &mut HeaderWriteConfig {
         &mut self.header_cfg
     }
@@ -117,6 +136,7 @@ impl SoftPhone {
             .write_message(b, uri, self.reg.via_header(), &self.header_cfg)?)
     }
 
+    /// Get the messages required to cancel a response.
     pub fn cancel_response(&mut self, headers: &Headers) -> IoResult<(SipMessage, SipMessage)> {
         let mut out_headers = vec![];
         for header in headers.iter() {

@@ -1,4 +1,4 @@
-#![recursion_limit = "256"]
+#![recursion_limit = "1024"]
 //! libsip has three basic components a parser and managers.
 //!
 //! Managers are utility struct's meant to ease one specifc asspect of the sip protocol,

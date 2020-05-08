@@ -16,6 +16,7 @@ pub struct RequestGenerator {
 }
 
 impl RequestGenerator {
+    /// Create a new instance.
     pub fn new() -> RequestGenerator {
         RequestGenerator {
             method: None,
@@ -52,10 +53,12 @@ impl RequestGenerator {
         self
     }
 
+    /// Get a reference to the header list.
     pub fn header_ref(&self) -> &Headers {
         &self.headers
     }
 
+    /// Get a mutable reference to the header list.
     pub fn headers_ref_mut(&mut self) -> &mut Headers {
         &mut self.headers
     }

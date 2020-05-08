@@ -83,6 +83,7 @@ macro_rules! named_header {
     };
 }
 
+/// Same as `named_header` except for internal use.
 macro_rules! __named_header {
     ($u:tt) => {
         crate::headers::NamedHeader {
