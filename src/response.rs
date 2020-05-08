@@ -1,6 +1,10 @@
 use crate::*;
 
-use std::io::{Error as IoError, ErrorKind as IoErrorKind, Result as IoResult};
+use std::io::{
+    Error as IoError,
+    ErrorKind as IoErrorKind,
+    Result as IoResult
+};
 
 /// Sip Response Generator. When build is called the struct
 /// is consumed and produces a SipMessage::Response variant.

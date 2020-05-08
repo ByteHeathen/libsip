@@ -10,7 +10,11 @@ use crate::{
     RequestGenerator, *,
 };
 
-use std::io;
+use std::io::{
+    Result as IoResult,
+    Error as IoError,
+    ErrorKind as IoErrorKind
+};
 
 /// Handle's the SIP registration process.
 /// This structure is designed to handle the authentication
@@ -82,7 +86,7 @@ impl RegistrationManager {
     /// Get the register request. if this method is called before `set_challenge`
     /// then no authentication header will be set, if called after `set_challenge`
     /// then the Authorization header will be set.
-    pub fn get_request(&mut self, cfg: &HeaderWriteConfig) -> Result<SipMessage, io::Error> {
+    pub fn get_request(&mut self, cfg: &HeaderWriteConfig) -> IoResult<SipMessage> {
         self.cseq_counter += 1;
         self.nonce_c += 1;
         let to_header = self.account_uri.clone();
@@ -129,7 +133,7 @@ impl RegistrationManager {
 
     /// After the first register request is sent. pass the received sip response
     /// to this function to perform compute the hashed password.
-    pub fn set_challenge(&mut self, msg: SipMessage) -> Result<(), io::Error> {
+    pub fn set_challenge(&mut self, msg: SipMessage) -> IoResult<()> {
         if let SipMessage::Response { headers, .. } = msg {
             for item in headers.into_iter() {
                 match item {
@@ -144,8 +148,8 @@ impl RegistrationManager {
             }
             Ok(())
         } else {
-            Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
+            Err(IoError::new(
+                IoErrorKind::InvalidInput,
                 "Challenge Response was not a SIP response",
             ))
         }

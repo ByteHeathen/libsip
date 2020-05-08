@@ -14,7 +14,12 @@ use libsip::{
     *,
 };
 
-use std::{io, net::UdpSocket};
+use std::{
+    io::{
+        Result as IoResult
+    },
+    net::UdpSocket
+};
 
 fn get_our_uri() -> Uri {
     Uri::sip(ip_domain!(192, 168, 1, 129, 5060))
@@ -22,7 +27,7 @@ fn get_our_uri() -> Uri {
         .parameter(Param::Transport(Transport::Udp))
 }
 
-fn send_request_get_response(req: SipMessage) -> Result<SipMessage, io::Error> {
+fn send_request_get_response(req: SipMessage) -> IoResult<SipMessage> {
     let addr = "0.0.0.0:5060";
     let sock = UdpSocket::bind(addr)?;
     sock.send_to(&format!("{}", req).as_ref(), "192.168.1.133:5060")?;
@@ -35,7 +40,7 @@ fn send_request_get_response(req: SipMessage) -> Result<SipMessage, io::Error> {
     Ok(msg)
 }
 
-fn main() -> Result<(), io::Error> {
+fn main() -> IoResult<()> {
     let acc_url = parse_uri(b"sip:20@192.168.1.133 ")
         .unwrap()
         .1

@@ -4,7 +4,11 @@ use sha::{
     utils::{Digest, DigestExt},
 };
 
-use std::{collections::HashMap, fmt, io::Result as IoResult};
+use std::{
+    fmt,
+    collections::HashMap,
+    io::Result as IoResult
+};
 
 use crate::Uri;
 

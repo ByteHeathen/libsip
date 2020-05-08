@@ -1,7 +1,9 @@
 #![allow(dead_code)]
-use std::io::Result as IoResult;
-use std::io::Error as IoError;
-use std::io::ErrorKind as IoErrorKind;
+use std::io::{
+    Result as IoResult,
+    Error as IoError,
+    ErrorKind as IoErrorKind
+};
 
 use crate::{
     client::HeaderWriteConfig,

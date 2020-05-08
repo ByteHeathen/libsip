@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-use std::{fmt, io, str::FromStr};
+use std::{
+    fmt,
+    io::Result as IoResult,
+    str::FromStr
+};
 
 pub mod schema;
 pub use self::schema::{parse_schema, Schema};
@@ -97,7 +101,7 @@ impl Uri {
 
     /// Retrieve a formatted string containing host and parameters.
     /// This can be used in the Via header.
-    pub fn host_and_params(&self) -> Result<String, io::Error> {
+    pub fn host_and_params(&self) -> IoResult<String> {
         let mut host = self.host();
         for param in &self.parameters {
             host += &format!("{}", param);

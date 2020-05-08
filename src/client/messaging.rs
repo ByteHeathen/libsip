@@ -1,7 +1,7 @@
 use std::io::{
     Result as IoResult,
-    ErrorKind,
-    Error
+    ErrorKind as IoErrorKind,
+    Error as IoError
 };
 
 use crate::{
@@ -19,7 +19,7 @@ macro_rules! impl_simple_header_method {
             if let Some(Header::$variant(header)) = self.headers.$name() {
                 Ok(header)
             } else {
-                Err(Error::new(ErrorKind::InvalidInput, format!("message doesnt contain a {} header", stringify!($variant))))
+                Err(IoError::new(IoErrorKind::InvalidInput, format!("message doesnt contain a {} header", stringify!($variant))))
             }
         }
     }
@@ -52,7 +52,7 @@ impl MessageHelper {
                 MessageHelper::new_from_vars(uri, headers, body)
             },
             SipMessage::Response { .. } => {
-                Err(Error::new(ErrorKind::InvalidData, "Expected a SIP request"))
+                Err(IoError::new(IoErrorKind::InvalidData, "Expected a SIP request"))
             }
         }
     }

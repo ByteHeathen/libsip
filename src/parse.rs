@@ -1,7 +1,11 @@
 use nom::{character::*, error::ErrorKind};
 
 use std::{
-    io::{Error as IoError, ErrorKind as IoErrorKind, ErrorKind::InvalidInput},
+    io::{
+        Error as IoError,
+        ErrorKind as IoErrorKind,
+        ErrorKind::InvalidInput
+    },
     net::Ipv4Addr,
 };
 

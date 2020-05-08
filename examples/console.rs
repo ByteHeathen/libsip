@@ -5,7 +5,11 @@ extern crate libsip;
 extern crate tokio;
 
 use std::{
-    io,
+    io::{
+        Error as IoError,
+        Result as IoResult,
+        ErrorKind as IoErrorKind
+    },
     time::{Duration, Instant},
 };
 
@@ -21,7 +25,7 @@ async fn registration_process(
     reg: &mut RegistrationManager,
     sock: &mut UdpSocket,
     verbose: bool,
-) -> Result<(), io::Error> {
+) -> IoResult<()> {
     let mut buf = vec![0; 65535];
     let request = reg.get_request(&Default::default())?;
     if verbose {
@@ -54,21 +58,21 @@ async fn registration_process(
             if code == 200 {
                 Ok(())
             } else {
-                Err(From::from(io::Error::new(
-                    io::ErrorKind::InvalidInput,
+                Err(From::from(IoError::new(
+                    IoErrorKind::InvalidInput,
                     "Failed to authenticate",
                 )))
             }
         },
-        _ => Err(From::from(io::Error::new(
-            io::ErrorKind::InvalidInput,
+        _ => Err(From::from(IoError::new(
+            IoErrorKind::InvalidInput,
             "Failed to authenticate",
         ))),
     }
 }
 
 #[tokio::main]
-async fn main() -> Result<(), io::Error> {
+async fn main() -> IoResult<()> {
     let verbose = get_verbose();
     let mut sock = UdpSocket::bind(SOCKET_ADDRESS).await?;
     let mut registrar = RegistrationManager::new(account_uri(), local_uri());
