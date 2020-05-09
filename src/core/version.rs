@@ -1,5 +1,9 @@
 use nom::character::is_digit;
-
+use nom::IResult;
+use nom::bytes::complete::tag;
+use nom::character::complete::char as parse_char;
+use nom::combinator::map_res;
+use nom::bytes::complete::take_while1;
 use crate::parse::parse_u8;
 
 use std::fmt;
@@ -27,12 +31,7 @@ impl Version {
     }
 }
 
-use nom::IResult;
-use nom::bytes::complete::tag;
-use nom::character::complete::char as parse_char;
-use nom::combinator::map_res;
-use nom::bytes::complete::take_while1;
-
+/// Parse the SIP protocol version.
 pub fn parse_version(input: &[u8]) -> IResult<&[u8], Version> {
     let (input, _) = tag("SIP/")(input)?;
     let (input, major) = map_res(take_while1(is_digit), parse_u8)(input)?;

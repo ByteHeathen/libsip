@@ -28,6 +28,7 @@ impl fmt::Display for Transport {
     }
 }
 
+/// Parse a SIP message transport protocol.
 pub fn parse_transport(input: &[u8]) -> IResult<&[u8], Transport> {
     alt((
         map(tag_no_case("TCP"), |_| Transport::Tcp),

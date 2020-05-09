@@ -24,6 +24,9 @@ pub enum Method {
 }
 
 impl Method {
+
+    /// Return all possible Methods. This comes in handy when
+    /// adding an AllowedMethods Header.
     pub fn all() -> Vec<Method> {
         vec![
             Method::Invite,
@@ -65,6 +68,7 @@ impl fmt::Display for Method {
     }
 }
 
+/// Parse SIP request Method.
 pub fn parse_method(input: &[u8]) -> IResult<&[u8], Method> {
     alt((
         map(tag_no_case("INVITE"), |_| Method::Invite),

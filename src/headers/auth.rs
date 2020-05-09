@@ -12,6 +12,7 @@ use std::{
 
 use crate::Uri;
 
+/// The SIP Authentication schema.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Schema {
     Digest,
@@ -25,6 +26,8 @@ impl fmt::Display for Schema {
     }
 }
 
+/// AuthHeader used for headers such as Authorization
+/// or WWWAuthenticate.
 #[derive(Debug, PartialEq, Clone)]
 pub struct AuthHeader(pub Schema, pub HashMap<String, String>);
 
@@ -50,6 +53,7 @@ impl fmt::Display for AuthHeader {
     }
 }
 
+/// Context struct used when calculating the Auth Headers.
 pub struct AuthContext<'a> {
     pub user: &'a str,
     pub pass: &'a str,
@@ -58,12 +62,15 @@ pub struct AuthContext<'a> {
 }
 
 impl AuthHeader {
+
+    /// Perform the authenticate action.
     pub fn authenticate<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         match self.0 {
             Schema::Digest => self.handle_digest_auth(ctx),
         }
     }
 
+    /// Perform the Digest auth method.
     fn handle_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         let qop = self
             .1
@@ -75,6 +82,7 @@ impl AuthHeader {
         }
     }
 
+    /// Decides witch authorization algorythm to use.
     fn handle_digest_qop_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         let alg = self
             .1
@@ -89,6 +97,7 @@ impl AuthHeader {
         }
     }
 
+    /// Handle the MD5 digest auth method.
     fn handle_md5_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         let realm = self
             .1
@@ -118,7 +127,8 @@ impl AuthHeader {
         map.insert("response".into(), format!("{:x}", pass));
         Ok(AuthHeader(Schema::Digest, map))
     }
-
+ 
+    /// Handle sha256 Digest auth method.
     fn handle_sha256_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         let realm = self
             .1
@@ -160,6 +170,7 @@ impl AuthHeader {
         Ok(AuthHeader(Schema::Digest, map))
     }
 
+    /// Handle sha512 auth method.
     fn handle_sha512_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         let realm = self
             .1
@@ -201,6 +212,7 @@ impl AuthHeader {
         Ok(AuthHeader(Schema::Digest, map))
     }
 
+    /// Generate the nonce used during authorization.
     fn generate_cnonce(&self) -> md5::Digest {
         md5::compute(rand::random::<[u8; 16]>())
     }

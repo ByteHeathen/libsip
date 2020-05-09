@@ -124,6 +124,7 @@ impl IntoIterator for Headers {
     }
 }
 
+/// Single SIP Header Representation.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Header {
     To(NamedHeader),

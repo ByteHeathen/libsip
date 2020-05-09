@@ -1,6 +1,9 @@
 //! This example was created using a virtualbox vm
-//! running ubuntu 19.04 and fusionpbx running at
-//! 192.168.1.123
+//! running ubuntu 19.04 and a SIP server running at
+//! 192.168.1.123:5060
+//! 
+//! This will attempt to register a sip account and print
+//! the returned OK response.
 //!
 //! This expects and extension with the numeric id `20`
 //! and a password of `program`

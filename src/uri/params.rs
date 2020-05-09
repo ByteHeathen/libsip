@@ -73,6 +73,7 @@ pub fn parse_param(input: &[u8]) -> IResult<&[u8], Param> {
     )(input)
 }
 
+/// Parse a single named field param.
 pub fn parse_named_param(input: &[u8]) -> IResult<&[u8], Param> {
     let (input, _) = tag(";")(input)?;
     let (input, key) = take_while(is_alphabetic)(input)?;

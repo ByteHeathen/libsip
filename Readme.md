@@ -31,7 +31,7 @@ cargo run --example console
   - **[rand](https://crates.io/crates/rand) 0.7.3**
   - **[md5](https://crates.io/crates/md5) 0.7.0**
   - **[sha](https://crates.io/crates/sha) 1.0.3**
-  - **[serde](https://crates.io/crates/serde) 1.0.106**
+  - **[serde](https://crates.io/crates/serde) 1.0.107**
 
 ### Development
   I've been using [fusionpbx](https://fusionpbx.com) as the testing server for this library.

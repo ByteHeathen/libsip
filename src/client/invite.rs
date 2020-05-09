@@ -27,6 +27,8 @@ macro_rules! impl_simple_header_method {
 }
 
 /// Structure to ease getting data from a Sip INVITE request.
+/// Also is used to generate the appropiate Ringing and Ok
+/// responses.
 #[derive(Debug)]
 pub struct InviteHelper {
     pub uri: Uri,
@@ -35,6 +37,7 @@ pub struct InviteHelper {
 }
 
 impl InviteHelper {
+
     impl_simple_header_method!(from, From, NamedHeader);
 
     impl_simple_header_method!(to, To, NamedHeader);
@@ -92,7 +95,8 @@ impl InviteHelper {
         header_cfg.write_headers(req.headers_ref_mut());
         req.build()
     }
-
+    
+    /// Generate a Bye response for this Invite Request.
     pub fn bye(&self) -> IoResult<SipMessage> {
         RequestGenerator::new()
             .method(Method::Bye)
@@ -105,10 +109,11 @@ impl InviteHelper {
             .build()
     }
 
-    pub fn check_cseq(&self, id: u32) -> IoResult<bool> {
+    /// Verify the CSeq header is equal to `cseq`.
+    pub fn check_cseq(&self, cseq: u32) -> IoResult<bool> {
         for header in self.headers.iter() {
             if let Header::CSeq(count, _) = header {
-                if count == &id {
+                if count == &cseq {
                     return Ok(true);
                 }
             }
@@ -117,26 +122,27 @@ impl InviteHelper {
     }
 }
 
+
+/// The InviteWriter Helps create an Invite Request
+/// sent to the `uri` given in the new function.
 #[derive(Debug)]
 pub struct InviteWriter {
     cseq: u32,
-    uri: Uri,
-    user_agent: Option<String>,
+    uri: Uri
 }
 
 impl InviteWriter {
+
+    /// Create a new InviteHelper struct. `uri` is the uri to send
+    /// the request too.
     pub fn new(uri: Uri) -> InviteWriter {
         InviteWriter {
             cseq: 0,
-            uri,
-            user_agent: None,
+            uri
         }
     }
 
-    pub fn set_user_agent<S: Into<String>>(&mut self, s: S) {
-        self.user_agent = Some(s.into());
-    }
-
+    /// Generate a Invite Request.
     pub fn generate_invite(&mut self, uri: Uri, sdp: Vec<u8>) -> IoResult<SipMessage> {
         self.cseq += 1;
         let me_uri = self.uri.clone();
@@ -151,11 +157,14 @@ impl InviteWriter {
             .build()
     }
 
+    /// Generate a CSeq header.
     pub fn cseq(&self) -> IoResult<Header> {
         let h = Header::CSeq(self.cseq, Method::Invite);
         Ok(h)
     }
 
+    /// Generate a new CallId value. This is calculated as an
+    /// MD5 hash of a randomly generated 16 byte sequence.
     pub fn generate_call_id(&self) -> String {
         format!("{:x}", md5::compute(rand::random::<[u8; 16]>()))
     }

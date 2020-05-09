@@ -125,6 +125,7 @@ impl fmt::Display for SipMessage {
     }
 }
 
+/// Write the headers and body of a SIP message.
 pub fn display_headers_and_body(
     f: &mut fmt::Formatter,
     headers: &Headers,
@@ -138,6 +139,7 @@ pub fn display_headers_and_body(
     Ok(())
 }
 
+/// Parse SIP headers recursivily
 pub fn parse_headers(input: &[u8]) -> ParserResult<Headers> {
     let mut headers = Headers(vec![]);
     let mut input = input;
@@ -154,6 +156,7 @@ use nom::{
     character::complete::char
 };
 
+/// Parse a SIP message assuming it is a SIP response.
 pub fn parse_response(input: &[u8]) -> IResult<&[u8], SipMessage> {
     let (input, version) = parse_version(input)?;
     let (input, _) = char(' ')(input)?;
@@ -168,6 +171,7 @@ pub fn parse_response(input: &[u8]) -> IResult<&[u8], SipMessage> {
     Ok((input, SipMessage::Response { code, version, headers, body }))
 }
 
+/// Parse a SIP message assuming it is a SIP request.
 pub fn parse_request(input: &[u8]) -> IResult<&[u8], SipMessage> {
     let (input, method) = parse_method(input)?;
     let (input, _) = char(' ')(input)?;
@@ -182,6 +186,7 @@ pub fn parse_request(input: &[u8]) -> IResult<&[u8], SipMessage> {
     Ok((input, SipMessage::Request { method, uri, version, headers, body }))
 }
 
+/// This is the main parsing function for libsip.
 pub fn parse_message(input: &[u8]) -> IResult<&[u8], SipMessage> {
     alt((
         parse_request,

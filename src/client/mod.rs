@@ -1,3 +1,7 @@
+//! The client module contains all of the code for
+//! processing and generating SIP requests. Encapsulating
+//! all this functionality is the SoftPhone struct.
+
 mod registration;
 pub use self::registration::RegistrationManager;
 

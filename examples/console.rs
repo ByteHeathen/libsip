@@ -1,6 +1,9 @@
 /// if the `-v` is present then the registration requests
-/// will be shown as well. This example Does not use the sip
-/// codec.
+/// will be shown as well. This example expects there to
+/// be a SIP server running on IP address '192.168.1.129:5060'
+/// and will attempt to connect to a sip account with the
+/// username '20' and the password 'program'.
+
 extern crate libsip;
 extern crate tokio;
 

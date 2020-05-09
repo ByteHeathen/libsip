@@ -24,6 +24,7 @@ impl fmt::Display for Schema {
     }
 }
 
+/// Parse SIP URI schema. Only Accepts 'sip' and 'sips'.
 pub fn parse_schema(input: &[u8]) -> IResult<&[u8], Schema> {
     alt((
         map(tag_no_case("sip"), |_| Schema::Sip),

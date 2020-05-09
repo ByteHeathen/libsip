@@ -45,6 +45,7 @@ impl fmt::Display for UriAuth {
     }
 }
 
+/// Parse the username/password of a uri.
 pub fn parse_uriauth(input: &[u8]) -> IResult<&[u8], UriAuth> {
     let (input, username) = map_res(take_while(is_alphanumeric), slice_to_string)(input)?;
     let (input, password) = opt(parse_password)(input)?;
@@ -52,6 +53,7 @@ pub fn parse_uriauth(input: &[u8]) -> IResult<&[u8], UriAuth> {
     Ok((input, UriAuth { username, password }))
  }
 
+/// Currently this will only accept alphanumeric characters.
 pub fn parse_password(input: &[u8]) -> IResult<&[u8], String> {
     let (input, _) = char(':')(input)?;
     Ok(map_res(take_while(is_alphanumeric), slice_to_string)(input)?)

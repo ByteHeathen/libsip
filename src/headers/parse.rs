@@ -226,7 +226,6 @@ impl_string_parser!(
     "X-FS-Sending-Message",
     XFsSendingMessage
 );
-//impl_string_parser!(parse_via_header, "Via", Via);
 impl_string_parser!(parse_priority_header, "Priority", Priority);
 impl_u32_parser!(parse_timestamp_header, "Timestamp", Timestamp);
 impl_array_parser!(parse_accept_header, "Accept", Accept, parse_method);

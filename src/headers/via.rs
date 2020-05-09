@@ -5,6 +5,7 @@ use crate::{
 
 use std::fmt;
 
+/// Value used in the Via Header.
 #[derive(Debug, PartialEq, Clone)]
 pub struct ViaHeader {
     pub version: Version,
