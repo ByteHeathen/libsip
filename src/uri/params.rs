@@ -60,21 +60,26 @@ impl fmt::Display for Param {
     }
 }
 
-named!(pub parse_param<Param>, alt!(
-    map!(tag!(";rport"), |_| Param::RPort) |
-    parse_named_param
-));
+use nom::{
+    IResult,
+    bytes::complete::{ take_while, tag},
+    combinator::map,
+    branch::alt,
+};
 
-named!(
-    parse_named_param<Param>,
-    do_parse!(
-        tag!(";")
-            >> key: take_while!(is_alphabetic)
-            >> tag!("=")
-            >> value: take_while!(|item| is_alphanumeric(item) || b'.' == item)
-            >> (Param::from_key(key, value)?)
-    )
-);
+pub fn parse_param(input: &[u8]) -> IResult<&[u8], Param> {
+    alt(
+        (map(tag(";rport"), |_| Param::RPort), parse_named_param)
+    )(input)
+}
+
+pub fn parse_named_param(input: &[u8]) -> IResult<&[u8], Param> {
+    let (input, _) = tag(";")(input)?;
+    let (input, key) = take_while(is_alphabetic)(input)?;
+    let (input, _) = tag("=")(input)?;
+    let (input, value) = take_while(|item| is_alphanumeric(item) || b'.' == item)(input)?;
+    Ok((input, Param::from_key(key, value)?))
+}
 
 /// Parse multiple uri parameters.
 pub fn parse_params(input: &[u8]) -> ParserResult<Vec<Param>> {

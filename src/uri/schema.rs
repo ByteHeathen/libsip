@@ -1,6 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 use std::fmt;
+use nom::{
+    IResult,
+    branch::alt,
+    combinator::map,
+    bytes::complete::tag_no_case
+};
 
 /// Sip URI Schema.
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
@@ -18,7 +24,9 @@ impl fmt::Display for Schema {
     }
 }
 
-named!(pub parse_schema<Schema>, alt!(
-    map!(tag_no_case!("sip"), |_| Schema::Sip) |
-    map!(tag_no_case!("sips"), |_| Schema::Sips)
-));
+pub fn parse_schema(input: &[u8]) -> IResult<&[u8], Schema> {
+    alt((
+        map(tag_no_case("sip"), |_| Schema::Sip),
+        map(tag_no_case("sips"), |_| Schema::Sips)
+    ))(input)
+}

@@ -6,6 +6,13 @@ use std::{
     str::FromStr
 };
 
+use nom::{
+    IResult,
+    character::complete::char,
+    combinator::{opt},
+    sequence::pair
+};
+
 pub mod schema;
 pub use self::schema::{parse_schema, Schema};
 
@@ -127,13 +134,13 @@ impl fmt::Display for Uri {
     }
 }
 
-named!(pub parse_uri<Uri>, do_parse!(
-    schema: opt!(pair!(parse_schema, char!(':'))) >>
-    auth: opt!(parse_uriauth) >>
-    host: parse_domain >>
-    parameters: parse_params >>
-    (Uri { schema: schema.map(|item|item.0), host, parameters, auth })
-));
+pub fn parse_uri(input: &[u8]) -> IResult<&[u8], Uri> {
+    let (input, schema) = opt(pair(parse_schema, char(':')))(input)?;
+    let (input, auth) = opt(parse_uriauth)(input)?;
+    let (input, host) = parse_domain(input)?;
+    let (input, parameters) = parse_params(input)?;
+    Ok((input, Uri { schema: schema.map(|item|item.0), host, parameters, auth}))
+}
 
 impl FromStr for Uri {
     type Err = nom::Err<nom::error::ErrorKind>;

@@ -1,5 +1,24 @@
 use nom::character::*;
-
+use nom::{
+    IResult,
+    combinator::{
+        map, opt,
+        map_res,
+    },
+    sequence::{
+        pair
+    },
+    multi::{
+        separated_list0
+    },
+    character::complete::{
+        char
+    },
+    bytes::complete::{
+        tag_no_case, take_while,
+        tag, take_until
+    }
+};
 use super::{content::*, language::*, named::*, *};
 use crate::{
     core::{parse_method, parse_transport, parse_version},
@@ -9,12 +28,12 @@ use crate::{
 
 use std::collections::HashMap;
 
-named!(pub parse_header<Header>, do_parse!(
-    opt!(tag!("\r\n")) >>
-    opt!(take_while!(is_space)) >>
-    header: _parse_header >>
-    (header)
-));
+pub fn parse_header(input: &[u8]) -> IResult<&[u8], Header> {
+    let (input, _) = opt(tag("\r\n"))(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, header) = _parse_header(input)?;
+    Ok((input, header))
+}
 
 named!(pub _parse_header<Header>, alt!(
     parse_accept_encoding_header |
@@ -67,96 +86,96 @@ named!(pub _parse_header<Header>, alt!(
 
 macro_rules! impl_u32_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
-        named!(pub $name<Header>, do_parse!(
-            tag!($tag) >>
-            opt!(take_while!(is_space)) >>
-            char!(':') >>
-            opt!(take_while!(is_space)) >>
-            value: map_res!(take_while!(is_digit), parse_u32) >>
-            tag!("\r\n") >>
-            (Header::$variant(value))
-        ));
+        pub fn $name(input: &[u8]) -> IResult<&[u8], Header> {
+            let (input, _) = tag($tag)(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, _) = char(':')(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, value) = map_res(take_while(is_digit), parse_u32)(input)?;
+            let (input, _) = tag("\r\n")(input)?;
+            Ok((input, Header::$variant(value)))
+        }
     }
 }
 macro_rules! impl_f32_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
-        named!(pub $name<Header>, do_parse!(
-            tag_no_case!($tag) >>
-            opt!(take_while!(is_space)) >>
-            char!(':') >>
-            opt!(take_while!(is_space)) >>
-            value: map_res!(take_while!(|item| is_digit(item) || item == b'.'), parse_f32) >>
-            (Header::$variant(value))
-        ));
+        pub fn $name(input: &[u8]) -> IResult<&[u8], Header> {
+            let (input, _) = tag_no_case($tag)(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, _) = char(':')(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, value) = map_res(take_while(|item| is_digit(item) || item == b'.'), parse_f32)(input)?;
+            Ok((input, Header::$variant(value)))
+        }
     }
 }
 
 macro_rules! impl_string_parser {
     ($name:tt, $tag:tt, $variant: ident) => {
-        named!(pub $name<Header>, do_parse!(
-            tag_no_case!($tag) >>
-            opt!(take_while!(is_space)) >>
-            char!(':') >>
-            opt!(take_while!(is_space)) >>
-            value: map_res!(take_until!("\r"), slice_to_string) >>
-            tag!("\r\n") >>
-            (Header::$variant(value))
-        ));
+        pub fn $name(input: &[u8]) -> IResult<&[u8], Header> {
+            let (input, _) = tag_no_case($tag)(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, _) = char(':')(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, value) = map_res(take_until("\r"), slice_to_string)(input)?;
+            let (input, _) = tag("\r\n")(input)?;
+            Ok((input, Header::$variant(value)))
+        }
     }
 }
 
 macro_rules! impl_array_parser {
     ($name:tt, $tag:tt, $variant:ident, $func:ident) => {
-        named!(pub $name<Header>, do_parse!(
-            tag_no_case!($tag) >>
-            opt!(take_while!(is_space)) >>
-            char!(':') >>
-            opt!(take_while!(is_space)) >>
-            data: separated_list0!(pair!(char!(','), opt!(char!(' '))), $func) >>
-            tag!("\r\n") >>
-            (Header::$variant(data))
-        ));
+        pub fn $name(input: &[u8]) -> IResult<&[u8], Header> {
+            let (input, _) = tag_no_case($tag)(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, _) = char(':')(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, data) = separated_list0(pair(char(','), opt(char(' '))), $func)(input)?;
+            let (input, _) = tag("\r\n")(input)?;
+            Ok((input, Header::$variant(data)))
+        }
     }
 }
 
 macro_rules! impl_named_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
-        named!(pub $name<Header>, do_parse!(
-            tag_no_case!($tag) >>
-            opt!(take_while!(is_space)) >>
-            char!(':') >>
-            opt!(take_while!(is_space)) >>
-            out: parse_named_field_value >>
-            params: parse_named_field_params >>
-            tag!("\r\n") >>
-            (Header::$variant(NamedHeader { display_name: out.0, uri: out.1, params: params }))
-        ));
+        pub fn $name(input: &[u8]) -> IResult<&[u8], Header> {
+            let (input, _) = tag_no_case($tag)(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, _) = char(':')(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, out) = parse_named_field_value(input)?;
+            let (input, params) = parse_named_field_params(input)?;
+            let (input, _) = tag("\r\n")(input)?;
+            Ok((input, Header::$variant(NamedHeader { display_name: out.0, uri: out.1, params: params })))
+        }
     }
 }
 
 macro_rules! impl_type_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
-        named!(pub $name<Header>, do_parse!(
-            tag_no_case!($tag) >>
-            opt!(take_while!(is_space)) >>
-            char!(':') >>
-            opt!(take_while!(is_space)) >>
-            ty: parse_content_type >>
-            (Header::$variant(ty))
-        ));
+        pub fn $name(input: &[u8]) -> IResult<&[u8], Header> {
+            let (input, _) = tag_no_case($tag)(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, _) = char(':')(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, ty) = parse_content_type(input)?;
+            Ok((input, Header::$variant(ty)))
+        }
     }
 }
 
 macro_rules! impl_lang_parser {
     ($name:tt, $tag:tt, $variant:ident) => {
-        named!(pub $name<Header>, do_parse!(
-            tag_no_case!($tag) >>
-            opt!(take_while!(is_space)) >>
-            char!(':') >>
-            opt!(take_while!(is_space)) >>
-            ty: parse_language >>
-            (Header::$variant(ty))
-        ));
+        pub fn $name(input: &[u8]) -> IResult<&[u8], Header> {
+            let (input, _) = tag_no_case($tag)(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, _) = char(':')(input)?;
+            let (input, _) = opt(take_while(is_space))(input)?;
+            let (input, ty) = parse_language(input)?;
+            Ok((input, Header::$variant(ty)))
+        }
     }
 }
 
@@ -239,69 +258,6 @@ impl_lang_parser!(
     AcceptLanguage
 );
 
-named!(pub parse_other_header<Header>, do_parse!(
-    opt!(tag!("\r\n")) >>
-    key: map_res!(take_while!(|item| is_alphanumeric(item) || item == b'-'), slice_to_string) >>
-    char!(':') >>
-    value: map_res!(take_until!("\r"), slice_to_string) >>
-    tag!("\r\n") >>
-    (Header::Other(key, value))
-));
-
-named!(pub parse_cseq_header<Header>, do_parse!(
-    opt!(tag!("\r\n")) >>
-    tag_no_case!("CSeq") >>
-    opt!(take_while!(is_space)) >>
-    char!(':') >>
-    opt!(take_while!(is_space)) >>
-    value: map_res!(take_while!(is_digit), parse_u32) >>
-    opt!(take_while!(is_space)) >>
-    method: parse_method >>
-    tag!("\r\n") >>
-    (Header::CSeq(value, method))
-));
-
-named!(pub parse_via_header<Header>, do_parse!(
-    tag_no_case!("Via") >>
-    opt!(take_while!(is_space)) >>
-    char!(':') >>
-    opt!(take_while!(is_space)) >>
-    version: parse_version >>
-    char!('/') >>
-    transport: parse_transport >>
-    opt!(take_while!(is_space)) >>
-    uri: parse_uri >>
-    (Header::Via(via::ViaHeader { version, transport, uri }))
-));
-
-named!(pub parse_www_authenticate_header<Header>, do_parse!(
-    opt!(tag!("\r\n")) >>
-    tag_no_case!("WWW-Authenticate") >>
-    opt!(take_while!(is_space)) >>
-    char!(':') >>
-    opt!(take_while!(is_space)) >>
-    schema: parse_auth_schema >>
-    char!(' ') >>
-    res: parse_auth_header_vars >>
-    opt!(char!(' ')) >>
-    tag!("\r\n") >>
-    (Header::WwwAuthenticate(auth::AuthHeader(schema, res)))
-));
-
-named!(pub parse_authorization_header<Header>, do_parse!(
-    opt!(tag!("\r\n")) >>
-    tag_no_case!("Authorization") >>
-    opt!(take_while!(is_space)) >>
-    char!(':') >>
-    opt!(take_while!(is_space)) >>
-    schema: parse_auth_schema >>
-    char!(' ') >>
-    res: parse_auth_header_vars >>
-    opt!(char!(' ')) >>
-    tag!("\r\n") >>
-    (Header::Authorization(auth::AuthHeader(schema, res)))
-));
-
 fn parse_auth_header_vars(input: &[u8]) -> ParserResult<HashMap<String, String>> {
     let mut map = HashMap::new();
     let mut data = input;
@@ -311,19 +267,79 @@ fn parse_auth_header_vars(input: &[u8]) -> ParserResult<HashMap<String, String>>
     }
     Ok((data, map))
 }
-named!(
-    parse_key_value_pair<(String, String)>,
-    do_parse!(
-        opt!(char!(','))
-            >> opt!(char!(' '))
-            >> key: map_res!(take_while!(is_alphanumeric), slice_to_string)
-            >> char!('=')
-            >> value: parse_possibly_quoted_string
-            >> ((key, value))
-    )
-);
 
-named!(
-    parse_auth_schema<auth::Schema>,
-    alt!(map!(tag_no_case!("Digest"), |_| auth::Schema::Digest))
-);
+pub fn parse_other_header(input: &[u8]) -> IResult<&[u8], Header> {
+    let (input, _) = opt(tag("\r\n"))(input)?;
+    let (input, key) = map_res(take_while(|item| is_alphanumeric(item) || item == b'-'), slice_to_string)(input)?;
+    let (input, _) = char(':')(input)?;
+    let (input, value) = map_res(take_until("\r"), slice_to_string)(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    Ok((input, Header::Other(key, value)))
+}
+
+pub fn parse_cseq_header(input: &[u8]) -> IResult<&[u8], Header> {
+    let (input, _) = opt(tag("\r\n"))(input)?;
+    let (input, _) = tag_no_case("CSeq")(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, _) = char(':')(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, value) = map_res(take_while(is_digit), parse_u32)(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, method) = parse_method(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    Ok((input, Header::CSeq(value, method)))
+}
+
+pub fn parse_via_header(input: &[u8]) -> IResult<&[u8], Header> {
+    let (input, _) = tag_no_case("Via")(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, _) = char(':')(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, version) = parse_version(input)?;
+    let (input, _) = char('/')(input)?;
+    let (input, transport) = parse_transport(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, uri) = parse_uri(input)?;
+    Ok((input, Header::Via(via::ViaHeader { version, transport, uri })))
+}
+
+pub fn parse_www_authenticate_header(input: &[u8]) -> IResult<&[u8], Header> {
+    let (input, _) = opt(tag("\r\n"))(input)?;
+    let (input, _) = tag_no_case("WWW-Authenticate")(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, _) = char(':')(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, schema) = parse_auth_schema(input)?;
+    let (input, _) = char(' ')(input)?;
+    let (input, res) = parse_auth_header_vars(input)?;
+    let (input, _) = opt(char(' '))(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    Ok((input, Header::WwwAuthenticate(auth::AuthHeader(schema, res))))
+}
+
+pub fn parse_authorization_header(input: &[u8]) -> IResult<&[u8], Header> {
+    let (input, _) = opt(tag("\r\n"))(input)?;
+    let (input, _) = tag_no_case("Authorization")(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, _) = char(':')(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, schema) = parse_auth_schema(input)?;
+    let (input, _) = char(' ')(input)?;
+    let (input, res) = parse_auth_header_vars(input)?;
+    let (input, _) = opt(char(' '))(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    Ok((input, Header::Authorization(auth::AuthHeader(schema, res))))
+}
+
+pub fn parse_key_value_pair(input: &[u8]) -> IResult<&[u8], (String, String)> {
+    let (input, _) = opt(char(','))(input)?;
+    let (input, _) = opt(char(' '))(input)?;
+    let (input, key) = map_res(take_while(is_alphanumeric), slice_to_string)(input)?;
+    let (input, _) = opt(char('='))(input)?;
+    let (input, value) = parse_possibly_quoted_string(input)?;
+    Ok((input, (key, value)))
+}
+
+pub fn parse_auth_schema(input: &[u8]) -> IResult<&[u8], auth::Schema> {
+    Ok(map(tag_no_case("Digest"), |_| auth::Schema::Digest)(input)?)
+}

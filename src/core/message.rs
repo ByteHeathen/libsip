@@ -1,5 +1,10 @@
 use nom::character::*;
 
+use nom::{
+    IResult,
+    branch::alt
+};
+
 use std::fmt;
 
 use crate::{
@@ -143,34 +148,43 @@ pub fn parse_headers(input: &[u8]) -> ParserResult<Headers> {
     Ok((input, headers))
 }
 
-named!(pub parse_response<SipMessage>, do_parse!(
-    version: parse_version >>
-    char!(' ') >>
-    code: map_res!(take_while!(is_digit), parse_u32) >>
-    char!(' ') >>
-    opt!(map_res!(take_while!(|item| is_alphabetic(item) || is_space(item)), slice_to_string)) >>
-    opt!(char!(' ')) >>
-    tag!("\r\n") >>
-    headers: parse_headers >>
-    tag!("\r\n") >>
-    body: parse_byte_vec >>
-    (SipMessage::Response { code, version, headers, body })
-));
+use nom::{
+    combinator::{map_res, opt},
+    bytes::complete::{take_while, tag},
+    character::complete::char
+};
 
-named!(pub parse_request<SipMessage>, do_parse!(
-    method: parse_method >>
-    char!(' ') >>
-    uri: parse_uri >>
-    char!(' ') >>
-    version: parse_version >>
-    opt!(char!(' ')) >>
-    tag!("\r\n") >>
-    headers: parse_headers >>
-    tag!("\r\n") >>
-    body: parse_byte_vec >>
-    (SipMessage::Request { method, uri, version, headers, body })
-));
+pub fn parse_response(input: &[u8]) -> IResult<&[u8], SipMessage> {
+    let (input, version) = parse_version(input)?;
+    let (input, _) = char(' ')(input)?;
+    let (input, code) = map_res(take_while(is_digit), parse_u32)(input)?;
+    let (input, _) = char(' ')(input)?;
+    let (input, _) = opt(map_res(take_while(|item| is_alphabetic(item) || is_space(item)), slice_to_string))(input)?;
+    let (input, _) = opt(char(' '))(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    let (input, headers) = parse_headers(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    let (input, body) = parse_byte_vec(input)?;
+    Ok((input, SipMessage::Response { code, version, headers, body }))
+}
 
-named!(pub parse_message<SipMessage>, alt!(
-    parse_request | parse_response
-));
+pub fn parse_request(input: &[u8]) -> IResult<&[u8], SipMessage> {
+    let (input, method) = parse_method(input)?;
+    let (input, _) = char(' ')(input)?;
+    let (input, uri) = parse_uri(input)?;
+    let (input, _) = char(' ')(input)?;
+    let (input, version) = parse_version(input)?;
+    let (input, _) = opt(char(' '))(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    let (input, headers) = parse_headers(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    let (input, body) = parse_byte_vec(input)?;
+    Ok((input, SipMessage::Request { method, uri, version, headers, body }))
+}
+
+pub fn parse_message(input: &[u8]) -> IResult<&[u8], SipMessage> {
+    alt((
+        parse_request,
+        parse_response
+    ))(input)
+}

@@ -1,4 +1,8 @@
 use serde::{Deserialize, Serialize};
+use nom::IResult;
+use nom::branch::alt;
+use nom::combinator::map;
+use nom::bytes::complete::tag_no_case;
 
 use std::fmt;
 
@@ -24,7 +28,9 @@ impl fmt::Display for Transport {
     }
 }
 
-named!(pub parse_transport<Transport>, alt!(
-    map!(tag_no_case!("TCP"), |_| Transport::Tcp) |
-    map!(tag_no_case!("UDP"), |_| Transport::Udp)
-));
+pub fn parse_transport(input: &[u8]) -> IResult<&[u8], Transport> {
+    alt((
+        map(tag_no_case("TCP"), |_| Transport::Tcp),
+        map(tag_no_case("UDP"), |_| Transport::Udp)
+    ))(input)
+}

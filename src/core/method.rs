@@ -1,4 +1,8 @@
 use std::fmt;
+use nom::IResult;
+use nom::branch::alt;
+use nom::combinator::map;
+use nom::bytes::complete::tag_no_case;
 
 /// SIP protocol methods.
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -61,19 +65,21 @@ impl fmt::Display for Method {
     }
 }
 
-named!(pub parse_method<Method>, alt!(
-    map!(tag_no_case!("INVITE"), |_| Method::Invite) |
-    map!(tag_no_case!("ACK"), |_| Method::Ack) |
-    map!(tag_no_case!("BYE"), |_| Method::Bye) |
-    map!(tag_no_case!("CANCEL"), |_| Method::Cancel) |
-    map!(tag_no_case!("REGISTER"), |_| Method::Register) |
-    map!(tag_no_case!("OPTIONS"), |_| Method::Options) |
-    map!(tag_no_case!("PRACK"), |_| Method::PRack) |
-    map!(tag_no_case!("SUBSCRIBE"), |_| Method::Subscribe) |
-    map!(tag_no_case!("NOTIFY"), |_| Method::Notify) |
-    map!(tag_no_case!("PUBLISH"), |_| Method::Publish) |
-    map!(tag_no_case!("INFO"), |_| Method::Info) |
-    map!(tag_no_case!("REFER"), |_| Method::Refer) |
-    map!(tag_no_case!("MESSAGE"), |_| Method::Message) |
-    map!(tag_no_case!("UPDATE"), |_| Method::Update)
-));
+pub fn parse_method(input: &[u8]) -> IResult<&[u8], Method> {
+    alt((
+        map(tag_no_case("INVITE"), |_| Method::Invite),
+        map(tag_no_case("ACK"), |_| Method::Ack),
+        map(tag_no_case("BYE"), |_| Method::Bye),
+        map(tag_no_case("CANCEL"), |_| Method::Cancel),
+        map(tag_no_case("REGISTER"), |_| Method::Register),
+        map(tag_no_case("OPTIONS"), |_| Method::Options),
+        map(tag_no_case("PRACK"), |_| Method::PRack),
+        map(tag_no_case("SUBSCRIBE"), |_| Method::Subscribe),
+        map(tag_no_case("NOTIFY"), |_| Method::Notify),
+        map(tag_no_case("PUBLISH"), |_| Method::Publish),
+        map(tag_no_case("INFO"), |_| Method::Info),
+        map(tag_no_case("REFER"), |_| Method::Refer),
+        map(tag_no_case("MESSAGE"), |_| Method::Message),
+        map(tag_no_case("UPDATE"), |_| Method::Update)
+    ))(input)
+}

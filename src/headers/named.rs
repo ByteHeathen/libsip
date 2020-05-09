@@ -1,4 +1,13 @@
-use nom::character::*;
+use nom::{
+    IResult,
+    branch::alt,
+    combinator::{opt, map_res},
+    bytes::complete::take_while,
+    character::{
+        *,
+        complete::char
+    }
+};
 
 use crate::{parse::*, uri::parse_uri, Uri};
 
@@ -46,33 +55,34 @@ impl fmt::Display for NamedHeader {
     }
 }
 
-named!(pub parse_named_field_param<(String, String)>, do_parse!(
-    char!(';') >>
-    key: map_res!(take_while!(is_alphabetic), slice_to_string) >>
-    char!('=') >>
-    value: map_res!(take_while!(is_alphanumeric), slice_to_string) >>
-    (key, value)
-));
+pub fn parse_named_field_param(input: &[u8]) -> IResult<&[u8], (String, String)> {
+    let (input, _) = char(';')(input)?;
+    let (input, key) = map_res(take_while(is_alphabetic), slice_to_string)(input)?;
+    let (input, _) = char('=')(input)?;
+    let (input, value) = map_res(take_while(is_alphanumeric), slice_to_string)(input)?;
+    Ok((input, (key, value)))
+}
 
-named!(pub parse_name<String>, alt!(
-        parse_quoted_string |
-        parse_unquoted_string
-));
+pub fn parse_name(input: &[u8]) -> IResult<&[u8], String> {
+    Ok(
+        alt((parse_quoted_string, parse_unquoted_string))(input)?
+    )
+}
 
-named!(pub parse_unquoted_string<String>, do_parse!(
-    string_data: map_res!(take_while!(is_alphabetic), slice_to_string) >>
-    char!(' ') >>
-    (string_data)
-));
+pub fn parse_unquoted_string(input: &[u8]) -> IResult<&[u8], String> {
+    let (input, string_data) = map_res(take_while(is_alphabetic), slice_to_string)(input)?;
+    let (input, _) = char(' ')(input)?;
+    Ok((input, string_data))
+}
 
-named!(pub parse_named_field_value<(Option<String>, Uri)>, do_parse!(
-    name: opt!(parse_name) >>
-    opt!(take_while!(is_space)) >>
-    opt!(char!('<')) >>
-    value: parse_uri >>
-    opt!(char!('>')) >>
-    ((name, value))
-));
+pub fn parse_named_field_value(input: &[u8]) -> IResult<&[u8], (Option<String>, Uri)> {
+    let (input, name) = opt(parse_name)(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, _) = opt(char('<'))(input)?;
+    let (input, value) = parse_uri(input)?;
+    let (input, _) = opt(char('>'))(input)?;
+    Ok((input, (name, value)))
+}
 
 pub fn parse_named_field_params(input: &[u8]) -> ParserResult<HashMap<String, String>> {
     let mut map = HashMap::new();

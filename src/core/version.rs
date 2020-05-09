@@ -27,13 +27,16 @@ impl Version {
     }
 }
 
-named!(
-	pub parse_version<Version>,
-	do_parse!(
-		tag!("SIP/") >>
-		major: map_res!(take_while1!(is_digit), parse_u8) >>
-		char!('.') >>
-		minor: map_res!(take_while1!(is_digit), parse_u8) >>
-		(Version ( major, minor ))
-	)
-);
+use nom::IResult;
+use nom::bytes::complete::tag;
+use nom::character::complete::char as parse_char;
+use nom::combinator::map_res;
+use nom::bytes::complete::take_while1;
+
+pub fn parse_version(input: &[u8]) -> IResult<&[u8], Version> {
+    let (input, _) = tag("SIP/")(input)?;
+    let (input, major) = map_res(take_while1(is_digit), parse_u8)(input)?;
+    let (input, _) = parse_char('.')(input)?;
+    let (input, minor) = map_res(take_while1(is_digit), parse_u8)(input)?;
+    Ok((input, Version(major, minor)))
+}

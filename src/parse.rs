@@ -1,4 +1,19 @@
-use nom::{character::*, error::ErrorKind};
+use nom::{
+    IResult,
+    branch::alt,
+    character::{
+        *,
+        complete::char as parse_char
+    },
+    bytes::{
+        complete::{
+            take_while,
+            take_until
+        }
+    },
+    combinator::map_res,
+    error::ErrorKind
+};
 
 use std::{
     io::{
@@ -78,28 +93,31 @@ pub fn parse_byte_vec(input: &[u8]) -> ParserResult<Vec<u8>> {
     Ok((&input[input.len()..], input.to_vec()))
 }
 
-named!(pub parse_ip_address<Ipv4Addr>, do_parse!(
-    byte1: map_res!(take_while!(is_digit), parse_u8) >>
-    char!('.') >>
-    byte2: map_res!(take_while!(is_digit), parse_u8) >>
-    char!('.') >>
-    byte3: map_res!(take_while!(is_digit), parse_u8) >>
-    char!('.') >>
-    byte4: map_res!(take_while!(is_digit), parse_u8) >>
-    (Ipv4Addr::new(byte1, byte2,  byte3, byte4))
-));
+pub fn parse_ip_address(input: &[u8]) -> IResult<&[u8], Ipv4Addr> {
+  let (input, byte1) = map_res(take_while(is_digit), parse_u8)(input)?;
+  let (input, _) = parse_char('.')(input)?;
+  let (input, byte2) = map_res(take_while(is_digit), parse_u8)(input)?;
+  let (input, _) = parse_char('.')(input)?;
+  let (input, byte3) = map_res(take_while(is_digit), parse_u8)(input)?;
+  let (input, _) = parse_char('.')(input)?;
+  let (input, byte4) = map_res(take_while(is_digit), parse_u8)(input)?;
+  Ok((input, Ipv4Addr::new(byte1, byte2, byte3, byte4)))
+}
 
-named!(pub parse_string<String>, map_res!(
-    take_while!(is_alphanumeric), slice_to_string
-));
+pub fn parse_string(input: &[u8]) -> IResult<&[u8], String> {
+    map_res(take_while(is_alphanumeric), slice_to_string)(input)
+}
 
-named!(pub parse_possibly_quoted_string<String>, alt!(
-	parse_string | parse_quoted_string
-));
+pub fn parse_possibly_quoted_string(input: &[u8]) -> IResult<&[u8], String> {
+    alt((
+        parse_string,
+        parse_quoted_string
+    ))(input)
+}
 
-named!(pub parse_quoted_string<String>, do_parse!(
-    char!('\"') >>
-    out: map_res!(take_until!("\""), slice_to_string_nullable) >>
-    char!('\"') >>
-    (out)
-));
+pub fn parse_quoted_string(input: &[u8]) -> IResult<&[u8], String> {
+    let (input, _) = parse_char('\"')(input)?;
+    let (input, out) = map_res(take_until("\""), slice_to_string_nullable)(input)?;
+    let (input, _) = parse_char('\"')(input)?;
+    Ok((input, out))
+}

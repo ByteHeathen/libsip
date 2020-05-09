@@ -2,6 +2,13 @@ use crate::parse::slice_to_string;
 use nom::character::is_alphanumeric;
 use serde::{Deserialize, Serialize};
 
+use nom::{
+    IResult,
+    character::complete::char,
+    bytes::complete::take_while,
+    combinator::{ map_res, opt}
+};
+
 use std::fmt;
 
 /// URI Credentials
@@ -38,18 +45,14 @@ impl fmt::Display for UriAuth {
     }
 }
 
-named!(pub parse_uriauth<UriAuth>, do_parse!(
-    username: map_res!(take_while!(is_alphanumeric), slice_to_string) >>
-    password: opt!(parse_password) >>
-    char!('@') >>
-    (UriAuth { username, password })
-));
+pub fn parse_uriauth(input: &[u8]) -> IResult<&[u8], UriAuth> {
+    let (input, username) = map_res(take_while(is_alphanumeric), slice_to_string)(input)?;
+    let (input, password) = opt(parse_password)(input)?;
+    let (input, _) = char('@')(input)?;
+    Ok((input, UriAuth { username, password }))
+ }
 
-named!(
-    parse_password<String>,
-    do_parse!(
-        char!(':')
-            >> password: map_res!(take_while!(is_alphanumeric), slice_to_string)
-            >> (password)
-    )
-);
+pub fn parse_password(input: &[u8]) -> IResult<&[u8], String> {
+    let (input, _) = char(':')(input)?;
+    Ok(map_res(take_while(is_alphanumeric), slice_to_string)(input)?)
+}
