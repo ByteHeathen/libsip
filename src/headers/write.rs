@@ -1,7 +1,6 @@
 use std::fmt;
 
-use super::Header;
-use crate::core::Method;
+use super::*;
 
 impl fmt::Display for Header {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

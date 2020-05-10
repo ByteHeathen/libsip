@@ -12,7 +12,7 @@ use std::{
 
 use crate::Uri;
 
-/// The SIP Authentication auth schema.
+/// The SIP Authentication schema.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum AuthSchema {
     Digest,

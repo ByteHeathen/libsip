@@ -1,11 +1,11 @@
 use crate::parse::slice_to_string;
-use nom::character::is_alphanumeric;
 use serde::{Deserialize, Serialize};
 
 use nom::{
     IResult,
     error::ParseError,
     character::complete::char,
+    character::is_alphanumeric,
     bytes::complete::take_while,
     combinator::{ map_res, opt}
 };

@@ -1,4 +1,6 @@
-/// if the `-v` is present then the registration requests
+/// This example will register with a Registrar
+/// and print all requests received from the server.
+/// If the `-v` is present then the registration requests
 /// will be shown as well. This example expects there to
 /// be a SIP server running on IP address '192.168.1.129:5060'
 /// and will attempt to connect to a sip account with the

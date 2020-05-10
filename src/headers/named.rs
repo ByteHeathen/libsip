@@ -93,7 +93,7 @@ pub fn parse_named_field_value<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> 
 }
 
 /// Parse as many valid named field params as the input contains.
-pub fn parse_named_field_params<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> ParserResult<HashMap<String, String>, E> {
+pub fn parse_named_field_params<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], HashMap<String, String>, E> {
     let mut map = HashMap::new();
     let mut input = input;
     while let Ok((data, (key, value))) = parse_named_field_param::<E>(input) {

@@ -261,7 +261,7 @@ impl_lang_parser!(
     AcceptLanguage
 );
 
-fn parse_auth_header_vars<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> ParserResult<HashMap<String, String>, E> {
+fn parse_auth_header_vars<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], HashMap<String, String>, E> {
     let mut map = HashMap::new();
     let mut data = input;
     while let Ok((remains, (key, value))) = parse_key_value_pair::<E>(data) {

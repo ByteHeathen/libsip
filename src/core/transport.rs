@@ -1,9 +1,12 @@
 use serde::{Deserialize, Serialize};
-use nom::IResult;
-use nom::branch::alt;
-use nom::combinator::map;
-use nom::bytes::complete::tag_no_case;
-use nom::error::ParseError;
+use nom::{
+    IResult,
+    branch::alt,
+    combinator::map,
+    bytes::complete::tag_no_case,
+    error::ParseError
+};
+
 use std::fmt;
 
 /// SIP protocol transport.

@@ -1,14 +1,4 @@
-use crate::{
-    client::HeaderWriteConfig,
-    core::Transport,
-    headers::{
-        auth::{AuthContext, AuthHeader},
-        via::ViaHeader,
-        NamedHeader,
-    },
-    uri::{UriParam, UriAuth},
-    RequestGenerator, *,
-};
+use crate::*;
 
 use std::io::{
     Result as IoResult,

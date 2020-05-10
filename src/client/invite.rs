@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use std::io::{
     Result as IoResult,
     Error as IoError,

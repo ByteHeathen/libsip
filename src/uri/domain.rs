@@ -1,4 +1,7 @@
-use nom::character::{is_alphanumeric, is_digit};
+use nom::character::{
+    is_alphanumeric,
+    is_digit
+};
 use serde::{Deserialize, Serialize};
 
 use std::{fmt, net::Ipv4Addr};

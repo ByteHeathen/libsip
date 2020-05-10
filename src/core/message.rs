@@ -1,18 +1,17 @@
-use nom::character::*;
-
 use nom::{
     IResult,
-    branch::alt
+    branch::alt,
+    character::*
 };
 
 use std::fmt;
 
 use crate::{
+    *,
     core::{code::error_code_to_str, method::parse_method, version::parse_version},
     headers::parse_header,
-    parse::{parse_byte_vec, parse_u32, slice_to_string, *},
+    parse::{parse_byte_vec, parse_u32, slice_to_string},
     uri::parse_uri,
-    *,
 };
 
 /// Sip Protocol Message.
@@ -140,7 +139,7 @@ pub fn display_headers_and_body(
 }
 
 /// Parse SIP headers recursivily
-pub fn parse_headers<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> ParserResult<Headers, E> {
+pub fn parse_headers<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Headers, E> {
     let mut headers = Headers(vec![]);
     let mut input = input;
     while let Ok((data, value)) = parse_header::<E>(input) {

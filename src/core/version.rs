@@ -1,10 +1,12 @@
-use nom::character::is_digit;
-use nom::IResult;
-use nom::bytes::complete::tag;
-use nom::character::complete::char as parse_char;
-use nom::combinator::map_res;
-use nom::error::ParseError;
-use nom::bytes::complete::take_while1;
+use nom::{
+    IResult,
+    bytes::complete::tag,
+    character::is_digit,
+    character::complete::char as parse_char,
+    combinator::map_res,
+    error::ParseError,
+    bytes::complete::take_while1
+};
 use crate::parse::parse_u8;
 
 use std::fmt;

@@ -5,7 +5,6 @@ use std::io::{
 };
 
 use crate::*;
-use crate::headers::via::ViaHeader;
 
 macro_rules! impl_simple_header_method {
     ($name:ident, $variant:ident, $ty: ident) => {

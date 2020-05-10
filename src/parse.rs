@@ -12,7 +12,6 @@ use nom::{
         }
     },
     combinator::map_res,
-    error::VerboseError,
     error::ParseError,
     error::ErrorKind
 };
@@ -24,8 +23,6 @@ use std::{
     },
     net::Ipv4Addr,
 };
-
-pub type ParserResult<'a, 'b, T, E = VerboseError<&'a str>> = IResult<&'b [u8], T, E>;
 
 /// Parse input as a string using `String::from_utf8`.
 pub fn slice_to_string<'a, E: ParseError<&'a [u8]>>(slice: &'a [u8]) -> Result<String, E> {
@@ -87,7 +84,7 @@ pub fn parse_f32(slice: &[u8]) -> Result<f32, IoError> {
 }
 
 /// Parse Input as a vector of bytes.
-pub fn parse_byte_vec<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> ParserResult<Vec<u8>, E> {
+pub fn parse_byte_vec<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Vec<u8>, E> {
     Ok((&input[input.len()..], input.to_vec()))
 }
 

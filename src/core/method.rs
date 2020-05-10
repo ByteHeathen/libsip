@@ -1,9 +1,11 @@
 use std::fmt;
-use nom::IResult;
-use nom::branch::alt;
-use nom::combinator::map;
-use nom::error::ParseError;
-use nom::bytes::complete::tag_no_case;
+use nom::{
+    IResult,
+    branch::alt,
+    combinator::map,
+    error::ParseError,
+    bytes::complete::tag_no_case
+};
 
 /// SIP protocol methods.
 #[derive(Debug, PartialEq, Clone, Copy)]
