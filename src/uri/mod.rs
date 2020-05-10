@@ -10,7 +10,8 @@ use nom::{
     IResult,
     character::complete::char,
     combinator::{opt},
-    sequence::pair
+    sequence::pair,
+    error::ParseError
 };
 
 pub mod schema;
@@ -134,11 +135,11 @@ impl fmt::Display for Uri {
     }
 }
 
-pub fn parse_uri(input: &[u8]) -> IResult<&[u8], Uri> {
-    let (input, schema) = opt(pair(parse_schema, char(':')))(input)?;
-    let (input, auth) = opt(parse_uriauth)(input)?;
-    let (input, host) = parse_domain(input)?;
-    let (input, parameters) = parse_params(input)?;
+pub fn parse_uri<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Uri, E> {
+    let (input, schema) = opt(pair(parse_schema::<E>, char(':')))(input)?;
+    let (input, auth) = opt(parse_uriauth::<E>)(input)?;
+    let (input, host) = parse_domain::<E>(input)?;
+    let (input, parameters) = parse_params::<E>(input)?;
     Ok((input, Uri { schema: schema.map(|item|item.0), host, parameters, auth}))
 }
 

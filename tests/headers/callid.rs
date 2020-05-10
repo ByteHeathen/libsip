@@ -1,5 +1,7 @@
 use libsip::{headers::parse::parse_callid_header, *};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::CallId("Sofngfwertwowert.0".into());
@@ -15,6 +17,6 @@ fn read() {
     let header = Header::CallId("Sofngfwertwowert.0".into());
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_callid_header(b"Call-ID: Sofngfwertwowert.0\r\n")
+        parse_callid_header::<VerboseError<&[u8]>>(b"Call-ID: Sofngfwertwowert.0\r\n")
     );
 }

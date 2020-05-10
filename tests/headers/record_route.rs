@@ -1,5 +1,7 @@
 use libsip::{headers::parse::parse_record_route_header, Header};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::RecordRoute("Softphone 1.0".into());
@@ -15,6 +17,6 @@ fn read() {
     let header = Header::RecordRoute("Softphone 1.0".into());
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_record_route_header(b"Record-Route: Softphone 1.0\r\n")
+        parse_record_route_header::<VerboseError<&[u8]>>(b"Record-Route: Softphone 1.0\r\n")
     );
 }

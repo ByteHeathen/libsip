@@ -1,5 +1,7 @@
 use libsip::{headers::parse::parse_timestamp_header, Header};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::Timestamp(60);
@@ -12,6 +14,6 @@ fn read() {
     let header = Header::Timestamp(60);
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_timestamp_header(b"Timestamp: 60\r\n")
+        parse_timestamp_header::<VerboseError<&[u8]>>(b"Timestamp: 60\r\n")
     );
 }

@@ -140,10 +140,10 @@ pub fn display_headers_and_body(
 }
 
 /// Parse SIP headers recursivily
-pub fn parse_headers(input: &[u8]) -> ParserResult<Headers> {
+pub fn parse_headers<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> ParserResult<Headers, E> {
     let mut headers = Headers(vec![]);
     let mut input = input;
-    while let Ok((data, value)) = parse_header(input) {
+    while let Ok((data, value)) = parse_header::<E>(input) {
         headers.push(value);
         input = data;
     }
@@ -153,26 +153,27 @@ pub fn parse_headers(input: &[u8]) -> ParserResult<Headers> {
 use nom::{
     combinator::{map_res, opt},
     bytes::complete::{take_while, tag},
-    character::complete::char
+    character::complete::char,
+    error::ParseError
 };
 
 /// Parse a SIP message assuming it is a SIP response.
-pub fn parse_response(input: &[u8]) -> IResult<&[u8], SipMessage> {
-    let (input, version) = parse_version(input)?;
+pub fn parse_response<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], SipMessage, E> {
+    let (input, version) = parse_version::<E>(input)?;
     let (input, _) = char(' ')(input)?;
     let (input, code) = map_res(take_while(is_digit), parse_u32)(input)?;
     let (input, _) = char(' ')(input)?;
-    let (input, _) = opt(map_res(take_while(|item| is_alphabetic(item) || is_space(item)), slice_to_string))(input)?;
+    let (input, _) = opt(map_res::<_, _, _, _, E, _, _>(take_while(|item| is_alphabetic(item) || is_space(item)), slice_to_string))(input)?;
     let (input, _) = opt(char(' '))(input)?;
     let (input, _) = tag("\r\n")(input)?;
-    let (input, headers) = parse_headers(input)?;
+    let (input, headers) = parse_headers::<E>(input)?;
     let (input, _) = tag("\r\n")(input)?;
-    let (input, body) = parse_byte_vec(input)?;
+    let (input, body) = parse_byte_vec::<E>(input)?;
     Ok((input, SipMessage::Response { code, version, headers, body }))
 }
 
 /// Parse a SIP message assuming it is a SIP request.
-pub fn parse_request(input: &[u8]) -> IResult<&[u8], SipMessage> {
+pub fn parse_request<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], SipMessage, E> {
     let (input, method) = parse_method(input)?;
     let (input, _) = char(' ')(input)?;
     let (input, uri) = parse_uri(input)?;
@@ -187,9 +188,9 @@ pub fn parse_request(input: &[u8]) -> IResult<&[u8], SipMessage> {
 }
 
 /// This is the main parsing function for libsip.
-pub fn parse_message(input: &[u8]) -> IResult<&[u8], SipMessage> {
-    alt((
-        parse_request,
-        parse_response
+pub fn parse_message<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], SipMessage, E> {
+    alt::<_, _, E, _>((
+        parse_request::<E>,
+        parse_response::<E>
     ))(input)
 }

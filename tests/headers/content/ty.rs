@@ -1,5 +1,7 @@
 use libsip::headers::{parse::parse_content_type_header, ContentType, Header};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::ContentType(ContentType::Sdp);
@@ -15,6 +17,6 @@ fn read() {
     let header = Header::ContentType(ContentType::Sdp);
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_content_type_header(b"Content-Type: application/sdp")
+        parse_content_type_header::<VerboseError<&[u8]>>(b"Content-Type: application/sdp")
     );
 }

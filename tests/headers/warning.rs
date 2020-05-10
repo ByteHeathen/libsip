@@ -1,5 +1,7 @@
 use libsip::{headers::parse::parse_warning_header, Header};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::Warning("Softphone 1.0".into());
@@ -12,6 +14,6 @@ fn read() {
     let header = Header::Warning("Softphone 1.0".into());
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_warning_header(b"Warning: Softphone 1.0\r\n")
+        parse_warning_header::<VerboseError<&[u8]>>(b"Warning: Softphone 1.0\r\n")
     );
 }

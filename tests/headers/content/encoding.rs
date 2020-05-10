@@ -3,6 +3,8 @@ use libsip::{
     Header,
 };
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::ContentEncoding(ContentType::Sdp);
@@ -18,6 +20,6 @@ fn read() {
     let header = Header::ContentEncoding(ContentType::Sdp);
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_content_encoding_header(b"Content-Encoding: application/sdp")
+        parse_content_encoding_header::<VerboseError<&[u8]>>(b"Content-Encoding: application/sdp")
     );
 }

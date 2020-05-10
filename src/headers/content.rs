@@ -50,10 +50,12 @@ use nom::{
     IResult,
     branch::alt,
     combinator::map,
-    bytes::complete::tag_no_case
+    bytes::complete::tag_no_case,
+    error::ParseError
 };
 
-pub fn parse_content_type(input: &[u8]) -> IResult<&[u8], ContentType> {
+
+pub fn parse_content_type<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], ContentType, E> {
     Ok(alt((
       map(tag_no_case("application/sdp"), |_| ContentType::Sdp),
       map(tag_no_case("text/plain"), |_| ContentType::PlainText),

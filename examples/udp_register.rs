@@ -24,6 +24,8 @@ use std::{
     net::UdpSocket
 };
 
+use nom::error::VerboseError;
+
 fn get_our_uri() -> Uri {
     Uri::sip(ip_domain!(192, 168, 1, 129, 5060))
         .auth(uri_auth!("20"))
@@ -39,12 +41,12 @@ fn send_request_get_response(req: SipMessage) -> IoResult<SipMessage> {
     if let Err(nom::Err::Error((data, _))) = parse_response(&buf[..amt]) {
         panic!("{}", String::from_utf8_lossy(data));
     }
-    let (_, msg) = parse_response(&buf[..amt]).unwrap();
+    let (_, msg) = parse_response::<VerboseError<&[u8]>>(&buf[..amt]).unwrap();
     Ok(msg)
 }
 
 fn main() -> IoResult<()> {
-    let acc_url = parse_uri(b"sip:20@192.168.1.133 ")
+    let acc_url = parse_uri::<VerboseError<&[u8]>>(b"sip:20@192.168.1.133 ")
         .unwrap()
         .1
         .parameter(Param::Transport(Transport::Udp));

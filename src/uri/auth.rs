@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use nom::{
     IResult,
+    error::ParseError,
     character::complete::char,
     bytes::complete::take_while,
     combinator::{ map_res, opt}
@@ -46,15 +47,15 @@ impl fmt::Display for UriAuth {
 }
 
 /// Parse the username/password of a uri.
-pub fn parse_uriauth(input: &[u8]) -> IResult<&[u8], UriAuth> {
-    let (input, username) = map_res(take_while(is_alphanumeric), slice_to_string)(input)?;
-    let (input, password) = opt(parse_password)(input)?;
+pub fn parse_uriauth<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], UriAuth, E> {
+    let (input, username) = map_res(take_while(is_alphanumeric), slice_to_string::<E>)(input)?;
+    let (input, password) = opt(parse_password::<E>)(input)?;
     let (input, _) = char('@')(input)?;
     Ok((input, UriAuth { username, password }))
  }
 
 /// Currently this will only accept alphanumeric characters.
-pub fn parse_password(input: &[u8]) -> IResult<&[u8], String> {
+pub fn parse_password<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], String, E> {
     let (input, _) = char(':')(input)?;
-    Ok(map_res(take_while(is_alphanumeric), slice_to_string)(input)?)
+    Ok(map_res(take_while(is_alphanumeric), slice_to_string::<E>)(input)?)
 }

@@ -1,4 +1,5 @@
 use libsip::{uri::parse_domain, Domain, *};
+use nom::error::VerboseError;
 
 use std::net::Ipv4Addr;
 
@@ -8,14 +9,14 @@ fn read_domain() {
     let domain = domain!("example.com");
     assert_eq!(
         Ok((remains.as_ref(), domain)),
-        parse_domain(b"example.com ")
+        parse_domain::<VerboseError<&[u8]>>(b"example.com ")
     );
 
     let remains = vec![b' '];
     let domain = domain!("example.com", 8080);
     assert_eq!(
         Ok((remains.as_ref(), domain)),
-        parse_domain(b"example.com:8080 ")
+        parse_domain::<VerboseError<&[u8]>>(b"example.com:8080 ")
     );
 }
 
@@ -23,13 +24,13 @@ fn read_domain() {
 fn read_ip_address() {
     let remains = vec![b' '];
     let domain = ip_domain!(10, 1, 10, 1);
-    assert_eq!(Ok((remains.as_ref(), domain)), parse_domain(b"10.1.10.1 "));
+    assert_eq!(Ok((remains.as_ref(), domain)), parse_domain::<VerboseError<&[u8]>>(b"10.1.10.1 "));
 
     let remains = vec![b' '];
     let domain = ip_domain!(10, 1, 10, 1, 8080);
     assert_eq!(
         Ok((remains.as_ref(), domain)),
-        parse_domain(b"10.1.10.1:8080 ")
+        parse_domain::<VerboseError<&[u8]>>(b"10.1.10.1:8080 ")
     );
 }
 

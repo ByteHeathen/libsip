@@ -1,5 +1,7 @@
 use libsip::*;
 
+use nom::error::VerboseError;
+
 #[test]
 fn read_message() {
     let remains = vec![];
@@ -11,7 +13,7 @@ fn read_message() {
         .unwrap();
     assert_eq!(
         Ok((remains.as_ref(), req)),
-        parse_message(b"REGISTER sip:example.com SIP/2.0\r\n\r\n")
+        parse_message::<VerboseError<&[u8]>>(b"REGISTER sip:example.com SIP/2.0\r\n\r\n")
     );
 }
 
@@ -26,5 +28,5 @@ fn read_complex() {
         .body(vec![b'6'; 5])
         .build()
         .unwrap();
-    assert_eq!(Ok((remains.as_ref(), req)), parse_message(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));
+    assert_eq!(Ok((remains.as_ref(), req)), parse_message::<VerboseError<&[u8]>>(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));
 }

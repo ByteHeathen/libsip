@@ -3,7 +3,7 @@ use nom::IResult;
 use nom::branch::alt;
 use nom::combinator::map;
 use nom::bytes::complete::tag_no_case;
-
+use nom::error::ParseError;
 use std::fmt;
 
 /// SIP protocol transport.
@@ -29,9 +29,9 @@ impl fmt::Display for Transport {
 }
 
 /// Parse a SIP message transport protocol.
-pub fn parse_transport(input: &[u8]) -> IResult<&[u8], Transport> {
-    alt((
-        map(tag_no_case("TCP"), |_| Transport::Tcp),
-        map(tag_no_case("UDP"), |_| Transport::Udp)
+pub fn parse_transport<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Transport, E> {
+    alt::<_, _, E, _>((
+        map(tag_no_case::<_, _, E>("TCP"), |_| Transport::Tcp),
+        map(tag_no_case::<_, _, E>("UDP"), |_| Transport::Udp)
     ))(input)
 }

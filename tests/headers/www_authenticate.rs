@@ -1,5 +1,5 @@
 use libsip::{headers::auth::*, Header};
-
+use nom::error::VerboseError;
 use libsip::headers::parse::parse_www_authenticate_header;
 
 use std::collections::HashMap;
@@ -23,6 +23,6 @@ fn read() {
     let header = Header::WwwAuthenticate(AuthHeader(Schema::Digest, map));
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_www_authenticate_header(b"WWW-Authenticate: Digest key=value \r\n")
+        parse_www_authenticate_header::<VerboseError<&[u8]>>(b"WWW-Authenticate: Digest key=value \r\n")
     );
 }

@@ -1,5 +1,7 @@
 use libsip::{core::message::parse_request, headers::Header, *};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write_simple() {
     let uri = Uri::sip(domain!("example.com")).auth(uri_auth!("user"));
@@ -42,7 +44,7 @@ fn read_simple() {
         .unwrap();
     assert_eq!(
         Ok((remains.as_ref(), req)),
-        parse_request(b"REGISTER sip:user@example.com SIP/2.0\r\n\r\n")
+        parse_request::<VerboseError<&[u8]>>(b"REGISTER sip:user@example.com SIP/2.0\r\n\r\n")
     );
 }
 
@@ -57,5 +59,5 @@ fn read_complex() {
         .body(vec![b'6'; 5])
         .build()
         .unwrap();
-    assert_eq!(Ok((remains.as_ref(), req)), parse_request(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));
+    assert_eq!(Ok((remains.as_ref(), req)), parse_request::<VerboseError<&[u8]>>(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));
 }

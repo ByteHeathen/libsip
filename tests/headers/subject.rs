@@ -1,5 +1,7 @@
 use libsip::{headers::parse::parse_subject_header, Header};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::Subject("Softphone 1.0".into());
@@ -12,6 +14,6 @@ fn read() {
     let header = Header::Subject("Softphone 1.0".into());
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_subject_header(b"Subject: Softphone 1.0\r\n")
+        parse_subject_header::<VerboseError<&[u8]>>(b"Subject: Softphone 1.0\r\n")
     );
 }

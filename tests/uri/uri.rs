@@ -1,11 +1,13 @@
 use libsip::{core::Transport, uri::*, *};
 
+use nom::error::VerboseError;
+
 #[test]
 fn read_uri() {
     let expected_remains = vec![b' '];
     assert_eq!(
         Ok((expected_remains.as_ref(), Uri::sip(domain!("hostname")))),
-        parse_uri(b"sip:hostname ")
+        parse_uri::<VerboseError<&[u8]>>(b"sip:hostname ")
     );
 
     let expected_remains = vec![b' '];
@@ -14,7 +16,7 @@ fn read_uri() {
             expected_remains.as_ref(),
             Uri::new_schemaless(domain!("hostname"))
         )),
-        parse_uri(b"hostname ")
+        parse_uri::<VerboseError<&[u8]>>(b"hostname ")
     );
 
     let expected_remains = vec![b' '];
@@ -23,7 +25,7 @@ fn read_uri() {
             expected_remains.as_ref(),
             Uri::new_schemaless(domain!("hostname"))
         )),
-        parse_uri(b"hostname ")
+        parse_uri::<VerboseError<&[u8]>>(b"hostname ")
     );
 
     let expected_remains = vec![b' '];
@@ -32,28 +34,28 @@ fn read_uri() {
             expected_remains.as_ref(),
             Uri::sip(ip_domain!(10, 1, 10, 1))
         )),
-        parse_uri(b"sip:10.1.10.1 ")
+        parse_uri::<VerboseError<&[u8]>>(b"sip:10.1.10.1 ")
     );
 
     let expected_remains = vec![b' '];
     let expected = Uri::sip(domain!("hostname.com")).auth(uri_auth!("username"));
     assert_eq!(
         Ok((expected_remains.as_ref(), expected)),
-        parse_uri(b"sip:username@hostname.com ")
+        parse_uri::<VerboseError<&[u8]>>(b"sip:username@hostname.com ")
     );
 
     let expected_remains = vec![b' '];
     let expected = Uri::sip(domain!("hostname.com")).auth(uri_auth!("username", "password"));
     assert_eq!(
         Ok((expected_remains.as_ref(), expected)),
-        parse_uri(b"sip:username:password@hostname.com ")
+        parse_uri::<VerboseError<&[u8]>>(b"sip:username:password@hostname.com ")
     );
 
     let expected_remains = vec![b' '];
     let expected = Uri::sip(domain!("hostname.com", 8080)).auth(uri_auth!("username", "password"));
     assert_eq!(
         Ok((expected_remains.as_ref(), expected)),
-        parse_uri(b"sip:username:password@hostname.com:8080 ")
+        parse_uri::<VerboseError<&[u8]>>(b"sip:username:password@hostname.com:8080 ")
     );
 
     let expected_remains = vec![b' '];
@@ -62,7 +64,7 @@ fn read_uri() {
         .auth(uri_auth!("username", "password"));
     assert_eq!(
         Ok((expected_remains.as_ref(), expected)),
-        parse_uri(b"sip:username:password@hostname.com:8080;transport=UDP ")
+        parse_uri::<VerboseError<&[u8]>>(b"sip:username:password@hostname.com:8080;transport=UDP ")
     );
 }
 

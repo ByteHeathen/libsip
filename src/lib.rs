@@ -8,11 +8,13 @@
 //! libsip exposes many parsing function though only one `parse_message` is needed.
 //! ```rust
 //! extern crate libsip;
-//!
+//! extern crate nom;
+//! 
 //! use libsip::parse_message;
+//! use nom::error::VerboseError;
 //!
 //! let packet = "SIP/2.0 200 OK\r\n\r\n";
-//! let output = libsip::parse_message(packet.as_ref()).unwrap();
+//! let output = libsip::parse_message::<VerboseError<&[u8]>>(packet.as_ref()).unwrap();
 //! ```
 //!
 //! ### Creating Messages
@@ -21,7 +23,9 @@
 //! `RequestGenerator` is used to generate sip requests.
 //!  ```rust
 //!     extern crate libsip;
+//!     extern crate nom;
 //!
+//!     use nom::error::VerboseError;
 //!     use libsip::ResponseGenerator;
 //!     use libsip::RequestGenerator;
 //!     use libsip::Method;
@@ -32,7 +36,7 @@
 //!                         .build()
 //!                         .unwrap();
 //!
-//!     let uri = parse_uri("sip:1@0.0.0.0:5060;transport=UDP".as_ref()).unwrap().1;
+//!     let uri = parse_uri::<VerboseError<&[u8]>>("sip:1@0.0.0.0:5060;transport=UDP".as_ref()).unwrap().1;
 //!     let _req = RequestGenerator::new()
 //!                         .method(Method::Invite)
 //!                         .uri(uri)

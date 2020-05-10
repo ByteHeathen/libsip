@@ -1,5 +1,7 @@
 use libsip::{headers::parse::parse_supported_header, Header};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::Supported(vec!["allowed".into(), "events".into()]);
@@ -15,6 +17,6 @@ fn read() {
     let header = Header::Supported(vec!["allowed".into(), "events".into()]);
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_supported_header(b"Supported: allowed, events\r\n")
+        parse_supported_header::<VerboseError<&[u8]>>(b"Supported: allowed, events\r\n")
     );
 }

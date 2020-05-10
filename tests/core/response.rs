@@ -1,5 +1,7 @@
 use libsip::{core::message::parse_response, *};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write_simple() {
     let req = ResponseGenerator::new().code(200).build().unwrap();
@@ -27,7 +29,7 @@ fn read_simple() {
     let req = ResponseGenerator::new().code(200).build().unwrap();
     assert_eq!(
         Ok((remains.as_ref(), req)),
-        parse_response(b"SIP/2.0 200 OK\r\n\r\n")
+        parse_response::<VerboseError<&[u8]>>(b"SIP/2.0 200 OK\r\n\r\n")
     );
 }
 
@@ -43,6 +45,6 @@ fn read_complex() {
         .unwrap();
     assert_eq!(
         Ok((remains.as_ref(), req)),
-        parse_response(b"SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555")
+        parse_response::<VerboseError<&[u8]>>(b"SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555")
     );
 }

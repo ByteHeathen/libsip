@@ -1,5 +1,5 @@
 use libsip::{headers::auth::*, Header};
-
+use nom::error::VerboseError;
 use libsip::headers::parse::parse_authorization_header;
 
 use std::collections::HashMap;
@@ -23,6 +23,6 @@ fn read() {
     let header = Header::Authorization(AuthHeader(Schema::Digest, map));
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_authorization_header(b"Authorization: Digest key=value \r\n")
+        parse_authorization_header::<VerboseError<&[u8]>>(b"Authorization: Digest key=value \r\n")
     );
 }

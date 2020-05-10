@@ -3,6 +3,8 @@ use libsip::{
     Header,
 };
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::AcceptLanguage(Language::English);
@@ -15,6 +17,6 @@ fn read() {
     let header = Header::AcceptLanguage(Language::English);
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_accept_language_header(b"Accept-Language: en")
+        parse_accept_language_header::<VerboseError<&[u8]>>(b"Accept-Language: en")
     );
 }

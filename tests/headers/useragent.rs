@@ -1,5 +1,7 @@
 use libsip::{headers::parse::parse_useragent_header, Header};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::UserAgent("Softphone 1.0".into());
@@ -15,6 +17,6 @@ fn read() {
     let header = Header::UserAgent("Softphone 1.0".into());
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_useragent_header(b"User-Agent: Softphone 1.0\r\n")
+        parse_useragent_header::<VerboseError<&[u8]>>(b"User-Agent: Softphone 1.0\r\n")
     );
 }

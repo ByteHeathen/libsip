@@ -5,6 +5,8 @@ use libsip::{
     *,
 };
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = ViaHeader {
@@ -28,7 +30,7 @@ fn read() {
     };
     assert_eq!(
         Ok((remains.as_ref(), Header::Via(header))),
-        parse_via_header(b"Via: SIP/2.0/UDP example.com\r\n")
+        parse_via_header::<VerboseError<&[u8]>>(b"Via: SIP/2.0/UDP example.com\r\n")
     );
 
     let input = b"Via: SIP/2.0/UDP 192.168.1.120;rport;branch=z9hG4bK7Q6y313Qrt6Uc\r\n";
@@ -42,7 +44,7 @@ fn read() {
     };
     assert_eq!(
         Ok((remains.as_ref(), Header::Via(header))),
-        parse_via_header(input)
+        parse_via_header::<VerboseError<&[u8]>>(input)
     );
 
     let input = b"Via: SIP/2.0/UDP 192.168.1.120;branch=03395ed83a7b9502c671c769bbe369cb;received=192.168.1.76\r\n";
@@ -56,6 +58,6 @@ fn read() {
     };
     assert_eq!(
         Ok((remains.as_ref(), Header::Via(header))),
-        parse_via_header(input)
+        parse_via_header::<VerboseError<&[u8]>>(input)
     );
 }

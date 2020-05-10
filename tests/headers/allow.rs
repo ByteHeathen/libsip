@@ -1,5 +1,7 @@
 use libsip::{headers::parse::parse_allow_header, *};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::Allow(vec![Method::Invite, Method::Options]);
@@ -12,6 +14,6 @@ fn read() {
     let header = Header::Allow(vec![Method::Register, Method::Invite]);
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_allow_header(b"Allow: REGISTER,INVITE\r\n")
+        parse_allow_header::<VerboseError<&[u8]>>(b"Allow: REGISTER,INVITE\r\n")
     );
 }

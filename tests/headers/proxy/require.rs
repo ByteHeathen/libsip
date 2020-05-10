@@ -1,5 +1,7 @@
 use libsip::{headers::parse::parse_proxy_require_header, Header};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write() {
     let header = Header::ProxyRequire("call@id.com".into());
@@ -15,6 +17,6 @@ fn read() {
     let header = Header::ProxyRequire("call@id.com".into());
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_proxy_require_header(b"Proxy-Require: call@id.com\r\n")
+        parse_proxy_require_header::<VerboseError<&[u8]>>(b"Proxy-Require: call@id.com\r\n")
     );
 }

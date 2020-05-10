@@ -16,6 +16,8 @@ use std::{
     time::{Duration, Instant},
 };
 
+use nom::error::VerboseError;
+
 use libsip::{client::RegistrationManager, core::Transport, parse_message, uri::Param, *};
 use tokio::net::UdpSocket;
 
@@ -37,7 +39,7 @@ async fn registration_process(
     sock.send_to(&format!("{}", request).as_ref(), SERVER_SOCK_ADDRESS)
         .await?;
     let (amt, _src) = sock.recv_from(&mut buf).await?;
-    let (_, msg) = parse_message(&buf[..amt]).unwrap();
+    let (_, msg) = parse_message::<VerboseError<&[u8]>>(&buf[..amt]).unwrap();
     if verbose {
         print_sip_message_recv(&msg);
     }
@@ -52,7 +54,7 @@ async fn registration_process(
     sock.send_to(format!("{}", auth_request).as_ref(), SERVER_SOCK_ADDRESS)
         .await?;
     let (amt, _src) = sock.recv_from(&mut buf).await.unwrap();
-    let (_, msg) = parse_message(&buf[..amt]).unwrap();
+    let (_, msg) = parse_message::<VerboseError<&[u8]>>(&buf[..amt]).unwrap();
     if verbose {
         print_sip_message_recv(&msg);
     }
@@ -96,7 +98,7 @@ async fn main() -> IoResult<()> {
         let result = tokio::time::timeout(timeout_duration, sock.recv_from(&mut buf)).await;
         match result {
             Ok(Ok(value)) => {
-                let (_, msg) = parse_message(&buf[..value.0]).unwrap();
+                let (_, msg) = parse_message::<VerboseError<&[u8]>>(&buf[..value.0]).unwrap();
                 println!("{}", msg);
                 print_sip_message_recv(&msg);
             },

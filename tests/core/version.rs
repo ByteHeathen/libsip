@@ -1,5 +1,7 @@
 use libsip::{core::parse_version, Version};
 
+use nom::error::VerboseError;
+
 #[test]
 fn write_version() {
     assert_eq!("SIP/2.0".to_string(), format!("{}", Version::default()));
@@ -11,10 +13,10 @@ fn read_version() {
     let remains = vec![b' '];
     assert_eq!(
         Ok((remains.as_ref(), Version::default())),
-        parse_version(b"SIP/2.0 ")
+        parse_version::<VerboseError<&[u8]>>(b"SIP/2.0 ")
     );
     assert_eq!(
         Ok((remains.as_ref(), Version::new(1, 1))),
-        parse_version(b"SIP/1.1 ")
+        parse_version::<VerboseError<&[u8]>>(b"SIP/1.1 ")
     );
 }
