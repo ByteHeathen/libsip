@@ -2,6 +2,9 @@ language: rust
 rust: [nightly]
 cache: cargo
 
+before_script:
+  - bash -c 'rustup component add clippy --toolchain nightly-x86_64-unknown-linux-gnu'
+
 script:
   - bash -c 'cargo test --release'
   - bash -c 'cargo clippy'
