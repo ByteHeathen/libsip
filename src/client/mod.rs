@@ -9,11 +9,14 @@ mod messaging;
 pub use self::messaging::{MessageHelper, MessageWriter};
 
 mod invite;
-pub use self::invite::InviteHelper;
+pub use self::invite::{InviteHelper, InviteWriter};
 
-use crate::{Header, Headers, Method, ResponseGenerator, SipMessage, Uri};
+use crate::{Header, Headers, Method, SipMessage, Uri};
 
 use std::io::Result as IoResult;
+use std::io::Error as IoError;
+use std::io::ErrorKind as IoErrorKind;
+use std::collections::HashMap;
 
 /// This struct is used in the client module when creating sip messages
 /// it is used to specify some common values for the generated sip
@@ -77,8 +80,13 @@ pub struct SoftPhone {
     /// Message writer instance used when generating
     /// a SIP message.
     msg: MessageWriter,
+    /// Invitation writer instance used when generating,
+    /// a SIP call.
+    invite: InviteWriter,
     /// Registration manage instance.
     reg: RegistrationManager,
+    /// List of ongoing calls.
+    calls: HashMap<String, InviteHelper>
 }
 
 impl SoftPhone {
@@ -88,7 +96,9 @@ impl SoftPhone {
         SoftPhone {
             header_cfg: HeaderWriteConfig::default(),
             msg: MessageWriter::new(account_uri.clone()),
+            invite: InviteWriter::new(account_uri.clone()),
             reg: RegistrationManager::new(account_uri, local_uri),
+            calls: HashMap::new()
         }
     }
 
@@ -110,6 +120,16 @@ impl SoftPhone {
     /// Return a mutable reference to the MessageWriter.
     pub fn messaging_mut(&mut self) -> &mut MessageWriter {
         &mut self.msg
+    }
+
+    /// Return a reference to the invite writer.
+    pub fn invite(&self) -> &InviteWriter {
+        &self.invite
+    }
+
+    /// Return a mutable reference to the InviteWriter.
+    pub fn invite_mut(&mut self) -> &mut InviteWriter {
+        &mut self.invite
     }
 
     /// Return a reference to the used HeaderWriteConfig.
@@ -137,34 +157,51 @@ impl SoftPhone {
     pub fn write_message(&mut self, b: Vec<u8>, uri: Uri) -> IoResult<SipMessage> {
         Ok(self
             .msg
-            .write_message(b, uri, self.reg.via_header(), &self.header_cfg)?)
+            .write_message(b, uri, self.reg.via_header(), &self.header_cfg)?
+        )
     }
 
-    /// Get the messages required to cancel a response.
-    pub fn cancel_response(&mut self, headers: &Headers) -> IoResult<(SipMessage, SipMessage)> {
-        let mut out_headers = vec![];
-        for header in headers.iter() {
-            match header {
-                Header::CSeq(a, b) => out_headers.push(Header::CSeq(*a, *b)),
-                Header::CallId(call) => out_headers.push(Header::CallId(call.clone())),
-                Header::From(from) => out_headers.push(Header::From(from.clone())),
-                Header::To(to) => out_headers.push(Header::To(to.clone())),
-                Header::Via(via) => out_headers.push(Header::Via(via.clone())),
-                _ => {},
-            }
-        }
+    /// Send a new Invite Request to `uri`.
+    pub fn send_invite(&mut self, body: Vec<u8>, uri: Uri) -> IoResult<SipMessage> {
+        self.invite.generate_invite(uri, body)
+    }
 
-        Ok((
-            ResponseGenerator::new()
-                .code(200)
-                .headers(out_headers.clone())
-                .header(Header::ContentLength(0))
-                .build()?,
-            ResponseGenerator::new()
-                .code(487)
-                .headers(out_headers)
-                .header(Header::ContentLength(0))
-                .build()?,
-        ))
+    /// Give the softphone a received call, returns the
+    /// ringing response to be sent.
+    pub fn get_received_request(&mut self, msg: SipMessage) -> IoResult<SipMessage> {
+        let invite = InviteHelper::new(msg)?;
+        let call_id = invite.call_id()?;
+        let received = invite.ringing(&self.header_cfg)?;
+        self.calls.insert(call_id, invite);
+        Ok(received)
+    }
+
+    /// Get a SIP Message that will accept a previously
+    /// recieved invitation.
+    pub fn get_accept_request(&mut self, body: Vec<u8>, call: &str) -> IoResult<SipMessage> {
+        if let Some(invite) = self.calls.get_mut(call) {
+          Ok(invite.accept(body, &self.header_cfg)?)
+        } else {
+            Err(IoError::new(IoErrorKind::NotFound, "Call not found"))
+        }
+    }
+
+    /// Get a SIP message that will close a previously
+    /// received invitation.
+    pub fn get_bye_request(&mut self, call: &str) -> IoResult<SipMessage> {
+        if let Some(invite) = self.calls.get_mut(call) {
+          Ok(invite.bye(&self.header_cfg)?)
+        } else {
+            Err(IoError::new(IoErrorKind::NotFound, "Call not found"))
+        }
+    }
+
+    /// Get the messages required to cancel a invitation.
+    pub fn get_cancel_request(&mut self, call: &str) -> IoResult<(SipMessage, SipMessage)> {
+        if let Some(invite) = self.calls.get_mut(call) {
+            invite.cancel(&self.header_cfg)
+        } else {
+            Err(IoError::new(IoErrorKind::NotFound, "Call not found"))
+        }
     }
 }

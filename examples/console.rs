@@ -18,7 +18,7 @@ use std::{
 
 use nom::error::VerboseError;
 
-use libsip::{client::RegistrationManager, core::Transport, parse_message, uri::Param, *};
+use libsip::*;
 use tokio::net::UdpSocket;
 
 const USERNAME: &'static str = "20";
@@ -118,7 +118,7 @@ fn account_uri() -> Uri {
 fn local_uri() -> Uri {
     Uri::sip(ip_domain!(192, 168, 1, 129))
         .auth(uri_auth!("20"))
-        .parameter(Param::Transport(Transport::Udp))
+        .parameter(UriParam::Transport(Transport::Udp))
 }
 
 fn print_sip_message_send(msg: &SipMessage) {

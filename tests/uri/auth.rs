@@ -1,5 +1,5 @@
-use libsip::{uri::parse_uriauth, uri_auth};
-
+use libsip::*;
+use libsip::uri::parse_uriauth;
 use nom::error::VerboseError;
 
 #[test]

@@ -12,16 +12,16 @@ use std::{
 
 use crate::Uri;
 
-/// The SIP Authentication schema.
+/// The SIP Authentication auth schema.
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Schema {
+pub enum AuthSchema {
     Digest,
 }
 
-impl fmt::Display for Schema {
+impl fmt::Display for AuthSchema {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Schema::Digest => write!(f, "Digest"),
+            AuthSchema::Digest => write!(f, "Digest"),
         }
     }
 }
@@ -29,7 +29,7 @@ impl fmt::Display for Schema {
 /// AuthHeader used for headers such as Authorization
 /// or WWWAuthenticate.
 #[derive(Debug, PartialEq, Clone)]
-pub struct AuthHeader(pub Schema, pub HashMap<String, String>);
+pub struct AuthHeader(pub AuthSchema, pub HashMap<String, String>);
 
 impl fmt::Display for AuthHeader {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -66,7 +66,7 @@ impl AuthHeader {
     /// Perform the authenticate action.
     pub fn authenticate<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         match self.0 {
-            Schema::Digest => self.handle_digest_auth(ctx),
+            AuthSchema::Digest => self.handle_digest_auth(ctx),
         }
     }
 
@@ -125,7 +125,7 @@ impl AuthHeader {
         );
         let pass = md5::compute(digest);
         map.insert("response".into(), format!("{:x}", pass));
-        Ok(AuthHeader(Schema::Digest, map))
+        Ok(AuthHeader(AuthSchema::Digest, map))
     }
  
     /// Handle sha256 Digest auth method.
@@ -167,7 +167,7 @@ impl AuthHeader {
         );
         let pass = md5::compute(digest);
         map.insert("response".into(), format!("{:x}", pass));
-        Ok(AuthHeader(Schema::Digest, map))
+        Ok(AuthHeader(AuthSchema::Digest, map))
     }
 
     /// Handle sha512 auth method.
@@ -209,7 +209,7 @@ impl AuthHeader {
         );
         let pass = md5::compute(digest);
         map.insert("response".into(), format!("{:x}", pass));
-        Ok(AuthHeader(Schema::Digest, map))
+        Ok(AuthHeader(AuthSchema::Digest, map))
     }
 
     /// Generate the nonce used during authorization.

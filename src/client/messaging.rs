@@ -4,13 +4,8 @@ use std::io::{
     Error as IoError
 };
 
-use crate::{
-    client::HeaderWriteConfig,
-    core::Method,
-    headers::{via::ViaHeader, ContentType, Header, Headers, NamedHeader},
-    uri::{Schema, Uri},
-    RequestGenerator, ResponseGenerator, SipMessage,
-};
+use crate::*;
+use crate::headers::via::ViaHeader;
 
 macro_rules! impl_simple_header_method {
     ($name:ident, $variant:ident, $ty: ident) => {
@@ -119,7 +114,7 @@ impl MessageWriter {
         self.cseq += 1;
         let mut req = RequestGenerator::new()
             .method(Method::Message)
-            .uri(to.clone().schema(Schema::Sip))
+            .uri(to.clone().schema(UriSchema::Sip))
             .header(via_header)
             .header(Header::To(NamedHeader::new(to)))
             .header(self.from())

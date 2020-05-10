@@ -15,13 +15,13 @@ use nom::{
 };
 
 pub mod schema;
-pub use self::schema::{parse_schema, Schema};
+pub use self::schema::{parse_schema, UriSchema};
 
 pub mod domain;
 pub use self::domain::{parse_domain, Domain};
 
 pub mod params;
-pub use self::params::{parse_param, parse_params, Param};
+pub use self::params::{parse_param, parse_params, UriParam};
 
 pub mod auth;
 pub use self::auth::{parse_uriauth, UriAuth};
@@ -29,14 +29,14 @@ pub use self::auth::{parse_uriauth, UriAuth};
 /// Universal Rescource Identifier for libsip.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Uri {
-    pub schema: Option<Schema>,
+    pub schema: Option<UriSchema>,
     pub host: Domain,
     pub auth: Option<UriAuth>,
-    pub parameters: Vec<Param>,
+    pub parameters: Vec<UriParam>,
 }
 
 impl Uri {
-    pub fn new(schema: Schema, host: Domain) -> Uri {
+    pub fn new(schema: UriSchema, host: Domain) -> Uri {
         Uri {
             schema: Some(schema),
             host,
@@ -57,12 +57,12 @@ impl Uri {
 
     /// Create a new Uri With schema set to `Schema::Sip`.
     pub fn sip(host: Domain) -> Uri {
-        Uri::new(Schema::Sip, host)
+        Uri::new(UriSchema::Sip, host)
     }
 
     /// Create a new Uri With schema set to `Schema::Sips`.
     pub fn sips(host: Domain) -> Uri {
-        Uri::new(Schema::Sips, host)
+        Uri::new(UriSchema::Sips, host)
     }
 
     /// Add a `UriAuth` section to this Uri.
@@ -78,14 +78,14 @@ impl Uri {
     }
 
     /// Add a new parameter to the parameter list.
-    pub fn parameter(mut self, p: Param) -> Uri {
+    pub fn parameter(mut self, p: UriParam) -> Uri {
         self.parameters.push(p);
         self
     }
 
     /// Add a list of new parameters. This will remove
     /// all old parameters.
-    pub fn parameters(mut self, p: Vec<Param>) -> Uri {
+    pub fn parameters(mut self, p: Vec<UriParam>) -> Uri {
         self.parameters = p;
         self
     }
@@ -97,7 +97,7 @@ impl Uri {
     }
 
     /// Set a new Schema.
-    pub fn schema(mut self, schema: Schema) -> Uri {
+    pub fn schema(mut self, schema: UriSchema) -> Uri {
         self.schema = Some(schema);
         self
     }

@@ -1,6 +1,7 @@
-use libsip::{headers::auth::*, Header};
-use nom::error::VerboseError;
+use libsip::*;
 use libsip::headers::parse::parse_authorization_header;
+
+use nom::error::VerboseError;
 
 use std::collections::HashMap;
 
@@ -8,7 +9,7 @@ use std::collections::HashMap;
 fn write() {
     let mut map = HashMap::new();
     map.insert("key".into(), "value".into());
-    let header = Header::Authorization(AuthHeader(Schema::Digest, map));
+    let header = Header::Authorization(AuthHeader(AuthSchema::Digest, map));
     assert_eq!(
         "Authorization: Digest key=\"value\"".to_string(),
         format!("{}", header)
@@ -20,7 +21,7 @@ fn read() {
     let remains = vec![];
     let mut map = HashMap::new();
     map.insert("key".into(), "value".into());
-    let header = Header::Authorization(AuthHeader(Schema::Digest, map));
+    let header = Header::Authorization(AuthHeader(AuthSchema::Digest, map));
     assert_eq!(
         Ok((remains.as_ref(), header)),
         parse_authorization_header::<VerboseError<&[u8]>>(b"Authorization: Digest key=value \r\n")

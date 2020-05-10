@@ -1,4 +1,6 @@
-use libsip::{headers::parse::parse_allow_header, *};
+use libsip::*;
+
+use libsip::headers::parse::parse_allow_header;
 
 use nom::error::VerboseError;
 

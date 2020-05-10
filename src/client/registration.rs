@@ -6,7 +6,7 @@ use crate::{
         via::ViaHeader,
         NamedHeader,
     },
-    uri::{Param, UriAuth},
+    uri::{UriParam, UriAuth},
     RequestGenerator, *,
 };
 
@@ -171,7 +171,7 @@ impl RegistrationManager {
         let via_uri = self
             .local_uri
             .clone()
-            .parameter(Param::Branch(self.branch.clone()))
+            .parameter(UriParam::Branch(self.branch.clone()))
             .authless()
             .schemaless();
         Header::Via(ViaHeader {

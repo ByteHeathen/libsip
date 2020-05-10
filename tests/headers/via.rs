@@ -1,9 +1,5 @@
-use libsip::{
-    core::*,
-    headers::{parse::parse_via_header, via::ViaHeader},
-    uri::Param,
-    *,
-};
+use libsip::*;
+use libsip::headers::parse::parse_via_header;
 
 use nom::error::VerboseError;
 
@@ -39,8 +35,8 @@ fn read() {
         version: Version::default(),
         transport: Transport::Udp,
         uri: Uri::new_schemaless(ip_domain!(192, 168, 1, 120))
-            .parameter(Param::RPort)
-            .parameter(Param::Branch("z9hG4bK7Q6y313Qrt6Uc".into())),
+            .parameter(UriParam::RPort)
+            .parameter(UriParam::Branch("z9hG4bK7Q6y313Qrt6Uc".into())),
     };
     assert_eq!(
         Ok((remains.as_ref(), Header::Via(header))),
@@ -53,8 +49,8 @@ fn read() {
         version: Version::default(),
         transport: Transport::Udp,
         uri: Uri::new_schemaless(ip_domain!(192, 168, 1, 120))
-            .parameter(Param::Branch("03395ed83a7b9502c671c769bbe369cb".into()))
-            .parameter(Param::Received(ip_domain!(192, 168, 1, 76))),
+            .parameter(UriParam::Branch("03395ed83a7b9502c671c769bbe369cb".into()))
+            .parameter(UriParam::Received(ip_domain!(192, 168, 1, 76))),
     };
     assert_eq!(
         Ok((remains.as_ref(), Header::Via(header))),

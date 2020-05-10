@@ -49,10 +49,10 @@ macro_rules! ip_domain {
 #[macro_export]
 macro_rules! uri_auth {
     ($u:tt) => {
-        libsip::uri::UriAuth::new($u)
+        libsip::UriAuth::new($u)
     };
     ($u:tt, $p:tt) => {
-        libsip::uri::UriAuth::new($u).password($p)
+        libsip::UriAuth::new($u).password($p)
     };
 }
 
@@ -68,14 +68,14 @@ macro_rules! uri_auth {
 #[macro_export]
 macro_rules! named_header {
     ($u:tt) => {
-        libsip::headers::NamedHeader {
+        libsip::NamedHeader {
             display_name: None,
             uri: $u,
             params: ::std::collections::HashMap::new(),
         }
     };
     ($u:tt, $name:tt) => {
-        libsip::headers::NamedHeader {
+        libsip::NamedHeader {
             display_name: Some($name.into()),
             uri: $u,
             params: ::std::collections::HashMap::new()
@@ -86,7 +86,7 @@ macro_rules! named_header {
 /// Same as `named_header` except for internal use.
 macro_rules! __named_header {
     ($u:tt) => {
-        crate::headers::NamedHeader {
+        crate::NamedHeader {
             display_name: None,
             uri: $u,
             params: ::std::collections::HashMap::new(),

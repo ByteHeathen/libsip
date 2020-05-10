@@ -58,31 +58,33 @@ extern crate serde;
 #[macro_use]
 mod macros;
 
-pub mod client;
-pub mod core;
+mod client;
+mod core;
 pub mod headers;
-pub(crate) mod parse;
-pub mod request;
-pub mod response;
+mod parse;
+mod request;
+mod response;
 pub mod uri;
 
 pub use crate::{
-    core::{Method, Version},
-    headers::{Header, Headers},
-};
-
-pub use crate::uri::{Domain, Uri};
-
-pub use crate::{
-    core::{message::parse_message, SipMessage},
+    client::{
+        SoftPhone, MessageHelper, MessageWriter,
+        InviteHelper, RegistrationManager,
+        HeaderWriteConfig
+    },
     request::RequestGenerator,
     response::ResponseGenerator,
+    core::{
+        Transport, Method, Version,
+        SipMessage, parse_message, parse_version,
+        parse_response, parse_request
+    },
+    headers::{
+        ContentType,
+        Language,
+        Header, Headers, NamedHeader,
+        AuthHeader, AuthContext, parse_header,
+        AuthSchema, via::ViaHeader
+    },
+    uri::{Domain, UriParam, Uri, UriAuth, UriSchema, parse_uri}
 };
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}

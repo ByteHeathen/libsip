@@ -1,10 +1,7 @@
 mod encoding;
 mod lang;
 
-use libsip::{
-    core::Method,
-    headers::{parse::parse_accept_header, Header},
-};
+use libsip::{*, headers::parse::parse_accept_header};
 
 use nom::error::VerboseError;
 

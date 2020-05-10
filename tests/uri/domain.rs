@@ -1,4 +1,5 @@
-use libsip::{uri::parse_domain, Domain, *};
+use libsip::*;
+use libsip::uri::parse_domain;
 use nom::error::VerboseError;
 
 use std::net::Ipv4Addr;

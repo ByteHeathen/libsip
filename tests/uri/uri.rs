@@ -1,4 +1,4 @@
-use libsip::{core::Transport, uri::*, *};
+use libsip::*;
 
 use nom::error::VerboseError;
 
@@ -60,11 +60,21 @@ fn read_uri() {
 
     let expected_remains = vec![b' '];
     let expected = Uri::sip(domain!("hostname.com", 8080))
-        .parameter(Param::Transport(Transport::Udp))
+        .parameter(UriParam::Transport(Transport::Udp))
         .auth(uri_auth!("username", "password"));
     assert_eq!(
         Ok((expected_remains.as_ref(), expected)),
         parse_uri::<VerboseError<&[u8]>>(b"sip:username:password@hostname.com:8080;transport=UDP ")
+    );
+
+    let expected_remains = vec![b' '];
+    let expected = Uri::sip(domain!("hostname.com", 8080))
+        .parameter(UriParam::Transport(Transport::Tcp))
+        .parameter(UriParam::Other("Some".into(), Some("Other".into())))
+        .auth(uri_auth!("username", "password"));
+    assert_eq!(
+        Ok((expected_remains.as_ref(), expected)),
+        parse_uri::<VerboseError<&[u8]>>(b"sip:username:password@hostname.com:8080;transport=TCP;Some=Other ")
     );
 }
 
@@ -98,7 +108,7 @@ fn write_uri() {
     );
 
     let uri = Uri::sip(domain!("hostname.com", 8080))
-        .parameter(Param::Transport(Transport::Udp))
+        .parameter(UriParam::Transport(Transport::Udp))
         .auth(uri_auth!("username", "password"));
     assert_eq!(
         "sip:username:password@hostname.com:8080;transport=UDP",
@@ -106,7 +116,7 @@ fn write_uri() {
     );
 
     let uri = Uri::new_schemaless(domain!("hostname.com", 8080))
-        .parameter(Param::Transport(Transport::Udp))
+        .parameter(UriParam::Transport(Transport::Udp))
         .auth(uri_auth!("username", "password"));
     assert_eq!(
         "username:password@hostname.com:8080;transport=UDP",

@@ -5,7 +5,13 @@ mod named;
 pub mod parse;
 pub mod via;
 mod write;
-pub use self::{content::ContentType, language::Language, named::NamedHeader, parse::parse_header};
+pub use self::{
+    auth::{AuthHeader, AuthContext, AuthSchema},
+    content::ContentType,
+    language::Language,
+    named::NamedHeader,
+    parse::parse_header
+};
 
 use crate::core::Method;
 

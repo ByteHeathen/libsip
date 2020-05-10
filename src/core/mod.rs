@@ -10,4 +10,4 @@ pub mod version;
 pub use self::version::{parse_version, Version};
 
 pub mod message;
-pub use self::message::{parse_message, SipMessage};
+pub use self::message::{parse_message, parse_request, parse_response, SipMessage};

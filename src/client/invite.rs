@@ -5,13 +5,7 @@ use std::io::{
     ErrorKind as IoErrorKind
 };
 
-use crate::{
-    client::HeaderWriteConfig,
-    core::Method,
-    headers::{via::ViaHeader, Header, Headers, NamedHeader},
-    uri::Uri,
-    RequestGenerator, ResponseGenerator, SipMessage,
-};
+use crate::*;
 
 macro_rules! impl_simple_header_method {
     ($name:ident, $variant:ident, $ty: ident) => {
@@ -97,16 +91,17 @@ impl InviteHelper {
     }
     
     /// Generate a Bye response for this Invite Request.
-    pub fn bye(&self) -> IoResult<SipMessage> {
-        RequestGenerator::new()
+    pub fn bye(&self, header_cfg: &HeaderWriteConfig) -> IoResult<SipMessage> {
+        let mut req = RequestGenerator::new()
             .method(Method::Bye)
             .uri(self.uri.clone())
             .header(self.headers.cseq().unwrap())
             .header(self.headers.via().unwrap())
             .header(self.headers.to().unwrap())
             .header(self.headers.from().unwrap())
-            .header(self.headers.call_id().unwrap())
-            .build()
+            .header(self.headers.call_id().unwrap());
+        header_cfg.write_headers(req.headers_ref_mut());
+        req.build()
     }
 
     /// Verify the CSeq header is equal to `cseq`.
@@ -119,6 +114,36 @@ impl InviteHelper {
             }
         }
         Ok(false)
+    }
+
+        /// Get the messages required to cancel a invitation.
+    pub fn cancel(&mut self, header_cfg: &HeaderWriteConfig) -> IoResult<(SipMessage, SipMessage)> {
+        let mut out_headers = vec![];
+        for header in self.headers.iter() {
+            match header {
+                Header::CSeq(a, b) => out_headers.push(Header::CSeq(*a, *b)),
+                Header::CallId(call) => out_headers.push(Header::CallId(call.clone())),
+                Header::From(from) => out_headers.push(Header::From(from.clone())),
+                Header::To(to) => out_headers.push(Header::To(to.clone())),
+                Header::Via(via) => out_headers.push(Header::Via(via.clone())),
+                _ => {},
+            }
+        }
+        let mut final_headers = Headers(out_headers);
+        header_cfg.write_headers(&mut final_headers);
+
+        Ok((
+            ResponseGenerator::new()
+                .code(200)
+                .headers(final_headers.clone().0)
+                .header(Header::ContentLength(0))
+                .build()?,
+            ResponseGenerator::new()
+                .code(487)
+                .headers(final_headers.0)
+                .header(Header::ContentLength(0))
+                .build()?,
+        ))
     }
 }
 
@@ -152,7 +177,7 @@ impl InviteWriter {
             .header(self.cseq()?)
             .header(Header::From(__named_header!(me_uri)))
             .header(Header::To(__named_header!(uri)))
-            .header(Header::CallId(self.generate_call_id()))
+            .header(Header::CallId(InviteWriter::generate_call_id()))
             .body(sdp)
             .build()
     }
@@ -165,7 +190,7 @@ impl InviteWriter {
 
     /// Generate a new CallId value. This is calculated as an
     /// MD5 hash of a randomly generated 16 byte sequence.
-    pub fn generate_call_id(&self) -> String {
+    pub fn generate_call_id() -> String {
         format!("{:x}", md5::compute(rand::random::<[u8; 16]>()))
     }
 }

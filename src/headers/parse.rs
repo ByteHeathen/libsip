@@ -344,6 +344,6 @@ pub fn parse_key_value_pair<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IRe
     Ok((input, (key, value)))
 }
 
-pub fn parse_auth_schema<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], auth::Schema, E> {
-    Ok(map(tag_no_case("Digest"), |_| auth::Schema::Digest)(input)?)
+pub fn parse_auth_schema<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], auth::AuthSchema, E> {
+    Ok(map(tag_no_case("Digest"), |_| auth::AuthSchema::Digest)(input)?)
 }

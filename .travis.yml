@@ -4,3 +4,4 @@ cache: cargo
 
 script:
   - bash -c 'cargo test --release'
+  - bash -c 'cargo clippy'

@@ -1,4 +1,5 @@
-use libsip::{headers::parse::parse_callid_header, *};
+use libsip::*;
+use libsip::headers::parse::parse_callid_header;
 
 use nom::error::VerboseError;
 

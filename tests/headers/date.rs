@@ -1,4 +1,5 @@
-use libsip::{headers::parse::parse_date_header, Header};
+use libsip::*;
+use libsip::headers::parse::parse_date_header;
 
 use nom::error::VerboseError;
 

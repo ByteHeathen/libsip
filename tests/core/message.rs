@@ -20,7 +20,12 @@ fn read_message() {
 #[test]
 fn read_complex() {
     let remains = vec![];
-    let uri = Uri::sip(domain!("example.com")).auth(uri_auth!("user"));
+    let uri = Uri::sip(domain!("example.com"))
+               .auth(uri_auth!("user"))
+               .parameter(UriParam::RPort)
+               .parameter(UriParam::Other("new".into(), None))
+               .parameter(UriParam::Other("Some".into(), Some("Param".into())))
+               .parameter(UriParam::Other("Other".into(), None));
     let req = RequestGenerator::new()
         .uri(uri)
         .method(Method::Register)
@@ -28,5 +33,8 @@ fn read_complex() {
         .body(vec![b'6'; 5])
         .build()
         .unwrap();
-    assert_eq!(Ok((remains.as_ref(), req)), parse_message::<VerboseError<&[u8]>>(b"REGISTER sip:user@example.com SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666"));
+    assert_eq!(Ok((
+        remains.as_ref(), req)),
+        parse_message::<VerboseError<&[u8]>>(b"REGISTER sip:user@example.com;rport;new;Some=Param;Other SIP/2.0\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n66666")
+    );
 }
