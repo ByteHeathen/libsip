@@ -35,8 +35,24 @@ fn read() {
         version: Version::default(),
         transport: Transport::Udp,
         uri: Uri::new_schemaless(ip_domain!(192, 168, 1, 120))
-            .parameter(UriParam::RPort)
+            .parameter(UriParam::RPort(None))
             .parameter(UriParam::Branch("z9hG4bK7Q6y313Qrt6Uc".into())),
+    };
+    assert_eq!(
+        Ok((remains.as_ref(), Header::Via(header))),
+        parse_via_header::<VerboseError<&[u8]>>(input)
+    );
+
+    let input = b"Via: SIP/2.0/UDP 192.168.1.1:5060;rport=5060;received=192.168.1.1;branch=8e7ec4e3d1e1380bc111f8723341ca70;transport=UDP\r\n";
+    let remains = vec!['\r' as u8, '\n' as u8];
+    let header = ViaHeader {
+        version: Version::default(),
+        transport: Transport::Udp,
+        uri: Uri::new_schemaless(ip_domain!(192, 168, 1, 1, 5060))
+            .parameter(UriParam::RPort(Some(5060)))
+            .parameter(UriParam::Received(ip_domain!(192, 168, 1, 1)))
+            .parameter(UriParam::Branch("8e7ec4e3d1e1380bc111f8723341ca70".into()))
+            .parameter(UriParam::Transport(Transport::Udp)),
     };
     assert_eq!(
         Ok((remains.as_ref(), Header::Via(header))),
