@@ -22,7 +22,7 @@ fn read_complex() {
     let remains = vec![];
     let uri = Uri::sip(domain!("example.com"))
                .auth(uri_auth!("user"))
-               .parameter(UriParam::RPort)
+               .parameter(UriParam::RPort(None))
                .parameter(UriParam::Other("new".into(), None))
                .parameter(UriParam::Other("Some".into(), Some("Param".into())))
                .parameter(UriParam::Other("Other".into(), None));

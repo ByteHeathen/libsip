@@ -3,7 +3,7 @@ use std::fmt;
 
 use crate::{
     core::{parse_transport, Transport},
-    uri::{parse_domain, Domain},
+    uri::{parse_domain, parse_port, Domain},
 };
 
 use nom::{
@@ -23,7 +23,7 @@ pub enum UriParam {
     Transport(Transport),
     Branch(String),
     Received(Domain),
-    RPort,
+    RPort(Option<u16>),
     Other(String, Option<String>)
 }
 
@@ -34,6 +34,7 @@ impl UriParam {
         value: &'a [u8],
     ) -> Result<UriParam, nom::Err<E>> {
         match key {
+            b"rport" => Ok(UriParam::RPort(parse_port::<E>(&value)?.1)),
             b"transport" => Ok(UriParam::Transport(parse_transport::<E>(&value)?.1)),
             b"branch" => Ok(UriParam::Branch(
                 String::from_utf8(value.to_vec()).expect("Utf-8 Error"),
@@ -57,7 +58,8 @@ impl fmt::Display for UriParam {
             UriParam::Transport(trans) => write!(f, ";transport={}", trans),
             UriParam::Branch(branch) => write!(f, ";branch={}", branch),
             UriParam::Received(branch) => write!(f, ";received={}", branch),
-            UriParam::RPort => write!(f, ";rport"),
+            UriParam::RPort(Some(value)) => write!(f, ";rport={}", value),
+            UriParam::RPort(None) => write!(f, ";rport"),
             UriParam::Other(key, Some(value)) => write!(f, ";{}={}", key, value),
             UriParam::Other(key, None) => write!(f, ";{}", key)
         }
@@ -67,8 +69,8 @@ impl fmt::Display for UriParam {
 pub fn parse_param<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], UriParam, E> {
     alt::<_, _, E, _>(
         (
-            map(tag::<_, _, E>(";rport"), |_| UriParam::RPort),
             parse_named_param,
+            map(tag::<_, _, E>(";rport"), |_| UriParam::RPort(None)),
             parse_single_param
         )
     )(input)

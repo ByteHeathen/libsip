@@ -46,6 +46,11 @@ use nom::{
     error::ParseError
 };
 
+pub fn parse_port<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Option<u16>, E> {
+    let (input, port) = opt(map_res::<_, _, _, _, E, _, _>(take_while::<_, _, E>(is_digit), parse_u16::<E>))(input)?;
+    Ok((input, port))
+}
+
 pub fn parse_domain<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Domain, E> {
   alt((parse_ip_domain::<E>, parse_domain_domain::<E>))(input)
 }
@@ -53,7 +58,7 @@ pub fn parse_domain<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a
 pub fn parse_ip_domain<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Domain, E> {
     let (input, addr) = parse_ip_address::<E>(input)?;
     let (input, _) = opt::<_, _, E, _>(char::<_, E>(':'))(input)?;
-    let (input, port) = opt(map_res::<_, _, _, _, E, _, _>(take_while::<_, _, E>(is_digit), parse_u16::<E>))(input)?;
+    let (input, port) = parse_port::<E>(input)?;
     Ok((input, Domain::Ipv4(addr, port)))
 }
 

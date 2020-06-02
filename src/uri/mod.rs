@@ -18,7 +18,7 @@ pub mod schema;
 pub use self::schema::{parse_schema, UriSchema};
 
 pub mod domain;
-pub use self::domain::{parse_domain, Domain};
+pub use self::domain::{parse_domain, parse_port, Domain};
 
 pub mod params;
 pub use self::params::{parse_param, parse_params, UriParam};
