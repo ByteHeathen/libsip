@@ -2,13 +2,13 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 use crate::{
-    core::{parse_transport, Transport},
+    core::{is_token, parse_transport, Transport},
     uri::{parse_domain, parse_port, Domain},
 };
 
 use nom::{
     IResult,
-    character::{is_alphabetic, is_alphanumeric},
+    character::{is_alphabetic},
     error::ParseError,
     bytes::complete::{ take_while, tag},
     combinator::map,
@@ -81,7 +81,7 @@ pub fn parse_named_param<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResul
     let (input, _) = tag(";")(input)?;
     let (input, key) = take_while(is_alphabetic)(input)?;
     let (input, _) = tag("=")(input)?;
-    let (input, value) = take_while(|item| is_alphanumeric(item) || b'.' == item)(input)?;
+    let (input, value) = take_while(is_token)(input)?;
     UriParam::from_key::<E>(key, value)
         .and_then(|item| Ok((input, item)))
 }

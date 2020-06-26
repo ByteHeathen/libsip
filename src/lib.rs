@@ -59,7 +59,7 @@ extern crate serde;
 mod macros;
 
 mod client;
-mod core;
+pub mod core;
 pub mod headers;
 mod parse;
 mod request;
