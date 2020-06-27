@@ -1,18 +1,18 @@
 use nom::{
-    IResult,
     branch::alt,
-    error::ParseError,
-    combinator::{opt, map_res},
     bytes::complete::take_while,
-    character::{
-        *,
-        complete::char
-    }
+    character::{complete::char, *},
+    combinator::{map_res, opt},
+    error::ParseError,
+    IResult,
 };
 
 use crate::{parse::*, uri::parse_uri, Uri};
 
-use std::{collections::HashMap, fmt};
+use std::{
+    collections::{hash_map::Entry, HashMap},
+    fmt,
+};
 
 /// Header Value for Named Headers,
 /// e.g. From, To, Contact
@@ -32,8 +32,30 @@ impl NamedHeader {
         }
     }
 
-    pub fn name<S: Into<String>>(mut self, name: S) -> NamedHeader {
+    /// Sets `display_name` of this header
+    pub fn name<S: Into<String>>(mut self, name: S) -> Self {
         self.display_name = Some(name.into());
+        self
+    }
+
+    /// Adds a parameter with a given name and a given value to `params`.
+    ///
+    /// If there is already a parameter with a given name, its value is changed because [RFC3261: Page 31, Header Field Format](https://tools.ietf.org/html/rfc3261#page-31) defines that "any given parameter-name MUST NOT appear more than once"
+    pub fn param<N, V>(mut self, name: N, value: V) -> Self
+    where
+        N: Into<String>,
+        V: Into<String>,
+    {
+        let name = name.into();
+        let value = value.into();
+        match self.params.entry(name) {
+            Entry::Occupied(mut entry) => {
+                entry.insert(value);
+            },
+            Entry::Vacant(entry) => {
+                entry.insert(value);
+            },
+        }
         self
     }
 }
@@ -59,7 +81,9 @@ impl fmt::Display for NamedHeader {
 }
 
 /// Parse a single NamedHeader param value.
-pub fn parse_named_field_param<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], (String, String), E> {
+pub fn parse_named_field_param<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], (String, String), E> {
     let (input, _) = char(';')(input)?;
     let (input, key) = map_res(take_while(is_alphabetic), slice_to_string::<E>)(input)?;
     let (input, _) = char('=')(input)?;
@@ -69,21 +93,26 @@ pub fn parse_named_field_param<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> 
 
 /// Parse the name part of the NamedHeader.
 pub fn parse_name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], String, E> {
-    Ok(
-        alt::<_, _, E, _>((parse_quoted_string::<E>, parse_unquoted_string::<E>))(input)?
-    )
+    Ok(alt::<_, _, E, _>((
+        parse_quoted_string::<E>,
+        parse_unquoted_string::<E>,
+    ))(input)?)
 }
 
 /// Parse a stream of text that is not quoted. This will stop
 /// at the first ' ' char the input contains.
-pub fn parse_unquoted_string<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], String, E> {
+pub fn parse_unquoted_string<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], String, E> {
     let (input, string_data) = map_res(take_while(is_alphabetic), slice_to_string::<E>)(input)?;
     let (input, _) = char(' ')(input)?;
     Ok((input, string_data))
 }
 
 /// Parse a single NamedHeader value.
-pub fn parse_named_field_value<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], (Option<String>, Uri), E> {
+pub fn parse_named_field_value<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], (Option<String>, Uri), E> {
     let (input, name) = opt(parse_name)(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
     let (input, _) = opt(char('<'))(input)?;
@@ -93,7 +122,9 @@ pub fn parse_named_field_value<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> 
 }
 
 /// Parse as many valid named field params as the input contains.
-pub fn parse_named_field_params<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], HashMap<String, String>, E> {
+pub fn parse_named_field_params<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], HashMap<String, String>, E> {
     let mut map = HashMap::new();
     let mut input = input;
     while let Ok((data, (key, value))) = parse_named_field_param::<E>(input) {

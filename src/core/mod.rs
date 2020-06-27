@@ -11,3 +11,6 @@ pub use self::version::{parse_version, Version};
 
 pub mod message;
 pub use self::message::{parse_message, parse_request, parse_response, SipMessage};
+
+pub mod parse;
+pub use self::parse::is_token;
