@@ -3,6 +3,7 @@ mod content;
 mod language;
 mod named;
 pub mod parse;
+pub mod sub_state;
 pub mod via;
 mod write;
 pub use self::{
@@ -10,7 +11,8 @@ pub use self::{
     content::ContentType,
     language::Language,
     named::NamedHeader,
-    parse::parse_header
+    parse::parse_header,
+    sub_state::SubState,
 };
 
 use crate::core::Method;
@@ -45,6 +47,16 @@ impl Headers {
         for h in &self.0 {
             if let Header::Expires(i) = h {
                 return Some(Header::Expires(*i));
+            }
+        }
+        None
+    }
+
+    /// Return the Event header if one is present.
+    pub fn event(&self) -> Option<Header> {
+        for h in &self.0 {
+            if let Header::Event(a) = h {
+                return Some(Header::Event(a.clone()));
             }
         }
         None
@@ -110,6 +122,16 @@ impl Headers {
         None
     }
 
+    /// Return the Subscription-State header if one is present.
+    pub fn sub_state(&self) -> Option<Header> {
+        for h in &self.0 {
+            if let Header::SubState(s) = h {
+                return Some(Header::SubState(s.clone()));
+            }
+        }
+        None
+    }
+
     /// Return XFS Sending Header if one is present.
     pub fn xfs_sending_message(&self) -> Option<Header> {
         for h in &self.0 {
@@ -139,6 +161,7 @@ pub enum Header {
     ReplyTo(NamedHeader),
     CSeq(u32, Method),
     MaxForwards(u32),
+    Event(String),
     Expires(u32),
     Accept(Vec<Method>),
     ContentLength(u32),
@@ -168,6 +191,7 @@ pub enum Header {
     RetryAfter(String),
     Route(String),
     Subject(String),
+    SubState(SubState),
     RecordRoute(String),
     Server(String),
     Supported(Vec<String>),

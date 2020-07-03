@@ -1,30 +1,18 @@
-use nom::character::*;
-use nom::{
-    IResult,
-    error::ParseError,
-    combinator::{
-        map, opt,
-        map_res,
-    },
-    sequence::{
-        pair
-    },
-    multi::{
-        separated_list0
-    },
-    character::complete::{
-        char
-    },
-    bytes::complete::{
-        tag_no_case, take_while,
-        tag, take_until
-    }
-};
-use super::{content::*, language::*, named::*, *};
+use super::{content::*, language::*, named::*, sub_state::parse_subscription_state_header, *};
 use crate::{
     core::{parse_method, parse_transport, parse_version},
     parse::*,
     uri::parse_uri,
+};
+use nom::{
+    branch::alt,
+    bytes::complete::{tag, tag_no_case, take_until, take_while},
+    character::{complete::char, *},
+    combinator::{map, map_res, opt},
+    error::ParseError,
+    multi::separated_list0,
+    sequence::pair,
+    IResult,
 };
 
 use std::collections::HashMap;
@@ -56,6 +44,7 @@ named!(pub _parse_header<Header>, alt!(
     parse_date_header |
     parse_error_info_header |
     parse_expires_header |
+    parse_event_header |
     parse_from_header |
     parse_in_reply_to_header |
     parse_max_forwards_header |
@@ -73,6 +62,7 @@ named!(pub _parse_header<Header>, alt!(
     parse_route_header |
     parse_server_header |
     parse_subject_header |
+    parse_subscription_state_header |
     parse_supported_header |
     parse_timestamp_header |
     parse_to_header |
@@ -86,7 +76,7 @@ named!(pub _parse_header<Header>, alt!(
 ));
 
 macro_rules! impl_u32_parser {
-    ($name:tt, $tag:tt, $variant: ident) => {
+    ($name:tt, $tag:tt, $variant:ident) => {
         pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
@@ -96,23 +86,24 @@ macro_rules! impl_u32_parser {
             let (input, _) = tag("\r\n")(input)?;
             Ok((input, Header::$variant(value)))
         }
-    }
+    };
 }
 macro_rules! impl_f32_parser {
-    ($name:tt, $tag:tt, $variant: ident) => {
+    ($name:tt, $tag:tt, $variant:ident) => {
         pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag_no_case($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, _) = char(':')(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
-            let (input, value) = map_res(take_while(|item| is_digit(item) || item == b'.'), parse_f32)(input)?;
+            let (input, value) =
+                map_res(take_while(|item| is_digit(item) || item == b'.'), parse_f32)(input)?;
             Ok((input, Header::$variant(value)))
         }
-    }
+    };
 }
 
 macro_rules! impl_string_parser {
-    ($name:tt, $tag:tt, $variant: ident) => {
+    ($name:tt, $tag:tt, $variant:ident) => {
         pub fn $name<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
             let (input, _) = tag_no_case::<_, _, E>($tag)(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
@@ -122,7 +113,7 @@ macro_rules! impl_string_parser {
             let (input, _) = tag("\r\n")(input)?;
             Ok((input, Header::$variant(value)))
         }
-    }
+    };
 }
 
 macro_rules! impl_array_parser {
@@ -136,7 +127,7 @@ macro_rules! impl_array_parser {
             let (input, _) = tag("\r\n")(input)?;
             Ok((input, Header::$variant(data)))
         }
-    }
+    };
 }
 
 macro_rules! impl_named_parser {
@@ -149,9 +140,16 @@ macro_rules! impl_named_parser {
             let (input, out) = parse_named_field_value(input)?;
             let (input, params) = parse_named_field_params(input)?;
             let (input, _) = tag("\r\n")(input)?;
-            Ok((input, Header::$variant(NamedHeader { display_name: out.0, uri: out.1, params: params })))
+            Ok((
+                input,
+                Header::$variant(NamedHeader {
+                    display_name: out.0,
+                    uri: out.1,
+                    params: params,
+                }),
+            ))
         }
-    }
+    };
 }
 
 macro_rules! impl_type_parser {
@@ -164,7 +162,7 @@ macro_rules! impl_type_parser {
             let (input, ty) = parse_content_type::<E>(input)?;
             Ok((input, Header::$variant(ty)))
         }
-    }
+    };
 }
 
 macro_rules! impl_lang_parser {
@@ -174,16 +172,16 @@ macro_rules! impl_lang_parser {
             let (input, _) = opt(take_while(is_space))(input)?;
             let (input, _) = char(':')(input)?;
             let (input, _) = opt(take_while(is_space))(input)?;
-            let (input, ty) = parse_language(input).map_err(|_| nom::Err::Failure(
-                E::from_error_kind(input, nom::error::ErrorKind::IsNot)
-              )
-            )?;
+            let (input, ty) = parse_language(input).map_err(|_| {
+                nom::Err::Failure(E::from_error_kind(input, nom::error::ErrorKind::IsNot))
+            })?;
             Ok((input, Header::$variant(ty)))
         }
-    }
+    };
 }
 
 impl_u32_parser!(parse_expires_header, "Expires", Expires);
+impl_string_parser!(parse_event_header, "Event", Event);
 impl_u32_parser!(parse_min_expires_header, "Min-Expires", MinExpires);
 impl_u32_parser!(parse_content_length_header, "Content-Length", ContentLength);
 impl_u32_parser!(parse_max_forwards_header, "Max-Forwards", MaxForwards);
@@ -261,7 +259,9 @@ impl_lang_parser!(
     AcceptLanguage
 );
 
-fn parse_auth_header_vars<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], HashMap<String, String>, E> {
+fn parse_auth_header_vars<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], HashMap<String, String>, E> {
     let mut map = HashMap::new();
     let mut data = input;
     while let Ok((remains, (key, value))) = parse_key_value_pair::<E>(data) {
@@ -271,17 +271,23 @@ fn parse_auth_header_vars<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResu
     Ok((data, map))
 }
 
-pub fn parse_other_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+pub fn parse_other_header<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
-    let (input, key) = map_res(take_while(|item| is_alphanumeric(item) || item == b'-'), slice_to_string::<E>)(input)?;
+    let (input, key) = map_res(
+        take_while(|item| is_alphanumeric(item) || item == b'-'),
+        slice_to_string::<E>,
+    )(input)?;
     let (input, _) = char(':')(input)?;
     let (input, value) = map_res(take_until("\r"), slice_to_string::<E>)(input)?;
     let (input, _) = tag("\r\n")(input)?;
     Ok((input, Header::Other(key, value)))
 }
 
-pub fn parse_cseq_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, 
-E> {
+pub fn parse_cseq_header<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
     let (input, _) = tag_no_case("CSeq")(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
@@ -294,7 +300,9 @@ E> {
     Ok((input, Header::CSeq(value, method)))
 }
 
-pub fn parse_via_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+pub fn parse_via_header<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Header, E> {
     let (input, _) = tag_no_case("Via")(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
     let (input, _) = char(':')(input)?;
@@ -304,10 +312,19 @@ pub fn parse_via_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult
     let (input, transport) = parse_transport(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
     let (input, uri) = parse_uri(input)?;
-    Ok((input, Header::Via(via::ViaHeader { version, transport, uri })))
+    Ok((
+        input,
+        Header::Via(via::ViaHeader {
+            version,
+            transport,
+            uri,
+        }),
+    ))
 }
 
-pub fn parse_www_authenticate_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+pub fn parse_www_authenticate_header<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
     let (input, _) = tag_no_case("WWW-Authenticate")(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
@@ -318,10 +335,15 @@ pub fn parse_www_authenticate_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8
     let (input, res) = parse_auth_header_vars(input)?;
     let (input, _) = opt(char(' '))(input)?;
     let (input, _) = tag("\r\n")(input)?;
-    Ok((input, Header::WwwAuthenticate(auth::AuthHeader(schema, res))))
+    Ok((
+        input,
+        Header::WwwAuthenticate(auth::AuthHeader(schema, res)),
+    ))
 }
 
-pub fn parse_authorization_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header, E> {
+pub fn parse_authorization_header<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Header, E> {
     let (input, _) = opt(tag("\r\n"))(input)?;
     let (input, _) = tag_no_case("Authorization")(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
@@ -335,7 +357,9 @@ pub fn parse_authorization_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) 
     Ok((input, Header::Authorization(auth::AuthHeader(schema, res))))
 }
 
-pub fn parse_key_value_pair<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], (String, String), E> {
+pub fn parse_key_value_pair<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], (String, String), E> {
     let (input, _) = opt(char(','))(input)?;
     let (input, _) = opt(char(' '))(input)?;
     let (input, key) = map_res(take_while(is_alphanumeric), slice_to_string::<E>)(input)?;
@@ -344,6 +368,81 @@ pub fn parse_key_value_pair<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IRe
     Ok((input, (key, value)))
 }
 
-pub fn parse_auth_schema<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], auth::AuthSchema, E> {
-    Ok(map(tag_no_case("Digest"), |_| auth::AuthSchema::Digest)(input)?)
+pub fn parse_auth_schema<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], auth::AuthSchema, E> {
+    Ok(map(tag_no_case("Digest"), |_| auth::AuthSchema::Digest)(
+        input,
+    )?)
+}
+
+/// Parses "generic-param" ([RFC3261: Page 227, "generic-param"](https://tools.ietf.org/html/rfc3261#page-227))
+/// # Examples
+///
+/// ```
+/// use libsip::headers::parse::parse_generic_param;
+/// use nom::error::VerboseError;
+/// assert_eq!(
+///     parse_generic_param::<VerboseError<_>>(b";expires=30"),
+///     Ok((
+///         "".as_bytes(),
+///         (String::from("expires"), Some(String::from("30")))
+///     ))
+/// );
+///
+/// assert_eq!(
+///     parse_generic_param::<VerboseError<_>>(b";some-param=\"comma,separated,values\""),
+///     Ok((
+///         "".as_bytes(),
+///         (
+///             String::from("some-param"),
+///             Some(String::from("comma,separated,values"))
+///         )
+///     ))
+/// );
+///
+/// assert_eq!(
+///     parse_generic_param::<VerboseError<_>>(b";+param-without-value"),
+///     Ok(("".as_bytes(), (String::from("+param-without-value"), None)))
+/// );
+/// ```
+pub fn parse_generic_param<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], (String, Option<String>), E> {
+    let (input, _) = char(';')(input)?;
+    let (input, name) = map_res(take_while(is_token), slice_to_string_nullable)(input)?;
+    let (input, chr) = opt(char('='))(input)?;
+    if chr.is_some() {
+        let (input, value) = parse_gen_value(input)?;
+        Ok((input, (name, Some(value))))
+    } else {
+        Ok((input, (name, None)))
+    }
+}
+
+/// Parses "gen-value" ([RFC3261: Page 227, "gen-value"](https://tools.ietf.org/html/rfc3261#page-227)), however, parsing host isn't implemented
+/// # Examples
+///
+/// ```
+/// use libsip::headers::parse::parse_gen_value;
+/// use nom::error::VerboseError;
+/// assert_eq!(
+///     parse_gen_value::<VerboseError<_>>(b"30"),
+///     Ok(("".as_bytes(), String::from("30")))
+/// );
+/// assert_eq!(
+///     parse_gen_value::<VerboseError<_>>(b"\"comma,separated,values\""),
+///     Ok(("".as_bytes(), String::from("comma,separated,values")))
+/// );
+/// ```
+pub fn parse_gen_value<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], String, E> {
+    // gen-value = token / host / quoted-string
+    // host isn't parsed yet
+    let (input, value) = alt::<_, _, E, _>((
+        parse_quoted_string::<E>,
+        map_res(take_while::<_, _, E>(is_token), slice_to_string_nullable),
+    ))(input)?;
+    Ok((input, value))
 }

@@ -9,7 +9,7 @@
 //! ```rust
 //! extern crate libsip;
 //! extern crate nom;
-//! 
+//!
 //! use libsip::parse_message;
 //! use nom::error::VerboseError;
 //!
@@ -61,30 +61,25 @@ mod macros;
 mod client;
 pub mod core;
 pub mod headers;
-mod parse;
+pub mod parse;
 mod request;
 mod response;
 pub mod uri;
 
 pub use crate::{
     client::{
-        SoftPhone, MessageHelper, MessageWriter,
-        InviteHelper, RegistrationManager,
-        HeaderWriteConfig
+        HeaderWriteConfig, InviteHelper, MessageHelper, MessageWriter, RegistrationManager,
+        SoftPhone,
+    },
+    core::{
+        parse_message, parse_request, parse_response, parse_version, Method, SipMessage, Transport,
+        Version,
+    },
+    headers::{
+        parse_header, via::ViaHeader, AuthContext, AuthHeader, AuthSchema, ContentType, Header,
+        Headers, Language, NamedHeader,
     },
     request::RequestGenerator,
     response::ResponseGenerator,
-    core::{
-        Transport, Method, Version,
-        SipMessage, parse_message, parse_version,
-        parse_response, parse_request
-    },
-    headers::{
-        ContentType,
-        Language,
-        Header, Headers, NamedHeader,
-        AuthHeader, AuthContext, parse_header,
-        AuthSchema, via::ViaHeader
-    },
-    uri::{Domain, UriParam, Uri, UriAuth, UriSchema, parse_uri}
+    uri::{parse_uri, Domain, Uri, UriAuth, UriParam, UriSchema},
 };

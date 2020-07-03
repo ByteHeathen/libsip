@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{collections::HashMap, fmt};
 
 use super::*;
 
@@ -12,6 +12,7 @@ impl fmt::Display for Header {
             Header::CSeq(num, method) => write!(f, "CSeq: {} {}", num, method),
             Header::MaxForwards(num) => write!(f, "Max-Forwards: {}", num),
             Header::Expires(num) => write!(f, "Expires: {}", num),
+            Header::Event(value) => write!(f, "Event: {}", value),
             Header::Accept(methods) => write_method_array_header("Accept", f, methods),
             Header::Allow(methods) => write_method_array_header("Allow", f, methods),
             Header::ContentEncoding(ty) => write_simple_field("Content-Encoding", ty, f),
@@ -40,6 +41,7 @@ impl fmt::Display for Header {
             Header::RetryAfter(data) => write_simple_field("Retry-After", data, f),
             Header::Route(data) => write_simple_field("Route", data, f),
             Header::Subject(data) => write_simple_field("Subject", data, f),
+            Header::SubState(data) => write_simple_field("Subscription-State", data, f),
             Header::RecordRoute(data) => write_simple_field("Record-Route", data, f),
             Header::Server(data) => write_simple_field("Server", data, f),
             Header::Supported(data) => write_string_array_header("Supported", f, data),
@@ -80,10 +82,32 @@ fn write_simple_field<D: fmt::Display>(
 ) -> fmt::Result {
     write!(f, "{}: {}", header, data)
 }
+
 fn write_auth_header<D: fmt::Display>(
     header: &str,
     data: D,
     f: &mut fmt::Formatter,
 ) -> fmt::Result {
     write!(f, "{}: {}", header, data)
+}
+
+/// Writes an optional parameter, prepending it with ';'.
+/// Writing happens only if the parameter has any value
+pub fn write_optional_param<V: fmt::Display>(param: &str, value: &Option<V>, f: &mut fmt::Formatter) -> fmt::Result {
+    if let Some(value) = value {
+        write!(f, ";{}={}", param, value)
+    } else {
+        Ok(())
+    }
+}
+
+/// Writes generic parameters, adding ';' before each (including the first one)
+pub fn write_generic_params(params: &HashMap<String, Option<String>>, f: &mut fmt::Formatter) -> fmt::Result {
+    for (name, value) in params.iter() {
+        write!(f, ";{}", name)?;
+        if let Some(value) = value {
+            write!(f, "={}", value)?;
+        }
+    }
+    Ok(())
 }

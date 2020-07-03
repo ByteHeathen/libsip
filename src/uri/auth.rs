@@ -15,8 +15,8 @@ use std::fmt;
 /// URI Credentials
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct UriAuth {
-    username: String,
-    password: Option<String>,
+    pub username: String,
+    pub password: Option<String>,
 }
 
 impl UriAuth {
