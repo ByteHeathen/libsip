@@ -3,16 +3,16 @@ mod content;
 mod language;
 mod named;
 pub mod parse;
-pub mod sub_state;
+pub mod subscription_state;
 pub mod via;
 mod write;
 pub use self::{
-    auth::{AuthHeader, AuthContext, AuthSchema},
+    auth::{AuthContext, AuthHeader, AuthSchema},
     content::ContentType,
     language::Language,
     named::NamedHeader,
     parse::parse_header,
-    sub_state::SubState,
+    subscription_state::SubscriptionState,
 };
 
 use crate::core::Method;
@@ -123,10 +123,10 @@ impl Headers {
     }
 
     /// Return the Subscription-State header if one is present.
-    pub fn sub_state(&self) -> Option<Header> {
+    pub fn subscription_state(&self) -> Option<Header> {
         for h in &self.0 {
-            if let Header::SubState(s) = h {
-                return Some(Header::SubState(s.clone()));
+            if let Header::SubscriptionState(s) = h {
+                return Some(Header::SubscriptionState(s.clone()));
             }
         }
         None
@@ -191,7 +191,7 @@ pub enum Header {
     RetryAfter(String),
     Route(String),
     Subject(String),
-    SubState(SubState),
+    SubscriptionState(SubscriptionState),
     RecordRoute(String),
     Server(String),
     Supported(Vec<String>),

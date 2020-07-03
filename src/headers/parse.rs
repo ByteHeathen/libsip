@@ -1,4 +1,6 @@
-use super::{content::*, language::*, named::*, sub_state::parse_subscription_state_header, *};
+use super::{
+    content::*, language::*, named::*, subscription_state::parse_subscription_state_header, *,
+};
 use crate::{
     core::{parse_method, parse_transport, parse_version},
     parse::*,
@@ -14,7 +16,6 @@ use nom::{
     sequence::pair,
     IResult,
 };
-
 use std::collections::HashMap;
 
 pub fn parse_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header> {

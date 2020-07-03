@@ -1,4 +1,5 @@
 use crate::{
+    core::extract_opt_param,
     headers::{
         named::parse_named_field_params,
         write::{write_generic_params, write_optional_param},
@@ -14,10 +15,10 @@ use nom::{
     error::ParseError,
     IResult,
 };
-use std::{collections::HashMap, fmt, str::FromStr};
+use std::{collections::HashMap, fmt};
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum SubState {
+pub enum SubscriptionState {
     Active {
         expires: Option<u32>,
         params: HashMap<String, Option<String>>,
@@ -37,7 +38,20 @@ pub enum SubState {
     },
 }
 
-impl fmt::Display for SubState {
+impl SubscriptionState {
+    pub fn set_params(&mut self, params: HashMap<String, Option<String>>) {
+        match self {
+            Self::Active { params: p, .. }
+            | Self::Pending { params: p, .. }
+            | Self::Terminated { params: p, .. }
+            | Self::Other { params: p, .. } => {
+                *p = params;
+            },
+        }
+    }
+}
+
+impl fmt::Display for SubscriptionState {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Active { expires, params } => {
@@ -73,7 +87,7 @@ impl fmt::Display for SubState {
 ///
 /// ```
 /// use libsip::{
-///     headers::sub_state::{parse_subscription_state_header, SubState},
+///     headers::subscription_state::{parse_subscription_state_header, SubscriptionState},
 ///     Header,
 /// };
 /// use nom::error::VerboseError;
@@ -87,7 +101,7 @@ impl fmt::Display for SubState {
 ///     ),
 ///     Ok((
 ///         "".as_bytes(),
-///         Header::SubState(SubState::Active {
+///         Header::SubscriptionState(SubscriptionState::Active {
 ///             expires: Some(600),
 ///             params: params.clone(),
 ///         })
@@ -100,7 +114,7 @@ impl fmt::Display for SubState {
 ///     ),
 ///     Ok((
 ///         "".as_bytes(),
-///         Header::SubState(SubState::Pending {
+///         Header::SubscriptionState(SubscriptionState::Pending {
 ///             expires: Some(600),
 ///             params: params.clone()
 ///         })
@@ -113,7 +127,7 @@ impl fmt::Display for SubState {
 ///     ),
 ///     Ok((
 ///         "".as_bytes(),
-///         Header::SubState(SubState::Terminated {
+///         Header::SubscriptionState(SubscriptionState::Terminated {
 ///             retry_after: Some(600),
 ///             reason: Some(String::from("giveup")),
 ///             params
@@ -132,85 +146,54 @@ pub fn parse_subscription_state_header<'a, E: ParseError<&'a [u8]>>(
     let (input, mut state) = parse_subscription_state_without_params(input)?;
     let (input, _) = parse_subscription_state_params(input, &mut state)?;
     let (input, _) = tag("\r\n")(input)?;
-    Ok((input, Header::SubState(state)))
+    Ok((input, Header::SubscriptionState(state)))
 }
 
 pub fn parse_subscription_state_without_params<'a, E: ParseError<&'a [u8]>>(
     input: &'a [u8],
-) -> IResult<&'a [u8], SubState, E> {
+) -> IResult<&'a [u8], SubscriptionState, E> {
     alt::<_, _, E, _>((
-        map(tag("active"), |_| SubState::Active {
+        map(tag("active"), |_| SubscriptionState::Active {
             expires: None,
             params: HashMap::new(),
         }),
-        map(tag("pending"), |_| SubState::Pending {
+        map(tag("pending"), |_| SubscriptionState::Pending {
             expires: None,
             params: HashMap::new(),
         }),
-        map(tag("terminated"), |_| SubState::Terminated {
+        map(tag("terminated"), |_| SubscriptionState::Terminated {
             retry_after: None,
             reason: None,
             params: HashMap::new(),
         }),
-        map(take_while(is_token), |state: &[u8]| SubState::Other {
-            state: String::from_utf8_lossy(state).to_string(),
-            params: HashMap::new(),
+        map(take_while(is_token), |state: &[u8]| {
+            SubscriptionState::Other {
+                state: String::from_utf8_lossy(state).to_string(),
+                params: HashMap::new(),
+            }
         }),
     ))(input)
 }
 
 pub fn parse_subscription_state_params<'a, E: ParseError<&'a [u8]>>(
     input: &'a [u8],
-    state: &mut SubState,
+    state: &mut SubscriptionState,
 ) -> IResult<&'a [u8], (), E> {
     let (input, mut parsed_params) = parse_named_field_params(input)?;
     match state {
-        SubState::Active { expires, .. } | SubState::Pending { expires, .. } => {
-            extract_optional_param_u32(&mut parsed_params, "expires", expires);
+        SubscriptionState::Active { expires, .. } | SubscriptionState::Pending { expires, .. } => {
+            extract_opt_param(&mut parsed_params, "expires", expires);
         },
-        SubState::Terminated {
+        SubscriptionState::Terminated {
             retry_after,
             reason,
             ..
         } => {
-            extract_optional_param_u32(&mut parsed_params, "retry-after", retry_after);
-            extract_optional_param_string(&mut parsed_params, "reason", reason);
+            extract_opt_param(&mut parsed_params, "retry-after", retry_after);
+            extract_opt_param(&mut parsed_params, "reason", reason);
         },
-        SubState::Other { .. } => {},
+        SubscriptionState::Other { .. } => {},
     }
-    match state {
-        SubState::Active { params, .. }
-        | SubState::Pending { params, .. }
-        | SubState::Terminated { params, .. }
-        | SubState::Other { params, .. } => *params = parsed_params,
-    }
+    state.set_params(parsed_params);
     Ok((input, ()))
-}
-
-fn extract_optional_param_u32(
-    params: &mut HashMap<String, Option<String>>,
-    param: &str,
-    extracted_value: &mut Option<u32>,
-) {
-    if let Some(Some(value)) = params.get(param) {
-        if let Ok(value) = u32::from_str(value) {
-            *extracted_value = Some(value)
-        }
-    }
-    if extracted_value.is_some() {
-        params.remove(param);
-    }
-}
-
-fn extract_optional_param_string(
-    params: &mut HashMap<String, Option<String>>,
-    param: &str,
-    extracted_value: &mut Option<String>,
-) {
-    if let Some(Some(value)) = params.get(param) {
-        *extracted_value = Some(value.clone());
-    }
-    if extracted_value.is_some() {
-        params.remove(param);
-    }
 }

@@ -41,7 +41,7 @@ impl fmt::Display for Header {
             Header::RetryAfter(data) => write_simple_field("Retry-After", data, f),
             Header::Route(data) => write_simple_field("Route", data, f),
             Header::Subject(data) => write_simple_field("Subject", data, f),
-            Header::SubState(data) => write_simple_field("Subscription-State", data, f),
+            Header::SubscriptionState(data) => write_simple_field("Subscription-State", data, f),
             Header::RecordRoute(data) => write_simple_field("Record-Route", data, f),
             Header::Server(data) => write_simple_field("Server", data, f),
             Header::Supported(data) => write_string_array_header("Supported", f, data),
@@ -91,9 +91,12 @@ fn write_auth_header<D: fmt::Display>(
     write!(f, "{}: {}", header, data)
 }
 
-/// Writes an optional parameter, prepending it with ';'.
-/// Writing happens only if the parameter has any value
-pub fn write_optional_param<V: fmt::Display>(param: &str, value: &Option<V>, f: &mut fmt::Formatter) -> fmt::Result {
+/// Writes an optional parameter if it has any value, prepending it with ';'.
+pub fn write_optional_param<V: fmt::Display>(
+    param: &str,
+    value: &Option<V>,
+    f: &mut fmt::Formatter,
+) -> fmt::Result {
     if let Some(value) = value {
         write!(f, ";{}={}", param, value)
     } else {
@@ -102,7 +105,10 @@ pub fn write_optional_param<V: fmt::Display>(param: &str, value: &Option<V>, f: 
 }
 
 /// Writes generic parameters, adding ';' before each (including the first one)
-pub fn write_generic_params(params: &HashMap<String, Option<String>>, f: &mut fmt::Formatter) -> fmt::Result {
+pub fn write_generic_params(
+    params: &HashMap<String, Option<String>>,
+    f: &mut fmt::Formatter,
+) -> fmt::Result {
     for (name, value) in params.iter() {
         write!(f, ";{}", name)?;
         if let Some(value) = value {
