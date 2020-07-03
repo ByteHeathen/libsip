@@ -4,11 +4,7 @@ use sha::{
     utils::{Digest, DigestExt},
 };
 
-use std::{
-    fmt,
-    collections::HashMap,
-    io::Result as IoResult
-};
+use std::{collections::HashMap, fmt, io::Result as IoResult};
 
 use crate::Uri;
 
@@ -62,7 +58,6 @@ pub struct AuthContext<'a> {
 }
 
 impl AuthHeader {
-
     /// Perform the authenticate action.
     pub fn authenticate<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         match self.0 {
@@ -127,7 +122,7 @@ impl AuthHeader {
         map.insert("response".into(), format!("{:x}", pass));
         Ok(AuthHeader(AuthSchema::Digest, map))
     }
- 
+
     /// Handle sha256 Digest auth method.
     fn handle_sha256_digest_auth<'a>(&self, ctx: AuthContext<'a>) -> IoResult<AuthHeader> {
         let realm = self

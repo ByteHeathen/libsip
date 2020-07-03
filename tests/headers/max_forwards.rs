@@ -1,5 +1,4 @@
-use libsip::*;
-use libsip::headers::parse::parse_max_forwards_header;
+use libsip::{headers::parse::parse_max_forwards_header, *};
 
 use nom::error::VerboseError;
 

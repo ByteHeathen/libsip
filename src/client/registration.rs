@@ -1,10 +1,6 @@
 use crate::*;
 
-use std::io::{
-    Result as IoResult,
-    Error as IoError,
-    ErrorKind as IoErrorKind
-};
+use std::io::{Error as IoError, ErrorKind as IoErrorKind, Result as IoResult};
 
 /// Handle's the SIP registration process.
 /// This structure is designed to handle the authentication

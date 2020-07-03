@@ -146,7 +146,7 @@ macro_rules! impl_named_parser {
                 Header::$variant(NamedHeader {
                     display_name: out.0,
                     uri: out.1,
-                    params: params,
+                    parameters: params,
                 }),
             ))
         }

@@ -1,13 +1,11 @@
+use crate::parse::parse_u8;
 use nom::{
-    IResult,
-    bytes::complete::tag,
-    character::is_digit,
-    character::complete::char as parse_char,
+    bytes::complete::{tag, take_while1},
+    character::{complete::char as parse_char, is_digit},
     combinator::map_res,
     error::ParseError,
-    bytes::complete::take_while1
+    IResult,
 };
-use crate::parse::parse_u8;
 
 use std::fmt;
 
@@ -35,7 +33,9 @@ impl Version {
 }
 
 /// Parse the SIP protocol version.
-pub fn parse_version<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Version, E> {
+pub fn parse_version<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Version, E> {
     let (input, _) = tag("SIP/")(input)?;
     let (input, major) = map_res(take_while1(is_digit), parse_u8)(input)?;
     let (input, _) = parse_char('.')(input)?;

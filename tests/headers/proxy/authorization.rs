@@ -17,6 +17,8 @@ fn read() {
     let header = Header::ProxyAuthorization("call@id.com".into());
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_proxy_authorization_header::<VerboseError<&[u8]>>(b"Proxy-Authorization: call@id.com\r\n")
+        parse_proxy_authorization_header::<VerboseError<&[u8]>>(
+            b"Proxy-Authorization: call@id.com\r\n"
+        )
     );
 }

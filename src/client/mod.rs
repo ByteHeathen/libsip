@@ -13,10 +13,10 @@ pub use self::invite::{InviteHelper, InviteWriter};
 
 use crate::{Header, Headers, Method, SipMessage, Uri};
 
-use std::io::Result as IoResult;
-use std::io::Error as IoError;
-use std::io::ErrorKind as IoErrorKind;
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    io::{Error as IoError, ErrorKind as IoErrorKind, Result as IoResult},
+};
 
 /// This struct is used in the client module when creating sip messages
 /// it is used to specify some common values for the generated sip
@@ -33,7 +33,6 @@ pub struct HeaderWriteConfig {
 }
 
 impl HeaderWriteConfig {
-
     /// Write configured headers into the provided Vec.
     pub fn write_headers_vec(&self, m: &mut Vec<Header>) {
         if let Some(agent) = &self.user_agent {
@@ -86,7 +85,7 @@ pub struct SoftPhone {
     /// Registration manage instance.
     reg: RegistrationManager,
     /// List of ongoing calls.
-    calls: HashMap<String, InviteHelper>
+    calls: HashMap<String, InviteHelper>,
 }
 
 impl SoftPhone {
@@ -98,7 +97,7 @@ impl SoftPhone {
             msg: MessageWriter::new(account_uri.clone()),
             invite: InviteWriter::new(account_uri.clone()),
             reg: RegistrationManager::new(account_uri, local_uri),
-            calls: HashMap::new()
+            calls: HashMap::new(),
         }
     }
 
@@ -157,8 +156,7 @@ impl SoftPhone {
     pub fn write_message(&mut self, b: Vec<u8>, uri: Uri) -> IoResult<SipMessage> {
         Ok(self
             .msg
-            .write_message(b, uri, self.reg.via_header(), &self.header_cfg)?
-        )
+            .write_message(b, uri, self.reg.via_header(), &self.header_cfg)?)
     }
 
     /// Send a new Invite Request to `uri`.
@@ -180,7 +178,7 @@ impl SoftPhone {
     /// recieved invitation.
     pub fn get_accept_request(&mut self, body: Vec<u8>, call: &str) -> IoResult<SipMessage> {
         if let Some(invite) = self.calls.get_mut(call) {
-          Ok(invite.accept(body, &self.header_cfg)?)
+            Ok(invite.accept(body, &self.header_cfg)?)
         } else {
             Err(IoError::new(IoErrorKind::NotFound, "Call not found"))
         }
@@ -190,7 +188,7 @@ impl SoftPhone {
     /// received invitation.
     pub fn get_bye_request(&mut self, call: &str) -> IoResult<SipMessage> {
         if let Some(invite) = self.calls.get_mut(call) {
-          Ok(invite.bye(&self.header_cfg)?)
+            Ok(invite.bye(&self.header_cfg)?)
         } else {
             Err(IoError::new(IoErrorKind::NotFound, "Call not found"))
         }

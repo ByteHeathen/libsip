@@ -21,31 +21,31 @@ use std::{collections::HashMap, fmt};
 pub enum SubscriptionState {
     Active {
         expires: Option<u32>,
-        params: HashMap<String, Option<String>>,
+        parameters: HashMap<String, Option<String>>,
     },
     Pending {
         expires: Option<u32>,
-        params: HashMap<String, Option<String>>,
+        parameters: HashMap<String, Option<String>>,
     },
     Terminated {
         retry_after: Option<u32>,
         reason: Option<String>,
-        params: HashMap<String, Option<String>>,
+        parameters: HashMap<String, Option<String>>,
     },
     Other {
         state: String,
-        params: HashMap<String, Option<String>>,
+        parameters: HashMap<String, Option<String>>,
     },
 }
 
 impl SubscriptionState {
     pub fn set_params(&mut self, params: HashMap<String, Option<String>>) {
         match self {
-            Self::Active { params: p, .. }
-            | Self::Pending { params: p, .. }
-            | Self::Terminated { params: p, .. }
-            | Self::Other { params: p, .. } => {
-                *p = params;
+            Self::Active { parameters, .. }
+            | Self::Pending { parameters, .. }
+            | Self::Terminated { parameters, .. }
+            | Self::Other { parameters, .. } => {
+                *parameters = params;
             },
         }
     }
@@ -54,29 +54,35 @@ impl SubscriptionState {
 impl fmt::Display for SubscriptionState {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Active { expires, params } => {
+            Self::Active {
+                expires,
+                parameters,
+            } => {
                 write!(f, "active")?;
                 write_optional_param("expires", expires, f)?;
-                write_generic_params(params, f)
+                write_generic_params(parameters, f)
             },
-            Self::Pending { expires, params } => {
+            Self::Pending {
+                expires,
+                parameters,
+            } => {
                 write!(f, "pending")?;
                 write_optional_param("expires", expires, f)?;
-                write_generic_params(params, f)
+                write_generic_params(parameters, f)
             },
             Self::Terminated {
                 retry_after,
                 reason,
-                params,
+                parameters,
             } => {
                 write!(f, "terminated")?;
                 write_optional_param("retry-after", retry_after, f)?;
                 write_optional_param("reason", reason, f)?;
-                write_generic_params(params, f)
+                write_generic_params(parameters, f)
             },
-            Self::Other { state, params } => {
+            Self::Other { state, parameters } => {
                 write!(f, "{}", state)?;
-                write_generic_params(params, f)
+                write_generic_params(parameters, f)
             },
         }
     }
@@ -103,7 +109,7 @@ impl fmt::Display for SubscriptionState {
 ///         "".as_bytes(),
 ///         Header::SubscriptionState(SubscriptionState::Active {
 ///             expires: Some(600),
-///             params: params.clone(),
+///             parameters: params.clone(),
 ///         })
 ///     ))
 /// );
@@ -116,7 +122,7 @@ impl fmt::Display for SubscriptionState {
 ///         "".as_bytes(),
 ///         Header::SubscriptionState(SubscriptionState::Pending {
 ///             expires: Some(600),
-///             params: params.clone()
+///             parameters: params.clone()
 ///         })
 ///     ))
 /// );
@@ -155,21 +161,21 @@ pub fn parse_subscription_state_without_params<'a, E: ParseError<&'a [u8]>>(
     alt::<_, _, E, _>((
         map(tag("active"), |_| SubscriptionState::Active {
             expires: None,
-            params: HashMap::new(),
+            parameters: HashMap::new(),
         }),
         map(tag("pending"), |_| SubscriptionState::Pending {
             expires: None,
-            params: HashMap::new(),
+            parameters: HashMap::new(),
         }),
         map(tag("terminated"), |_| SubscriptionState::Terminated {
             retry_after: None,
             reason: None,
-            params: HashMap::new(),
+            parameters: HashMap::new(),
         }),
         map(take_while(is_token), |state: &[u8]| {
             SubscriptionState::Other {
                 state: String::from_utf8_lossy(state).to_string(),
-                params: HashMap::new(),
+                parameters: HashMap::new(),
             }
         }),
     ))(input)

@@ -7,7 +7,7 @@ use nom::{
     IResult,
 };
 
-use crate::{parse::*, headers::parse::parse_generic_param, uri::parse_uri, Uri};
+use crate::{headers::parse::parse_generic_param, parse::*, uri::parse_uri, Uri};
 
 use std::{
     collections::{hash_map::Entry, HashMap},
@@ -20,14 +20,14 @@ use std::{
 pub struct NamedHeader {
     pub display_name: Option<String>,
     pub uri: Uri,
-    pub params: HashMap<String, Option<String>>,
+    pub parameters: HashMap<String, Option<String>>,
 }
 
 impl NamedHeader {
     pub fn new(uri: Uri) -> NamedHeader {
         NamedHeader {
             display_name: None,
-            params: HashMap::new(),
+            parameters: HashMap::new(),
             uri,
         }
     }
@@ -60,7 +60,7 @@ impl NamedHeader {
     {
         let name = name.into();
         let value = value.map(Into::into);
-        match self.params.entry(name) {
+        match self.parameters.entry(name) {
             Entry::Occupied(mut entry) => {
                 entry.insert(value);
             },
@@ -84,7 +84,7 @@ impl fmt::Display for NamedHeader {
         } else {
             write!(f, "{}", self.uri)?;
         }
-        for (key, value) in (&self.params).iter() {
+        for (key, value) in self.parameters.iter() {
             write!(f, ";{}", key)?;
             if let Some(value) = value {
                 write!(f, "={}", value)?;

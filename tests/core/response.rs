@@ -45,6 +45,8 @@ fn read_complex() {
         .unwrap();
     assert_eq!(
         Ok((remains.as_ref(), req)),
-        parse_response::<VerboseError<&[u8]>>(b"SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555")
+        parse_response::<VerboseError<&[u8]>>(
+            b"SIP/2.0 180 Ringing\r\nExpires: 10\r\nContent-Length: 5\r\n\r\n55555"
+        )
     );
 }

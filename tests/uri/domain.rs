@@ -1,5 +1,4 @@
-use libsip::*;
-use libsip::uri::parse_domain;
+use libsip::{uri::parse_domain, *};
 use nom::error::VerboseError;
 
 use std::net::Ipv4Addr;
@@ -25,7 +24,10 @@ fn read_domain() {
 fn read_ip_address() {
     let remains = vec![b' '];
     let domain = ip_domain!(10, 1, 10, 1);
-    assert_eq!(Ok((remains.as_ref(), domain)), parse_domain::<VerboseError<&[u8]>>(b"10.1.10.1 "));
+    assert_eq!(
+        Ok((remains.as_ref(), domain)),
+        parse_domain::<VerboseError<&[u8]>>(b"10.1.10.1 ")
+    );
 
     let remains = vec![b' '];
     let domain = ip_domain!(10, 1, 10, 1, 8080);

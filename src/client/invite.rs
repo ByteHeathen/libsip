@@ -1,22 +1,24 @@
-use std::io::{
-    Result as IoResult,
-    Error as IoError,
-    ErrorKind as IoErrorKind
-};
+use std::io::{Error as IoError, ErrorKind as IoErrorKind, Result as IoResult};
 
 use crate::*;
 
 macro_rules! impl_simple_header_method {
-    ($name:ident, $variant:ident, $ty: ident) => {
+    ($name:ident, $variant:ident, $ty:ident) => {
         /// Retrieve value of the $variant header.
         pub fn $name(&self) -> IoResult<$ty> {
             if let Some(Header::$variant(header)) = self.headers.$name() {
                 Ok(header)
             } else {
-                Err(IoError::new(IoErrorKind::InvalidInput, format!("invitiation doesnt contain a {} header", stringify!($variant))))
+                Err(IoError::new(
+                    IoErrorKind::InvalidInput,
+                    format!(
+                        "invitiation doesnt contain a {} header",
+                        stringify!($variant)
+                    ),
+                ))
             }
         }
-    }
+    };
 }
 
 /// Structure to ease getting data from a Sip INVITE request.
@@ -30,7 +32,6 @@ pub struct InviteHelper {
 }
 
 impl InviteHelper {
-
     impl_simple_header_method!(from, From, NamedHeader);
 
     impl_simple_header_method!(to, To, NamedHeader);
@@ -42,14 +43,16 @@ impl InviteHelper {
     /// Create a InviteHelper from the given SipMessage.
     pub fn new(msg: SipMessage) -> IoResult<InviteHelper> {
         match msg {
-            SipMessage::Request { uri, headers, body, .. } => {
-                InviteHelper::new_from_vars(uri, headers, body)
-            },
-            SipMessage::Response { .. } => {
-                Err(IoError::new(IoErrorKind::InvalidData, "Expected a SIP request"))
-            }
+            SipMessage::Request {
+                uri, headers, body, ..
+            } => InviteHelper::new_from_vars(uri, headers, body),
+            SipMessage::Response { .. } => Err(IoError::new(
+                IoErrorKind::InvalidData,
+                "Expected a SIP request",
+            )),
         }
     }
+
     /// Create an InviteHelper from the given variables.
     pub fn new_from_vars(uri: Uri, headers: Headers, body: Vec<u8>) -> IoResult<InviteHelper> {
         Ok(InviteHelper { uri, headers, body })
@@ -88,7 +91,7 @@ impl InviteHelper {
         header_cfg.write_headers(req.headers_ref_mut());
         req.build()
     }
-    
+
     /// Generate a Bye response for this Invite Request.
     pub fn bye(&self, header_cfg: &HeaderWriteConfig) -> IoResult<SipMessage> {
         let mut req = RequestGenerator::new()
@@ -115,7 +118,7 @@ impl InviteHelper {
         Ok(false)
     }
 
-        /// Get the messages required to cancel a invitation.
+    /// Get the messages required to cancel a invitation.
     pub fn cancel(&mut self, header_cfg: &HeaderWriteConfig) -> IoResult<(SipMessage, SipMessage)> {
         let mut out_headers = vec![];
         for header in self.headers.iter() {
@@ -146,24 +149,19 @@ impl InviteHelper {
     }
 }
 
-
 /// The InviteWriter Helps create an Invite Request
 /// sent to the `uri` given in the new function.
 #[derive(Debug)]
 pub struct InviteWriter {
     cseq: u32,
-    uri: Uri
+    uri: Uri,
 }
 
 impl InviteWriter {
-
     /// Create a new InviteHelper struct. `uri` is the uri to send
     /// the request too.
     pub fn new(uri: Uri) -> InviteWriter {
-        InviteWriter {
-            cseq: 0,
-            uri
-        }
+        InviteWriter { cseq: 0, uri }
     }
 
     /// Generate a Invite Request.

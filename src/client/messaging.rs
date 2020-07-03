@@ -1,22 +1,21 @@
-use std::io::{
-    Result as IoResult,
-    ErrorKind as IoErrorKind,
-    Error as IoError
-};
+use std::io::{Error as IoError, ErrorKind as IoErrorKind, Result as IoResult};
 
 use crate::*;
 
 macro_rules! impl_simple_header_method {
-    ($name:ident, $variant:ident, $ty: ident) => {
+    ($name:ident, $variant:ident, $ty:ident) => {
         /// Retrieve value of the $variant header.
         pub fn $name(&self) -> IoResult<$ty> {
             if let Some(Header::$variant(header)) = self.headers.$name() {
                 Ok(header)
             } else {
-                Err(IoError::new(IoErrorKind::InvalidInput, format!("message doesnt contain a {} header", stringify!($variant))))
+                Err(IoError::new(
+                    IoErrorKind::InvalidInput,
+                    format!("message doesnt contain a {} header", stringify!($variant)),
+                ))
             }
         }
-    }
+    };
 }
 
 /// Structure to ease getting data from a Sip Message request.
@@ -42,12 +41,13 @@ impl MessageHelper {
     /// Create a message helper from a SipMessage
     pub fn new(msg: SipMessage) -> IoResult<MessageHelper> {
         match msg {
-            SipMessage::Request { uri, headers, body, .. } => {
-                MessageHelper::new_from_vars(uri, headers, body)
-            },
-            SipMessage::Response { .. } => {
-                Err(IoError::new(IoErrorKind::InvalidData, "Expected a SIP request"))
-            }
+            SipMessage::Request {
+                uri, headers, body, ..
+            } => MessageHelper::new_from_vars(uri, headers, body),
+            SipMessage::Response { .. } => Err(IoError::new(
+                IoErrorKind::InvalidData,
+                "Expected a SIP request",
+            )),
         }
     }
 
