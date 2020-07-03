@@ -136,7 +136,7 @@ impl fmt::Display for SubscriptionState {
 ///         Header::SubscriptionState(SubscriptionState::Terminated {
 ///             retry_after: Some(600),
 ///             reason: Some(String::from("giveup")),
-///             params
+///             parameters: params
 ///         })
 ///     ))
 /// );
