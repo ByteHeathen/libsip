@@ -74,7 +74,9 @@ fn read_uri() {
         .auth(uri_auth!("username", "password"));
     assert_eq!(
         Ok((expected_remains.as_ref(), expected)),
-        parse_uri::<VerboseError<&[u8]>>(b"sip:username:password@hostname.com:8080;transport=TCP;Some=Other ")
+        parse_uri::<VerboseError<&[u8]>>(
+            b"sip:username:password@hostname.com:8080;transport=TCP;Some=Other "
+        )
     );
 }
 

@@ -5,16 +5,11 @@
 /// be a SIP server running on IP address '192.168.1.129:5060'
 /// and will attempt to connect to a sip account with the
 /// username '20' and the password 'program'.
-
 extern crate libsip;
 extern crate tokio;
 
 use std::{
-    io::{
-        Error as IoError,
-        Result as IoResult,
-        ErrorKind as IoErrorKind
-    },
+    io::{Error as IoError, ErrorKind as IoErrorKind, Result as IoResult},
     time::{Duration, Instant},
 };
 

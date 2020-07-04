@@ -1,7 +1,7 @@
 //! This example was created using a virtualbox vm
 //! running ubuntu 19.04 and a SIP server running at
 //! 192.168.1.123:5060
-//! 
+//!
 //! This will attempt to register a sip account and print
 //! the returned OK response.
 //!
@@ -12,12 +12,7 @@ extern crate libsip;
 
 use libsip::*;
 
-use std::{
-    io::{
-        Result as IoResult
-    },
-    net::UdpSocket
-};
+use std::{io::Result as IoResult, net::UdpSocket};
 
 use nom::error::VerboseError;
 

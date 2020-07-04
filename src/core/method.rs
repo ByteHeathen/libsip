@@ -1,11 +1,5 @@
+use nom::{branch::alt, bytes::complete::tag_no_case, combinator::map, error::ParseError, IResult};
 use std::fmt;
-use nom::{
-    IResult,
-    branch::alt,
-    combinator::map,
-    error::ParseError,
-    bytes::complete::tag_no_case
-};
 
 /// SIP protocol methods.
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -27,7 +21,6 @@ pub enum Method {
 }
 
 impl Method {
-
     /// Return all possible Methods. This comes in handy when
     /// adding an AllowedMethods Header.
     pub fn all() -> Vec<Method> {
@@ -87,6 +80,6 @@ pub fn parse_method<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a
         map(tag_no_case("INFO"), |_| Method::Info),
         map(tag_no_case("REFER"), |_| Method::Refer),
         map(tag_no_case("MESSAGE"), |_| Method::Message),
-        map(tag_no_case("UPDATE"), |_| Method::Update)
+        map(tag_no_case("UPDATE"), |_| Method::Update),
     ))(input)
 }

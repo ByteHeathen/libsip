@@ -2,7 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 use crate::{
-    core::{is_token, parse_transport, Transport},
+    core::{parse_transport, Transport},
+    parse::is_token,
     uri::{parse_domain, parse_port, Domain},
 };
 

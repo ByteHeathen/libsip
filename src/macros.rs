@@ -71,14 +71,14 @@ macro_rules! named_header {
         libsip::NamedHeader {
             display_name: None,
             uri: $u,
-            params: ::std::collections::HashMap::new(),
+            parameters: ::std::collections::HashMap::new(),
         }
     };
     ($u:tt, $name:tt) => {
         libsip::NamedHeader {
             display_name: Some($name.into()),
             uri: $u,
-            params: ::std::collections::HashMap::new()
+            parameters: ::std::collections::HashMap::new(),
         }
     };
 }
@@ -89,7 +89,7 @@ macro_rules! __named_header {
         crate::NamedHeader {
             display_name: None,
             uri: $u,
-            params: ::std::collections::HashMap::new(),
+            parameters: ::std::collections::HashMap::new(),
         }
     };
 }

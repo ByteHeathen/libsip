@@ -1,13 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use nom::{branch::alt, bytes::complete::tag_no_case, combinator::map, error::ParseError, IResult};
 use std::fmt;
-use nom::{
-    IResult,
-    branch::alt,
-    combinator::map,
-    error::ParseError,
-    bytes::complete::tag_no_case
-};
 
 /// Sip URI Schema.
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
@@ -26,9 +20,11 @@ impl fmt::Display for UriSchema {
 }
 
 /// Parse SIP URI schema. Only Accepts 'sip' and 'sips'.
-pub fn parse_schema<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], UriSchema, E> {
+pub fn parse_schema<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], UriSchema, E> {
     alt::<_, _, E, _>((
         map(tag_no_case::<_, _, E>("sip"), |_| UriSchema::Sip),
-        map(tag_no_case::<_, _, E>("sips"), |_| UriSchema::Sips)
+        map(tag_no_case::<_, _, E>("sips"), |_| UriSchema::Sips),
     ))(input)
 }

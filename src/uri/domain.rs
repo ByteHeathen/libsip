@@ -1,7 +1,4 @@
-use nom::character::{
-    is_alphanumeric,
-    is_digit
-};
+use nom::character::{is_alphanumeric, is_digit};
 use serde::{Deserialize, Serialize};
 
 use std::{fmt, net::Ipv4Addr};
@@ -38,34 +35,48 @@ impl fmt::Display for Domain {
 }
 
 use nom::{
-    IResult,
     branch::alt,
-    character::complete::char,
     bytes::complete::take_while,
-    combinator::{opt, map_res},
-    error::ParseError
+    character::complete::char,
+    combinator::{map_res, opt},
+    error::ParseError,
+    IResult,
 };
 
-pub fn parse_port<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Option<u16>, E> {
-    let (input, port) = opt(map_res::<_, _, _, _, E, _, _>(take_while::<_, _, E>(is_digit), parse_u16::<E>))(input)?;
+pub fn parse_port<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Option<u16>, E> {
+    let (input, port) = opt(map_res::<_, _, _, _, E, _, _>(
+        take_while::<_, _, E>(is_digit),
+        parse_u16::<E>,
+    ))(input)?;
     Ok((input, port))
 }
 
 pub fn parse_domain<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Domain, E> {
-  alt((parse_ip_domain::<E>, parse_domain_domain::<E>))(input)
+    alt((parse_ip_domain::<E>, parse_domain_domain::<E>))(input)
 }
 
-pub fn parse_ip_domain<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Domain, E> {
+pub fn parse_ip_domain<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Domain, E> {
     let (input, addr) = parse_ip_address::<E>(input)?;
     let (input, _) = opt::<_, _, E, _>(char::<_, E>(':'))(input)?;
     let (input, port) = parse_port::<E>(input)?;
     Ok((input, Domain::Ipv4(addr, port)))
 }
 
-pub fn parse_domain_domain<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Domain, E> {
+pub fn parse_domain_domain<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Domain, E> {
     let (input, domain) = map_res::<_, _, _, _, E, _, _>(
-        take_while::<_, _, E>(|item| is_alphanumeric(item) || item == b'.'), slice_to_string::<E>)(input)?;
+        take_while::<_, _, E>(|item| is_alphanumeric(item) || item == b'.'),
+        slice_to_string::<E>,
+    )(input)?;
     let (input, _) = opt::<_, _, E, _>(char::<_, E>(':'))(input)?;
-    let (input, port) = opt::<_, _, E, _>(map_res::<_, _, _, _, E, _, _>(take_while::<_, _, E>(is_digit), parse_u16::<E>))(input)?;
+    let (input, port) = opt::<_, _, E, _>(map_res::<_, _, _, _, E, _, _>(
+        take_while::<_, _, E>(is_digit),
+        parse_u16::<E>,
+    ))(input)?;
     Ok((input, Domain::Domain(domain, port)))
 }

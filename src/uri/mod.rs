@@ -1,18 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use std::{
-    fmt,
-    io::Result as IoResult,
-    str::FromStr
-};
+use std::{fmt, io::Result as IoResult, str::FromStr};
 
-use nom::{
-    IResult,
-    character::complete::char,
-    combinator::{opt},
-    sequence::pair,
-    error::ParseError
-};
+use nom::{character::complete::char, combinator::opt, error::ParseError, sequence::pair, IResult};
 
 pub mod schema;
 pub use self::schema::{parse_schema, UriSchema};
@@ -140,7 +130,15 @@ pub fn parse_uri<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u
     let (input, auth) = opt(parse_uriauth::<E>)(input)?;
     let (input, host) = parse_domain::<E>(input)?;
     let (input, parameters) = parse_params::<E>(input)?;
-    Ok((input, Uri { schema: schema.map(|item|item.0), host, parameters, auth}))
+    Ok((
+        input,
+        Uri {
+            schema: schema.map(|item| item.0),
+            host,
+            parameters,
+            auth,
+        },
+    ))
 }
 
 impl FromStr for Uri {

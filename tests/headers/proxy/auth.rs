@@ -17,6 +17,8 @@ fn read() {
     let header = Header::ProxyAuthenticate("call@id.com".into());
     assert_eq!(
         Ok((remains.as_ref(), header)),
-        parse_proxy_authenticate_header::<VerboseError<&[u8]>>(b"Proxy-Authenticate: call@id.com\r\n")
+        parse_proxy_authenticate_header::<VerboseError<&[u8]>>(
+            b"Proxy-Authenticate: call@id.com\r\n"
+        )
     );
 }
