@@ -7,7 +7,7 @@ use crate::{
     headers::parse_header,
     parse::{parse_byte_vec, parse_u32, slice_to_string},
     uri::parse_uri,
-    *,
+    SipMessageExt, *,
 };
 
 /// Sip Protocol Message.
@@ -44,6 +44,13 @@ impl SipMessage {
             true
         } else {
             false
+        }
+    }
+
+    pub fn method(&self) -> Option<Method> {
+        match self {
+            Self::Request { method, .. } => Some(*method),
+            Self::Response { .. } => self.cseq().map(|(_, method)| method),
         }
     }
 
