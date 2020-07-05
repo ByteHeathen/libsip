@@ -7,6 +7,8 @@ pub trait SipMessageExt {
 
     fn from_header_tag(&self) -> Option<&String>;
 
+    fn set_from_header_tag(&mut self, tag: String);
+
     fn from_header_username(&self) -> Option<&String>;
 
     fn to_header(&self) -> Option<&NamedHeader>;
@@ -14,6 +16,8 @@ pub trait SipMessageExt {
     fn to_header_mut(&mut self) -> Option<&mut NamedHeader>;
 
     fn to_header_tag(&self) -> Option<&String>;
+
+    fn set_to_header_tag(&mut self, tag: String);
 
     fn to_header_username(&self) -> Option<&String>;
 
@@ -37,6 +41,10 @@ pub trait SipMessageExt {
 
     /// Returns number of seconds if it's specified in the Contact header
     fn contact_header_expires(&self) -> Option<u32>;
+
+    fn expires_header(&self) -> Option<u32>;
+
+    fn expires_header_mut(&mut self) -> Option<&mut u32>;
 }
 
 macro_rules! header {
@@ -76,6 +84,12 @@ impl SipMessageExt for SipMessage {
         named_header_param!(self.from_header(), "tag")
     }
 
+    fn set_from_header_tag(&mut self, tag: String) {
+        if let Some(header) = header!(self.headers_mut().0.iter_mut(), Header::From) {
+            header.set_param("tag", Some(tag));
+        }
+    }
+
     fn from_header_username(&self) -> Option<&String> {
         self.from_header()
             .and_then(|header| header.uri.auth.as_ref().map(|auth| &auth.username))
@@ -91,6 +105,12 @@ impl SipMessageExt for SipMessage {
 
     fn to_header_tag(&self) -> Option<&String> {
         named_header_param!(self.to_header(), "tag")
+    }
+
+    fn set_to_header_tag(&mut self, tag: String) {
+        if let Some(header) = header!(self.headers_mut().0.iter_mut(), Header::To) {
+            header.set_param("tag", Some(tag));
+        }
     }
 
     fn to_header_username(&self) -> Option<&String> {
@@ -158,5 +178,13 @@ impl SipMessageExt for SipMessage {
         // https://tools.ietf.org/html/rfc3261#page-228 "c-p-expires" defines that it must be unsigned number
         named_header_param!(self.contact_header(), "expires")
             .and_then(|expires| expires.parse::<u32>().ok())
+    }
+
+    fn expires_header(&self) -> Option<u32> {
+        header!(self.headers().0.iter(), Header::Expires).map(Clone::clone)
+    }
+
+    fn expires_header_mut(&mut self) -> Option<&mut u32> {
+        header!(self.headers_mut().0.iter_mut(), Header::Expires)
     }
 }
