@@ -12,5 +12,11 @@ pub use self::version::{parse_version, Version};
 pub mod message;
 pub use self::message::{parse_message, parse_request, parse_response, SipMessage};
 
+mod message_ext;
+pub use self::message_ext::SipMessageExt;
+
 pub mod extract;
 pub use self::extract::extract_opt_param;
+
+mod register_request_ext;
+pub use self::register_request_ext::RegisterRequestExt;

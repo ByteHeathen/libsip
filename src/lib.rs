@@ -72,12 +72,12 @@ pub use crate::{
         SoftPhone,
     },
     core::{
-        parse_message, parse_request, parse_response, parse_version, Method, SipMessage, Transport,
-        Version,
+        parse_message, parse_request, parse_response, parse_version, Method, RegisterRequestExt,
+        SipMessage, SipMessageExt, Transport, Version,
     },
     headers::{
         parse_header, via::ViaHeader, AuthContext, AuthHeader, AuthSchema, ContentType, Header,
-        Headers, Language, NamedHeader,
+        Headers, Language, NamedHeader, SubscriptionState,
     },
     request::RequestGenerator,
     response::ResponseGenerator,
