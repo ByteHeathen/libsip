@@ -11,6 +11,7 @@ pub trait RegisterRequestExt {
 
 impl RegisterRequestExt for SipMessage {
     fn expires(&self) -> Option<u32> {
-        self.contact_header_expires().or(self.expires_header())
+        self.contact_header_expires()
+            .or_else(|| self.expires_header())
     }
 }
