@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     bytes::complete::{take_until, take_while},
-    character::{complete::char as parse_char, *},
+    character::{complete::char as parse_char, is_alphanumeric, *},
     combinator::map_res,
     error::{ErrorKind, ParseError},
     IResult,
@@ -107,6 +107,58 @@ pub fn parse_quoted_string<'a, E: ParseError<&'a [u8]>>(
     let (input, out) = map_res(take_until("\""), slice_to_string_nullable)(input)?;
     let (input, _) = parse_char('"')(input)?;
     Ok((input, out))
+}
+
+/// [RFC3261: Page 220, "reserved"](https://tools.ietf.org/html/rfc3261#page-220)
+pub fn parse_reserved<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], &'a [u8], E> {
+    let (input, out) = take_while(is_reserved)(input)?;
+    Ok((input, out))
+}
+
+/// [RFC3261: Page 220, "unreserved"](https://tools.ietf.org/html/rfc3261#page-220)
+pub fn parse_unreserved<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], &'a [u8], E> {
+    let (input, out) = take_while(is_reserved)(input)?;
+    Ok((input, out))
+}
+
+/// Checks if a given character is reserved ([RFC3261: Page 220, "reserved"](https://tools.ietf.org/html/rfc3261#page-220))
+/// # Examples
+///
+/// ```
+/// use libsip::parse::is_reserved;
+/// assert!(is_reserved(';' as u8));
+/// assert!(!is_reserved('"' as u8));
+/// ```
+pub fn is_reserved(chr: u8) -> bool {
+    ";/?:@&=+$,".contains(chr as char)
+}
+
+/// Checks if a given character is reserved ([RFC3261: Page 220, "unreserved"](https://tools.ietf.org/html/rfc3261#page-220))
+/// # Examples
+///
+/// ```
+/// use libsip::parse::is_unreserved;
+/// assert!(is_unreserved('a' as u8));
+/// assert!(!is_unreserved('"' as u8));
+/// ```
+pub fn is_unreserved(chr: u8) -> bool {
+    is_alphanumeric(chr) || is_mark(chr)
+}
+
+/// Checks if a given character is a mark ([RFC3261: Page 220, "mark"](https://tools.ietf.org/html/rfc3261#page-220))
+/// # Examples
+///
+/// ```
+/// use libsip::parse::is_mark;
+/// assert!(is_mark('*' as u8));
+/// assert!(!is_mark('"' as u8));
+/// ```
+pub fn is_mark(chr: u8) -> bool {
+    "-_.!~*'()".contains(chr as char)
 }
 
 /// Checks if a given character is a token ([RFC3261: Page 221, "token"](https://tools.ietf.org/html/rfc3261#page-221))

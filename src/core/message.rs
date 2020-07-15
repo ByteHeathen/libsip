@@ -5,7 +5,7 @@ use std::fmt;
 use crate::{
     core::{code::error_code_to_str, method::parse_method, version::parse_version},
     headers::parse_header,
-    parse::{parse_byte_vec, parse_u32, slice_to_string},
+    parse::{is_reserved, is_unreserved, parse_byte_vec, parse_u32},
     uri::parse_uri,
     SipMessageExt, *,
 };
@@ -161,6 +161,29 @@ use nom::{
     error::ParseError,
 };
 
+/// Parses Reason-Phrase ([RFC3261: Page 225](https://tools.ietf.org/html/rfc3261#page-225))
+/// # Notes
+/// escaped / UTF8-NONASCII / UTF8-CONT isn't supported yet
+/// # Examples
+/// ```
+/// use libsip::core::message::parse_reason_phrase;
+/// use nom::error::VerboseError;
+/// assert_eq!(
+///     parse_reason_phrase::<VerboseError<_>>(b"Not Found"),
+///     Ok(("".as_bytes(), "Not Found".as_bytes()))
+/// );
+/// assert_eq!(
+///     parse_reason_phrase::<VerboseError<_>>(b"Call/Transaction Does Not Exist"),
+///     Ok(("".as_bytes(), "Call/Transaction Does Not Exist".as_bytes()))
+/// );
+/// ```
+pub fn parse_reason_phrase<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], &'a [u8], E> {
+    let pred = |c| is_reserved(c) || is_unreserved(c) || is_space(c);
+    take_while(pred)(input)
+}
+
 /// Parse a SIP message assuming it is a SIP response.
 pub fn parse_response<'a, E: ParseError<&'a [u8]>>(
     input: &'a [u8],
@@ -169,10 +192,7 @@ pub fn parse_response<'a, E: ParseError<&'a [u8]>>(
     let (input, _) = char(' ')(input)?;
     let (input, code) = map_res(take_while(is_digit), parse_u32)(input)?;
     let (input, _) = char(' ')(input)?;
-    let (input, _) = opt(map_res::<_, _, _, _, E, _, _>(
-        take_while(|item| is_alphabetic(item) || is_space(item)),
-        slice_to_string,
-    ))(input)?;
+    let (input, _) = opt(parse_reason_phrase)(input)?;
     let (input, _) = opt(char(' '))(input)?;
     let (input, _) = tag("\r\n")(input)?;
     let (input, headers) = parse_headers::<E>(input)?;
