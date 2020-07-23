@@ -18,6 +18,16 @@ impl ViaHeader {
             version: Version::default(),
         }
     }
+
+    pub fn branch(&self) -> Option<&String> {
+        self.uri.parameters.iter().find_map(|p| {
+            if let UriParam::Branch(branch) = p {
+                Some(branch)
+            } else {
+                None
+            }
+        })
+    }
 }
 
 impl fmt::Display for ViaHeader {
