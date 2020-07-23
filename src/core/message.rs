@@ -50,7 +50,7 @@ impl SipMessage {
     pub fn method(&self) -> Option<Method> {
         match self {
             Self::Request { method, .. } => Some(*method),
-            Self::Response { .. } => self.cseq().map(|(_, method)| method),
+            Self::Response { .. } => self.cseq().ok().map(|(_, method)| method),
         }
     }
 

@@ -1,190 +1,264 @@
-use crate::{Header, Method, NamedHeader, SipMessage, UriParam, ViaHeader};
+use crate::{
+    Header, Method, MissingContactExpiresError, MissingHeaderError, MissingTagError,
+    MissingUsernameError, MissingViaBranchError, NamedHeader, SipMessage, ViaHeader,
+};
 
 pub trait SipMessageExt {
-    fn from_header(&self) -> Option<&NamedHeader>;
+    fn from_header(&self) -> Result<&NamedHeader, MissingHeaderError>;
 
-    fn from_header_mut(&mut self) -> Option<&mut NamedHeader>;
+    fn from_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError>;
 
-    fn from_header_tag(&self) -> Option<&String>;
+    fn from_header_tag(&self) -> Result<&String, MissingTagError>;
 
     fn set_from_header_tag(&mut self, tag: String);
 
-    fn from_header_username(&self) -> Option<&String>;
+    fn from_header_username(&self) -> Result<&String, MissingUsernameError>;
 
-    fn to_header(&self) -> Option<&NamedHeader>;
+    fn to_header(&self) -> Result<&NamedHeader, MissingHeaderError>;
 
-    fn to_header_mut(&mut self) -> Option<&mut NamedHeader>;
+    fn to_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError>;
 
-    fn to_header_tag(&self) -> Option<&String>;
+    fn to_header_tag(&self) -> Result<&String, MissingTagError>;
 
     fn set_to_header_tag(&mut self, tag: String);
 
-    fn to_header_username(&self) -> Option<&String>;
+    fn to_header_username(&self) -> Result<&String, MissingUsernameError>;
 
-    fn via_header(&self) -> Option<&ViaHeader>;
+    fn via_header(&self) -> Result<&ViaHeader, MissingHeaderError>;
 
-    fn via_header_mut(&mut self) -> Option<&mut ViaHeader>;
+    fn via_header_mut(&mut self) -> Result<&mut ViaHeader, MissingHeaderError>;
 
-    fn via_header_branch(&self) -> Option<&String>;
+    fn via_header_branch(&self) -> Result<&String, MissingViaBranchError>;
 
-    fn call_id(&self) -> Option<&String>;
+    fn call_id(&self) -> Result<&String, MissingHeaderError>;
 
-    fn call_id_mut(&mut self) -> Option<&mut String>;
+    fn call_id_mut(&mut self) -> Result<&mut String, MissingHeaderError>;
 
-    fn cseq(&self) -> Option<(u32, Method)>;
+    fn cseq(&self) -> Result<(u32, Method), MissingHeaderError>;
 
-    fn cseq_mut(&mut self) -> Option<(&mut u32, &mut Method)>;
+    fn cseq_mut(&mut self) -> Result<(&mut u32, &mut Method), MissingHeaderError>;
 
-    fn contact_header(&self) -> Option<&NamedHeader>;
+    fn contact_header(&self) -> Result<&NamedHeader, MissingHeaderError>;
 
-    fn contact_header_mut(&mut self) -> Option<&mut NamedHeader>;
+    fn contact_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError>;
 
     /// Returns number of seconds if it's specified in the Contact header
-    fn contact_header_expires(&self) -> Option<u32>;
+    fn contact_header_expires(&self) -> Result<u32, MissingContactExpiresError>;
 
-    fn expires_header(&self) -> Option<u32>;
+    fn expires_header(&self) -> Result<u32, MissingHeaderError>;
 
-    fn expires_header_mut(&mut self) -> Option<&mut u32>;
+    fn expires_header_mut(&mut self) -> Result<&mut u32, MissingHeaderError>;
 }
 
+#[macro_export]
 macro_rules! header {
-    ($iter:expr, $header:path) => {
-        $iter.find_map(|header| {
-            if let $header(header) = header {
-                Some(header)
-            } else {
-                None
-            }
-        })
-    };
-}
-
-macro_rules! named_header_param {
-    ($header:expr, $param:expr) => {
-        $header.and_then(|header| {
-            if let Some(param) = header.parameters.get($param) {
-                param.as_ref()
-            } else {
-                None
-            }
-        })
-    };
-}
-
-impl SipMessageExt for SipMessage {
-    fn from_header(&self) -> Option<&NamedHeader> {
-        header!(self.headers().0.iter(), Header::From)
-    }
-
-    fn from_header_mut(&mut self) -> Option<&mut NamedHeader> {
-        header!(self.headers_mut().0.iter_mut(), Header::From)
-    }
-
-    fn from_header_tag(&self) -> Option<&String> {
-        named_header_param!(self.from_header(), "tag")
-    }
-
-    fn set_from_header_tag(&mut self, tag: String) {
-        if let Some(header) = header!(self.headers_mut().0.iter_mut(), Header::From) {
-            header.set_param("tag", Some(tag));
-        }
-    }
-
-    fn from_header_username(&self) -> Option<&String> {
-        self.from_header()
-            .and_then(|header| header.uri.auth.as_ref().map(|auth| &auth.username))
-    }
-
-    fn to_header(&self) -> Option<&NamedHeader> {
-        header!(self.headers().0.iter(), Header::To)
-    }
-
-    fn to_header_mut(&mut self) -> Option<&mut NamedHeader> {
-        header!(self.headers_mut().0.iter_mut(), Header::To)
-    }
-
-    fn to_header_tag(&self) -> Option<&String> {
-        named_header_param!(self.to_header(), "tag")
-    }
-
-    fn set_to_header_tag(&mut self, tag: String) {
-        if let Some(header) = header!(self.headers_mut().0.iter_mut(), Header::To) {
-            header.set_param("tag", Some(tag));
-        }
-    }
-
-    fn to_header_username(&self) -> Option<&String> {
-        self.to_header()
-            .and_then(|header| header.uri.auth.as_ref().map(|auth| &auth.username))
-    }
-
-    fn via_header(&self) -> Option<&ViaHeader> {
-        header!(self.headers().0.iter(), Header::Via)
-    }
-
-    fn via_header_mut(&mut self) -> Option<&mut ViaHeader> {
-        header!(self.headers_mut().0.iter_mut(), Header::Via)
-    }
-
-    fn via_header_branch(&self) -> Option<&String> {
-        self.via_header().and_then(|header| {
-            header.uri.parameters.iter().find_map(|param| {
-                if let UriParam::Branch(branch) = param {
-                    Some(branch)
+    ($iter:expr, $header:path, $error:expr) => {
+        $iter
+            .find_map(|header| {
+                if let $header(header) = header {
+                    Some(header)
                 } else {
                     None
                 }
             })
-        })
-    }
+            .ok_or($error)
+    };
+}
 
-    fn call_id(&self) -> Option<&String> {
-        header!(self.headers().0.iter(), Header::CallId)
-    }
-
-    fn call_id_mut(&mut self) -> Option<&mut String> {
-        header!(self.headers_mut().0.iter_mut(), Header::CallId)
-    }
-
-    fn cseq(&self) -> Option<(u32, Method)> {
-        self.headers().0.iter().find_map(|header| {
-            if let Header::CSeq(cseq, method) = header {
-                Some((*cseq, *method))
+macro_rules! named_header_param {
+    ($header:expr, $param:expr, $error:expr) => {
+        if let Ok(header) = $header {
+            if let Some(Some(param)) = header.parameters.get($param) {
+                Ok(param)
             } else {
-                None
+                Err($error)
             }
-        })
-    }
+        } else {
+            Err($error)
+        }
+    };
+}
 
-    fn cseq_mut(&mut self) -> Option<(&mut u32, &mut Method)> {
-        self.headers_mut().0.iter_mut().find_map(|header| {
-            if let Header::CSeq(cseq, method) = header {
-                Some((cseq, method))
+macro_rules! named_header_username {
+    ($header:expr, $error:expr) => {
+        if let Ok(header) = $header {
+            if let Some(auth) = &header.uri.auth {
+                Ok(&auth.username)
             } else {
-                None
+                Err($error)
             }
-        })
+        } else {
+            Err($error)
+        }
+    };
+}
+
+impl SipMessageExt for SipMessage {
+    fn from_header(&self) -> Result<&NamedHeader, MissingHeaderError> {
+        header!(
+            self.headers().0.iter(),
+            Header::From,
+            MissingHeaderError::From
+        )
     }
 
-    fn contact_header(&self) -> Option<&NamedHeader> {
-        header!(self.headers().0.iter(), Header::Contact)
+    fn from_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError> {
+        header!(
+            self.headers_mut().0.iter_mut(),
+            Header::From,
+            MissingHeaderError::From
+        )
     }
 
-    fn contact_header_mut(&mut self) -> Option<&mut NamedHeader> {
-        header!(self.headers_mut().0.iter_mut(), Header::Contact)
+    fn from_header_tag(&self) -> Result<&String, MissingTagError> {
+        named_header_param!(self.from_header(), "tag", MissingTagError::From)
     }
 
-    fn contact_header_expires(&self) -> Option<u32> {
+    fn set_from_header_tag(&mut self, tag: String) {
+        if let Ok(header) = self.from_header_mut() {
+            header.set_param("tag", Some(tag));
+        }
+    }
+
+    fn from_header_username(&self) -> Result<&String, MissingUsernameError> {
+        named_header_username!(self.from_header(), MissingUsernameError::From)
+    }
+
+    fn to_header(&self) -> Result<&NamedHeader, MissingHeaderError> {
+        header!(self.headers().0.iter(), Header::To, MissingHeaderError::To)
+    }
+
+    fn to_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError> {
+        header!(
+            self.headers_mut().0.iter_mut(),
+            Header::To,
+            MissingHeaderError::To
+        )
+    }
+
+    fn to_header_tag(&self) -> Result<&String, MissingTagError> {
+        named_header_param!(self.to_header(), "tag", MissingTagError::To)
+    }
+
+    fn set_to_header_tag(&mut self, tag: String) {
+        if let Ok(header) = self.to_header_mut() {
+            header.set_param("tag", Some(tag));
+        }
+    }
+
+    fn to_header_username(&self) -> Result<&String, MissingUsernameError> {
+        named_header_username!(self.to_header(), MissingUsernameError::To)
+    }
+
+    fn via_header(&self) -> Result<&ViaHeader, MissingHeaderError> {
+        header!(
+            self.headers().0.iter(),
+            Header::Via,
+            MissingHeaderError::Via
+        )
+    }
+
+    fn via_header_mut(&mut self) -> Result<&mut ViaHeader, MissingHeaderError> {
+        header!(
+            self.headers_mut().0.iter_mut(),
+            Header::Via,
+            MissingHeaderError::Via
+        )
+    }
+
+    fn via_header_branch(&self) -> Result<&String, MissingViaBranchError> {
+        if let Ok(header) = self.via_header() {
+            header.branch().ok_or(MissingViaBranchError)
+        } else {
+            Err(MissingViaBranchError)
+        }
+    }
+
+    fn call_id(&self) -> Result<&String, MissingHeaderError> {
+        header!(
+            self.headers().0.iter(),
+            Header::CallId,
+            MissingHeaderError::CallId
+        )
+    }
+
+    fn call_id_mut(&mut self) -> Result<&mut String, MissingHeaderError> {
+        header!(
+            self.headers_mut().0.iter_mut(),
+            Header::CallId,
+            MissingHeaderError::CallId
+        )
+    }
+
+    fn cseq(&self) -> Result<(u32, Method), MissingHeaderError> {
+        self.headers()
+            .0
+            .iter()
+            .find_map(|header| {
+                if let Header::CSeq(cseq, method) = header {
+                    Some((*cseq, *method))
+                } else {
+                    None
+                }
+            })
+            .ok_or(MissingHeaderError::CSeq)
+    }
+
+    fn cseq_mut(&mut self) -> Result<(&mut u32, &mut Method), MissingHeaderError> {
+        self.headers_mut()
+            .0
+            .iter_mut()
+            .find_map(|header| {
+                if let Header::CSeq(cseq, method) = header {
+                    Some((cseq, method))
+                } else {
+                    None
+                }
+            })
+            .ok_or(MissingHeaderError::CSeq)
+    }
+
+    fn contact_header(&self) -> Result<&NamedHeader, MissingHeaderError> {
+        header!(
+            self.headers().0.iter(),
+            Header::Contact,
+            MissingHeaderError::Contact
+        )
+    }
+
+    fn contact_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError> {
+        header!(
+            self.headers_mut().0.iter_mut(),
+            Header::Contact,
+            MissingHeaderError::Contact
+        )
+    }
+
+    fn contact_header_expires(&self) -> Result<u32, MissingContactExpiresError> {
         // https://tools.ietf.org/html/rfc3261#page-228 "c-p-expires" defines that it must be unsigned number
-        named_header_param!(self.contact_header(), "expires")
-            .and_then(|expires| expires.parse::<u32>().ok())
+        named_header_param!(self.contact_header(), "expires", MissingContactExpiresError).and_then(
+            |expires| {
+                expires
+                    .parse::<u32>()
+                    .map_err(|_| MissingContactExpiresError)
+            },
+        )
     }
 
-    fn expires_header(&self) -> Option<u32> {
-        header!(self.headers().0.iter(), Header::Expires).map(Clone::clone)
+    fn expires_header(&self) -> Result<u32, MissingHeaderError> {
+        header!(
+            self.headers().0.iter(),
+            Header::Expires,
+            MissingHeaderError::Expires
+        )
+        .map(Clone::clone)
     }
 
-    fn expires_header_mut(&mut self) -> Option<&mut u32> {
-        header!(self.headers_mut().0.iter_mut(), Header::Expires)
+    fn expires_header_mut(&mut self) -> Result<&mut u32, MissingHeaderError> {
+        header!(
+            self.headers_mut().0.iter_mut(),
+            Header::Expires,
+            MissingHeaderError::Expires
+        )
     }
 }
