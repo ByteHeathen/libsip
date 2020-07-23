@@ -23,3 +23,6 @@ pub use self::event_request_ext::{EventRequestExt, MissingEventHeaderError};
 
 mod register_request_ext;
 pub use self::register_request_ext::{MissingExpiresError, RegisterRequestExt};
+
+mod errors;
+pub use self::errors::*;

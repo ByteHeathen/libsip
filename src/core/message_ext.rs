@@ -1,65 +1,54 @@
-use crate::{Header, Method, NamedHeader, SipMessage, ViaHeader};
+use crate::{
+    Header, Method, MissingContactExpiresError, MissingHeaderError, MissingTagError,
+    MissingUsernameError, MissingViaBranchError, NamedHeader, SipMessage, ViaHeader,
+};
 
 pub trait SipMessageExt {
-    fn from_header(&self) -> Result<&NamedHeader, MissingFromHeaderError>;
+    fn from_header(&self) -> Result<&NamedHeader, MissingHeaderError>;
 
-    fn from_header_mut(&mut self) -> Result<&mut NamedHeader, MissingFromHeaderError>;
+    fn from_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError>;
 
-    fn from_header_tag(&self) -> Result<&String, MissingFromTagError>;
+    fn from_header_tag(&self) -> Result<&String, MissingTagError>;
 
     fn set_from_header_tag(&mut self, tag: String);
 
-    fn from_header_username(&self) -> Result<&String, MissingFromUsernameError>;
+    fn from_header_username(&self) -> Result<&String, MissingUsernameError>;
 
-    fn to_header(&self) -> Result<&NamedHeader, MissingToHeaderError>;
+    fn to_header(&self) -> Result<&NamedHeader, MissingHeaderError>;
 
-    fn to_header_mut(&mut self) -> Result<&mut NamedHeader, MissingToHeaderError>;
+    fn to_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError>;
 
-    fn to_header_tag(&self) -> Result<&String, MissingToTagError>;
+    fn to_header_tag(&self) -> Result<&String, MissingTagError>;
 
     fn set_to_header_tag(&mut self, tag: String);
 
-    fn to_header_username(&self) -> Result<&String, MissingToUsernameError>;
+    fn to_header_username(&self) -> Result<&String, MissingUsernameError>;
 
-    fn via_header(&self) -> Result<&ViaHeader, MissingViaHeaderError>;
+    fn via_header(&self) -> Result<&ViaHeader, MissingHeaderError>;
 
-    fn via_header_mut(&mut self) -> Result<&mut ViaHeader, MissingViaHeaderError>;
+    fn via_header_mut(&mut self) -> Result<&mut ViaHeader, MissingHeaderError>;
 
     fn via_header_branch(&self) -> Result<&String, MissingViaBranchError>;
 
-    fn call_id(&self) -> Result<&String, MissingCallIdHeaderError>;
+    fn call_id(&self) -> Result<&String, MissingHeaderError>;
 
-    fn call_id_mut(&mut self) -> Result<&mut String, MissingCallIdHeaderError>;
+    fn call_id_mut(&mut self) -> Result<&mut String, MissingHeaderError>;
 
-    fn cseq(&self) -> Result<(u32, Method), MissingCSeqHeaderError>;
+    fn cseq(&self) -> Result<(u32, Method), MissingHeaderError>;
 
-    fn cseq_mut(&mut self) -> Result<(&mut u32, &mut Method), MissingCSeqHeaderError>;
+    fn cseq_mut(&mut self) -> Result<(&mut u32, &mut Method), MissingHeaderError>;
 
-    fn contact_header(&self) -> Result<&NamedHeader, MissingContactHeaderError>;
+    fn contact_header(&self) -> Result<&NamedHeader, MissingHeaderError>;
 
-    fn contact_header_mut(&mut self) -> Result<&mut NamedHeader, MissingContactHeaderError>;
+    fn contact_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError>;
 
     /// Returns number of seconds if it's specified in the Contact header
     fn contact_header_expires(&self) -> Result<u32, MissingContactExpiresError>;
 
-    fn expires_header(&self) -> Result<u32, MissingExpiresHeaderError>;
+    fn expires_header(&self) -> Result<u32, MissingHeaderError>;
 
-    fn expires_header_mut(&mut self) -> Result<&mut u32, MissingExpiresHeaderError>;
+    fn expires_header_mut(&mut self) -> Result<&mut u32, MissingHeaderError>;
 }
-
-pub struct MissingFromHeaderError;
-pub struct MissingFromTagError;
-pub struct MissingFromUsernameError;
-pub struct MissingToHeaderError;
-pub struct MissingToTagError;
-pub struct MissingToUsernameError;
-pub struct MissingViaHeaderError;
-pub struct MissingViaBranchError;
-pub struct MissingCallIdHeaderError;
-pub struct MissingCSeqHeaderError;
-pub struct MissingContactHeaderError;
-pub struct MissingContactExpiresError;
-pub struct MissingExpiresHeaderError;
 
 #[macro_export]
 macro_rules! header {
@@ -105,24 +94,24 @@ macro_rules! named_header_username {
 }
 
 impl SipMessageExt for SipMessage {
-    fn from_header(&self) -> Result<&NamedHeader, MissingFromHeaderError> {
+    fn from_header(&self) -> Result<&NamedHeader, MissingHeaderError> {
         header!(
             self.headers().0.iter(),
             Header::From,
-            MissingFromHeaderError
+            MissingHeaderError::From
         )
     }
 
-    fn from_header_mut(&mut self) -> Result<&mut NamedHeader, MissingFromHeaderError> {
+    fn from_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError> {
         header!(
             self.headers_mut().0.iter_mut(),
             Header::From,
-            MissingFromHeaderError
+            MissingHeaderError::From
         )
     }
 
-    fn from_header_tag(&self) -> Result<&String, MissingFromTagError> {
-        named_header_param!(self.from_header(), "tag", MissingFromTagError)
+    fn from_header_tag(&self) -> Result<&String, MissingTagError> {
+        named_header_param!(self.from_header(), "tag", MissingTagError::From)
     }
 
     fn set_from_header_tag(&mut self, tag: String) {
@@ -131,24 +120,24 @@ impl SipMessageExt for SipMessage {
         }
     }
 
-    fn from_header_username(&self) -> Result<&String, MissingFromUsernameError> {
-        named_header_username!(self.from_header(), MissingFromUsernameError)
+    fn from_header_username(&self) -> Result<&String, MissingUsernameError> {
+        named_header_username!(self.from_header(), MissingUsernameError::From)
     }
 
-    fn to_header(&self) -> Result<&NamedHeader, MissingToHeaderError> {
-        header!(self.headers().0.iter(), Header::To, MissingToHeaderError)
+    fn to_header(&self) -> Result<&NamedHeader, MissingHeaderError> {
+        header!(self.headers().0.iter(), Header::To, MissingHeaderError::To)
     }
 
-    fn to_header_mut(&mut self) -> Result<&mut NamedHeader, MissingToHeaderError> {
+    fn to_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError> {
         header!(
             self.headers_mut().0.iter_mut(),
             Header::To,
-            MissingToHeaderError
+            MissingHeaderError::To
         )
     }
 
-    fn to_header_tag(&self) -> Result<&String, MissingToTagError> {
-        named_header_param!(self.to_header(), "tag", MissingToTagError)
+    fn to_header_tag(&self) -> Result<&String, MissingTagError> {
+        named_header_param!(self.to_header(), "tag", MissingTagError::To)
     }
 
     fn set_to_header_tag(&mut self, tag: String) {
@@ -157,19 +146,23 @@ impl SipMessageExt for SipMessage {
         }
     }
 
-    fn to_header_username(&self) -> Result<&String, MissingToUsernameError> {
-        named_header_username!(self.to_header(), MissingToUsernameError)
+    fn to_header_username(&self) -> Result<&String, MissingUsernameError> {
+        named_header_username!(self.to_header(), MissingUsernameError::To)
     }
 
-    fn via_header(&self) -> Result<&ViaHeader, MissingViaHeaderError> {
-        header!(self.headers().0.iter(), Header::Via, MissingViaHeaderError)
+    fn via_header(&self) -> Result<&ViaHeader, MissingHeaderError> {
+        header!(
+            self.headers().0.iter(),
+            Header::Via,
+            MissingHeaderError::Via
+        )
     }
 
-    fn via_header_mut(&mut self) -> Result<&mut ViaHeader, MissingViaHeaderError> {
+    fn via_header_mut(&mut self) -> Result<&mut ViaHeader, MissingHeaderError> {
         header!(
             self.headers_mut().0.iter_mut(),
             Header::Via,
-            MissingViaHeaderError
+            MissingHeaderError::Via
         )
     }
 
@@ -181,23 +174,23 @@ impl SipMessageExt for SipMessage {
         }
     }
 
-    fn call_id(&self) -> Result<&String, MissingCallIdHeaderError> {
+    fn call_id(&self) -> Result<&String, MissingHeaderError> {
         header!(
             self.headers().0.iter(),
             Header::CallId,
-            MissingCallIdHeaderError
+            MissingHeaderError::CallId
         )
     }
 
-    fn call_id_mut(&mut self) -> Result<&mut String, MissingCallIdHeaderError> {
+    fn call_id_mut(&mut self) -> Result<&mut String, MissingHeaderError> {
         header!(
             self.headers_mut().0.iter_mut(),
             Header::CallId,
-            MissingCallIdHeaderError
+            MissingHeaderError::CallId
         )
     }
 
-    fn cseq(&self) -> Result<(u32, Method), MissingCSeqHeaderError> {
+    fn cseq(&self) -> Result<(u32, Method), MissingHeaderError> {
         self.headers()
             .0
             .iter()
@@ -208,10 +201,10 @@ impl SipMessageExt for SipMessage {
                     None
                 }
             })
-            .ok_or(MissingCSeqHeaderError)
+            .ok_or(MissingHeaderError::CSeq)
     }
 
-    fn cseq_mut(&mut self) -> Result<(&mut u32, &mut Method), MissingCSeqHeaderError> {
+    fn cseq_mut(&mut self) -> Result<(&mut u32, &mut Method), MissingHeaderError> {
         self.headers_mut()
             .0
             .iter_mut()
@@ -222,22 +215,22 @@ impl SipMessageExt for SipMessage {
                     None
                 }
             })
-            .ok_or(MissingCSeqHeaderError)
+            .ok_or(MissingHeaderError::CSeq)
     }
 
-    fn contact_header(&self) -> Result<&NamedHeader, MissingContactHeaderError> {
+    fn contact_header(&self) -> Result<&NamedHeader, MissingHeaderError> {
         header!(
             self.headers().0.iter(),
             Header::Contact,
-            MissingContactHeaderError
+            MissingHeaderError::Contact
         )
     }
 
-    fn contact_header_mut(&mut self) -> Result<&mut NamedHeader, MissingContactHeaderError> {
+    fn contact_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError> {
         header!(
             self.headers_mut().0.iter_mut(),
             Header::Contact,
-            MissingContactHeaderError
+            MissingHeaderError::Contact
         )
     }
 
@@ -252,20 +245,20 @@ impl SipMessageExt for SipMessage {
         )
     }
 
-    fn expires_header(&self) -> Result<u32, MissingExpiresHeaderError> {
+    fn expires_header(&self) -> Result<u32, MissingHeaderError> {
         header!(
             self.headers().0.iter(),
             Header::Expires,
-            MissingExpiresHeaderError
+            MissingHeaderError::Expires
         )
         .map(Clone::clone)
     }
 
-    fn expires_header_mut(&mut self) -> Result<&mut u32, MissingExpiresHeaderError> {
+    fn expires_header_mut(&mut self) -> Result<&mut u32, MissingHeaderError> {
         header!(
             self.headers_mut().0.iter_mut(),
             Header::Expires,
-            MissingExpiresHeaderError
+            MissingHeaderError::Expires
         )
     }
 }
