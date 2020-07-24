@@ -1,5 +1,5 @@
 use crate::{
-    Header, Method, MissingContactExpiresError, MissingHeaderError, MissingTagError,
+    ContactHeader, Header, Method, MissingContactExpiresError, MissingHeaderError, MissingTagError,
     MissingUsernameError, MissingViaBranchError, NamedHeader, SipMessage, ViaHeader,
 };
 
@@ -38,9 +38,9 @@ pub trait SipMessageExt {
 
     fn cseq_mut(&mut self) -> Result<(&mut u32, &mut Method), MissingHeaderError>;
 
-    fn contact_header(&self) -> Result<&NamedHeader, MissingHeaderError>;
+    fn contact_header(&self) -> Result<&ContactHeader, MissingHeaderError>;
 
-    fn contact_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError>;
+    fn contact_header_mut(&mut self) -> Result<&mut ContactHeader, MissingHeaderError>;
 
     /// Returns number of seconds if it's specified in the Contact header
     fn contact_header_expires(&self) -> Result<u32, MissingContactExpiresError>;
@@ -218,7 +218,7 @@ impl SipMessageExt for SipMessage {
             .ok_or(MissingHeaderError::CSeq)
     }
 
-    fn contact_header(&self) -> Result<&NamedHeader, MissingHeaderError> {
+    fn contact_header(&self) -> Result<&ContactHeader, MissingHeaderError> {
         header!(
             self.headers().0.iter(),
             Header::Contact,
@@ -226,7 +226,7 @@ impl SipMessageExt for SipMessage {
         )
     }
 
-    fn contact_header_mut(&mut self) -> Result<&mut NamedHeader, MissingHeaderError> {
+    fn contact_header_mut(&mut self) -> Result<&mut ContactHeader, MissingHeaderError> {
         header!(
             self.headers_mut().0.iter_mut(),
             Header::Contact,
@@ -239,6 +239,7 @@ impl SipMessageExt for SipMessage {
         named_header_param!(self.contact_header(), "expires", MissingContactExpiresError).and_then(
             |expires| {
                 expires
+                    .to_string()
                     .parse::<u32>()
                     .map_err(|_| MissingContactExpiresError)
             },

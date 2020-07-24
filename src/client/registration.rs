@@ -97,7 +97,7 @@ impl RegistrationManager {
         headers.push(Header::ContentLength(0));
         headers.push(Header::To(NamedHeader::new(to_header)));
         headers.push(Header::From(NamedHeader::new(from_header)));
-        headers.push(Header::Contact(NamedHeader::new(contact_header)));
+        headers.push(Header::Contact(ContactHeader::new(contact_header)));
         headers.push(Header::CSeq(self.cseq_counter, Method::Register));
         headers.push(Header::CallId(format!(
             "{}@{}",

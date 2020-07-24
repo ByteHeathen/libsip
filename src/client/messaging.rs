@@ -30,7 +30,7 @@ impl MessageHelper {
 
     impl_simple_header_method!(to, To, NamedHeader);
 
-    impl_simple_header_method!(contact, Contact, NamedHeader);
+    impl_simple_header_method!(contact, Contact, ContactHeader);
 
     impl_simple_header_method!(call_id, CallId, String);
 
