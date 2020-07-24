@@ -1,5 +1,6 @@
 use super::{
-    content::*, language::*, named::*, subscription_state::parse_subscription_state_header, *,
+    contact::*, content::*, language::*, named::*,
+    subscription_state::parse_subscription_state_header, *,
 };
 use crate::{
     core::{parse_method, parse_transport, parse_version},
@@ -236,7 +237,6 @@ impl_array_parser!(parse_allow_header, "Allow", Allow, parse_method);
 impl_array_parser!(parse_supported_header, "Supported", Supported, parse_string);
 impl_named_parser!(parse_to_header, "To", To);
 impl_named_parser!(parse_from_header, "From", From);
-impl_named_parser!(parse_contact_header, "Contact", Contact);
 impl_named_parser!(parse_reply_to_header, "Reply-To", ReplyTo);
 impl_type_parser!(parse_content_type_header, "Content-Type", ContentType);
 impl_type_parser!(
@@ -299,6 +299,26 @@ pub fn parse_cseq_header<'a, E: ParseError<&'a [u8]>>(
     let (input, method) = parse_method(input)?;
     let (input, _) = tag("\r\n")(input)?;
     Ok((input, Header::CSeq(value, method)))
+}
+
+pub fn parse_contact_header<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], Header, E> {
+    let (input, _) = tag_no_case("Contact")(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, _) = char(':')(input)?;
+    let (input, _) = opt(take_while(is_space))(input)?;
+    let (input, out) = parse_named_field_value(input)?;
+    let (input, params) = parse_contact_field_params(input)?;
+    let (input, _) = tag("\r\n")(input)?;
+    Ok((
+        input,
+        Header::Contact(ContactHeader {
+            display_name: out.0,
+            uri: out.1,
+            parameters: params,
+        }),
+    ))
 }
 
 pub fn parse_via_header<'a, E: ParseError<&'a [u8]>>(
@@ -421,6 +441,20 @@ pub fn parse_generic_param<'a, E: ParseError<&'a [u8]>>(
     }
 }
 
+pub fn parse_generic_param_with_possibly_quoted_value<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], (String, Option<GenValue>), E> {
+    let (input, _) = char(';')(input)?;
+    let (input, name) = map_res(take_while(is_token), slice_to_string_nullable)(input)?;
+    let (input, chr) = opt(char('='))(input)?;
+    if chr.is_some() {
+        let (input, value) = parse_gen_possibly_quoted_value(input)?;
+        Ok((input, (name, Some(value))))
+    } else {
+        Ok((input, (name, None)))
+    }
+}
+
 /// Parses "gen-value" ([RFC3261: Page 227, "gen-value"](https://tools.ietf.org/html/rfc3261#page-227)), however, parsing host isn't implemented
 /// # Examples
 ///
@@ -444,6 +478,18 @@ pub fn parse_gen_value<'a, E: ParseError<&'a [u8]>>(
     let (input, value) = alt::<_, _, E, _>((
         parse_quoted_string::<E>,
         map_res(take_while::<_, _, E>(is_token), slice_to_string_nullable),
+    ))(input)?;
+    Ok((input, value))
+}
+
+pub fn parse_gen_possibly_quoted_value<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], GenValue, E> {
+    // gen-value = token / host / quoted-string
+    // host isn't parsed yet
+    let (input, value) = alt::<_, _, E, _>((
+        parse_quoted_string_as_gen_value::<E>,
+        map_res(take_while::<_, _, E>(is_token), slice_to_gen_value_nullable),
     ))(input)?;
     Ok((input, value))
 }

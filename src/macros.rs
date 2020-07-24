@@ -83,6 +83,24 @@ macro_rules! named_header {
     };
 }
 
+#[macro_export]
+macro_rules! contact_header {
+    ($u:tt) => {
+        libsip::ContactHeader {
+            display_name: None,
+            uri: $u,
+            parameters: ::std::collections::HashMap::new(),
+        }
+    };
+    ($u:tt, $name:tt) => {
+        libsip::ContactHeader {
+            display_name: Some($name.into()),
+            uri: $u,
+            parameters: ::std::collections::HashMap::new(),
+        }
+    };
+}
+
 /// Same as `named_header` except for internal use.
 macro_rules! __named_header {
     ($u:tt) => {

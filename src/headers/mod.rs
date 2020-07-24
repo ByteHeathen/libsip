@@ -1,4 +1,5 @@
 pub mod auth;
+mod contact;
 mod content;
 mod language;
 mod named;
@@ -8,6 +9,7 @@ pub mod via;
 mod write;
 pub use self::{
     auth::{AuthContext, AuthHeader, AuthSchema},
+    contact::{ContactHeader, GenValue},
     content::ContentType,
     language::Language,
     named::NamedHeader,
@@ -156,7 +158,7 @@ impl IntoIterator for Headers {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Header {
     To(NamedHeader),
-    Contact(NamedHeader),
+    Contact(ContactHeader),
     From(NamedHeader),
     ReplyTo(NamedHeader),
     CSeq(u32, Method),

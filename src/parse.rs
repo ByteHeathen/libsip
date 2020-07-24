@@ -1,3 +1,4 @@
+use crate::headers::GenValue;
 use nom::{
     branch::alt,
     bytes::complete::{take_until, take_while},
@@ -25,6 +26,13 @@ pub fn slice_to_string<'a, E: ParseError<&'a [u8]>>(slice: &'a [u8]) -> Result<S
 pub fn slice_to_string_nullable(slice: &[u8]) -> Result<String, IoError> {
     Ok(String::from_utf8(Vec::from(slice))
         .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse utf8 string"))?)
+}
+
+pub fn slice_to_gen_value_nullable(slice: &[u8]) -> Result<GenValue, IoError> {
+    Ok(GenValue::Token(
+        String::from_utf8(Vec::from(slice))
+            .map_err(|_| IoError::new(IoErrorKind::InvalidInput, "Failed to parse utf8 string"))?,
+    ))
 }
 
 /// Parse unsigned 16 bit integer using `Parse::parse`.
@@ -107,6 +115,15 @@ pub fn parse_quoted_string<'a, E: ParseError<&'a [u8]>>(
     let (input, out) = map_res(take_until("\""), slice_to_string_nullable)(input)?;
     let (input, _) = parse_char('"')(input)?;
     Ok((input, out))
+}
+
+pub fn parse_quoted_string_as_gen_value<'a, E: ParseError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], GenValue, E> {
+    let (input, _) = parse_char('"')(input)?;
+    let (input, out) = map_res(take_until("\""), slice_to_string_nullable)(input)?;
+    let (input, _) = parse_char('"')(input)?;
+    Ok((input, GenValue::QuotedString(out)))
 }
 
 /// [RFC3261: Page 220, "reserved"](https://tools.ietf.org/html/rfc3261#page-220)

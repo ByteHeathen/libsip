@@ -77,8 +77,8 @@ pub use crate::{
         MissingViaBranchError, RegisterRequestExt, SipMessage, SipMessageExt, Transport, Version,
     },
     headers::{
-        parse_header, via::ViaHeader, AuthContext, AuthHeader, AuthSchema, ContentType, Header,
-        Headers, Language, NamedHeader, SubscriptionState,
+        parse_header, via::ViaHeader, AuthContext, AuthHeader, AuthSchema, ContactHeader,
+        ContentType, Header, Headers, Language, NamedHeader, SubscriptionState,
     },
     request::RequestGenerator,
     response::ResponseGenerator,
