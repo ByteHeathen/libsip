@@ -18,8 +18,10 @@ pub enum MissingTagError {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MissingUsernameError {
+    Uri,
     From,
     To,
+    Contact,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
