@@ -72,9 +72,8 @@ pub use crate::{
         SoftPhone,
     },
     core::{
-        parse_message, parse_request, parse_response, parse_version, Method,
-        MissingContactExpiresError, MissingHeaderError, MissingTagError, MissingUsernameError,
-        MissingViaBranchError, RegisterRequestExt, SipMessage, SipMessageExt, Transport, Version,
+        parse_message, parse_request, parse_response, parse_version, Method, RegisterRequestExt,
+        SipMessage, SipMessageError, SipMessageExt, Transport, Version,
     },
     headers::{
         parse_header, via::ViaHeader, AuthContext, AuthHeader, AuthSchema, ContactHeader,

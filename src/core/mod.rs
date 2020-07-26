@@ -22,10 +22,10 @@ mod event_request_ext;
 pub use self::event_request_ext::{EventRequestExt, MissingEventHeaderError};
 
 mod register_request_ext;
-pub use self::register_request_ext::{MissingExpiresError, RegisterRequestExt};
+pub use self::register_request_ext::RegisterRequestExt;
 
 mod request_ext;
 pub use self::request_ext::RequestExt;
 
 mod errors;
-pub use self::errors::*;
+pub use self::errors::SipMessageError;
