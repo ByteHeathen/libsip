@@ -42,6 +42,8 @@ pub trait SipMessageExt {
 
     fn contact_header_mut(&mut self) -> Result<&mut ContactHeader, MissingHeaderError>;
 
+    fn contact_header_username(&self) -> Result<&String, MissingUsernameError>;
+
     /// Returns number of seconds if it's specified in the Contact header
     fn contact_header_expires(&self) -> Result<u32, MissingContactExpiresError>;
 
@@ -232,6 +234,18 @@ impl SipMessageExt for SipMessage {
             Header::Contact,
             MissingHeaderError::Contact
         )
+    }
+
+    fn contact_header_username(&self) -> Result<&String, MissingUsernameError> {
+        if let Ok(header) = self.contact_header() {
+            if let Some(auth) = &header.uri.auth {
+                Ok(&auth.username)
+            } else {
+                Err(MissingUsernameError::Contact)
+            }
+        } else {
+            Err(MissingUsernameError::Contact)
+        }
     }
 
     fn contact_header_expires(&self) -> Result<u32, MissingContactExpiresError> {
