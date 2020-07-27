@@ -19,7 +19,7 @@ pub mod extract;
 pub use self::extract::extract_opt_param;
 
 mod event_request_ext;
-pub use self::event_request_ext::{EventRequestExt, MissingEventHeaderError};
+pub use self::event_request_ext::EventRequestExt;
 
 mod register_request_ext;
 pub use self::register_request_ext::RegisterRequestExt;
