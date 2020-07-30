@@ -1,7 +1,4 @@
-use libsip::{
-    headers::{parse::parse_contact_header},
-    *,
-};
+use libsip::{headers::parse::parse_contact_header, *};
 
 use nom::error::VerboseError;
 

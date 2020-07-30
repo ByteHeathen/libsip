@@ -40,7 +40,7 @@ async fn registration_process(
     if verbose {
         print_sip_message_recv(&msg);
     }
-    if msg.is_response() && msg.status_code() == Some(200) {
+    if msg.is_response() && msg.status_code() == Ok(200) {
         return Ok(());
     }
     reg.set_challenge(msg)?;

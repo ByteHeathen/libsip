@@ -1,4 +1,4 @@
-use crate::{SipMessage, SipMessageExt};
+use crate::{SipMessage, SipMessageError, SipMessageExt};
 
 pub trait RegisterRequestExt {
     /// Returns one of:
@@ -6,19 +6,17 @@ pub trait RegisterRequestExt {
     /// * "Expires"
     ///
     /// [RFC3261, Page 65](https://tools.ietf.org/html/rfc3261#page-65) defines this behavior
-    fn expires(&self) -> Result<u32, MissingExpiresError>;
+    fn expires(&self) -> Result<u32, SipMessageError>;
 }
 
-pub struct MissingExpiresError;
-
 impl RegisterRequestExt for SipMessage {
-    fn expires(&self) -> Result<u32, MissingExpiresError> {
+    fn expires(&self) -> Result<u32, SipMessageError> {
         if let Ok(expires) = self.contact_header_expires() {
             Ok(expires)
         } else if let Ok(expires) = self.expires_header() {
             Ok(expires)
         } else {
-            Err(MissingExpiresError)
+            Err(SipMessageError::MissingRegisterExpires)
         }
     }
 }

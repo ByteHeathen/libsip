@@ -47,20 +47,25 @@ impl SipMessage {
         }
     }
 
-    pub fn method(&self) -> Option<Method> {
+    pub fn method(&self) -> Result<Method, SipMessageError> {
         match self {
-            Self::Request { method, .. } => Some(*method),
-            Self::Response { .. } => self.cseq().ok().map(|(_, method)| method),
+            Self::Request { method, .. } => Ok(*method),
+            Self::Response { .. } => {
+                if let Ok((_, method)) = self.cseq() {
+                    Ok(method)
+                } else {
+                    Err(SipMessageError::MissingMethod)
+                }
+            },
         }
     }
 
     /// Retreive the SIP response's status code.
-    /// Returns None for requests.
-    pub fn status_code(&self) -> Option<u32> {
+    pub fn status_code(&self) -> Result<u32, SipMessageError> {
         if let SipMessage::Response { code, .. } = self {
-            Some(*code)
+            Ok(*code)
         } else {
-            None
+            Err(SipMessageError::MissingStatusCode)
         }
     }
 
