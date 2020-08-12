@@ -17,7 +17,7 @@ fn write() {
 
 #[test]
 fn read() {
-    let remains = vec!['\r' as u8, '\n' as u8];
+    let remains = vec![];
     let header = ViaHeader {
         version: Version::default(),
         transport: Transport::Udp,
@@ -29,7 +29,7 @@ fn read() {
     );
 
     let input = b"Via: SIP/2.0/UDP 192.168.1.120;rport;branch=z9hG4bK7Q6y313Qrt6Uc\r\n";
-    let remains = vec!['\r' as u8, '\n' as u8];
+    let remains = vec![];
     let header = ViaHeader {
         version: Version::default(),
         transport: Transport::Udp,
@@ -43,7 +43,7 @@ fn read() {
     );
 
     let input = b"Via: SIP/2.0/UDP 192.168.1.1:5060;rport=5060;received=192.168.1.1;branch=8e7ec4e3d1e1380bc111f8723341ca70;transport=UDP\r\n";
-    let remains = vec!['\r' as u8, '\n' as u8];
+    let remains = vec![];
     let header = ViaHeader {
         version: Version::default(),
         transport: Transport::Udp,
@@ -59,7 +59,7 @@ fn read() {
     );
 
     let input = b"Via: SIP/2.0/UDP 192.168.1.120;branch=03395ed83a7b9502c671c769bbe369cb;received=192.168.1.76\r\n";
-    let remains = vec!['\r' as u8, '\n' as u8];
+    let remains = vec![];
     let header = ViaHeader {
         version: Version::default(),
         transport: Transport::Udp,

@@ -20,7 +20,6 @@ use nom::{
 use std::collections::HashMap;
 
 pub fn parse_header<'a, E: ParseError<&'a [u8]>>(input: &'a [u8]) -> IResult<&'a [u8], Header> {
-    let (input, _) = opt(tag("\r\n"))(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
     let (input, header) = _parse_header(input)?;
     Ok((input, header))
@@ -333,6 +332,7 @@ pub fn parse_via_header<'a, E: ParseError<&'a [u8]>>(
     let (input, transport) = parse_transport(input)?;
     let (input, _) = opt(take_while(is_space))(input)?;
     let (input, uri) = parse_uri(input)?;
+    let (input, _) = tag("\r\n")(input)?;
     Ok((
         input,
         Header::Via(via::ViaHeader {
