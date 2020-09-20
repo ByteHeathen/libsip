@@ -31,16 +31,12 @@ impl fmt::Display for AuthHeader {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)?;
         for (index, (key, value)) in self.1.iter().enumerate() {
-            if index == 0 && key == &"qop".to_string() {
-                write!(f, "{}={}", key, value)?;
-            } else if index == 0 && key == &"auth".to_string() {
-                write!(f, "{}={:08}", key, value)?;
+            if index == 0 && (key == &"qop".to_string() || key == &"nc".to_string()) {
+                write!(f, " {}={}", key, value)?;
             } else if index == 0 {
                 write!(f, " {}=\"{}\"", key, value)?;
-            } else if key == &"qop".to_string() {
+            } else if (key == &"qop".to_string()) || (key == &"nc".to_string()) {
                 write!(f, ", {}={}", key, value)?;
-            } else if key == &"auth".to_string() {
-                write!(f, ", {}={:08}", key, value)?;
             } else {
                 write!(f, ", {}=\"{}\"", key, value)?;
             }

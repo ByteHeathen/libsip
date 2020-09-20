@@ -26,3 +26,25 @@ fn read() {
         parse_authorization_header::<VerboseError<&[u8]>>(b"Authorization: Digest key=value \r\n")
     );
 }
+
+#[test]
+fn qop_write() {
+    let mut map = HashMap::new();
+    map.insert("qop".into(), "auth".into());
+    let header = AuthHeader(AuthSchema::Digest, map);
+    assert_eq!(
+        format!("{}", header),
+        String::from("Digest qop=auth")
+    );
+}
+
+#[test]
+fn auth_write() {
+    let mut map = HashMap::new();
+    map.insert("nc".into(), "1".into());
+    let header = AuthHeader(AuthSchema::Digest, map);
+    assert_eq!(
+        format!("{}", header),
+        String::from("Digest nc=1")
+    );
+}
