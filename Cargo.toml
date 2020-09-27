@@ -13,7 +13,7 @@ description = "SIP protocol Implementation, with a focus towords softphone clien
 
 [dependencies]
 serde = { version = "1.0.107", features = ["derive"] }
-nom = "6.0.0-alpha1"
+nom = "=6.0.0-alpha1"
 rand = "0.7.3"
 sha = "1.0.3"
 md5 = "0.7.0"
