@@ -12,7 +12,7 @@ use nom::{
 use std::fmt;
 
 /// URI Credentials
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct UriAuth {
     pub username: String,
     pub password: Option<String>,

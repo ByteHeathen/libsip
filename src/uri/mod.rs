@@ -17,7 +17,7 @@ pub mod auth;
 pub use self::auth::{parse_uriauth, UriAuth};
 
 /// Universal Rescource Identifier for libsip.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Uri {
     pub schema: Option<UriSchema>,
     pub host: Domain,
