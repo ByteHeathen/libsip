@@ -7,7 +7,7 @@ use crate::parse::{parse_ip_address, parse_u16, slice_to_string};
 
 /// Domain address for a URI. Currently Only Ipv4 and
 /// domains are implemented.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum Domain {
     Ipv4(Ipv4Addr, Option<u16>),
     Domain(String, Option<u16>),

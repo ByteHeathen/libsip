@@ -19,7 +19,7 @@ use nom::{
 /// Uri Parameters.
 ///
 /// TODO: Expand this enum. Similar to `libsip::Header`
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum UriParam {
     Transport(Transport),
     Branch(String),

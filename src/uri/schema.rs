@@ -4,7 +4,7 @@ use nom::{branch::alt, bytes::complete::tag_no_case, combinator::map, error::Par
 use std::fmt;
 
 /// Sip URI Schema.
-#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum UriSchema {
     Sip,
     Sips,
