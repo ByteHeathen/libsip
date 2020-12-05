@@ -12,6 +12,12 @@ fn read_uri() {
 
     let expected_remains = vec![b' '];
     assert_eq!(
+        Ok((expected_remains.as_ref(), Uri::sips(domain!("hostname")))),
+        parse_uri::<VerboseError<&[u8]>>(b"sips:hostname ")
+    );
+
+    let expected_remains = vec![b' '];
+    assert_eq!(
         Ok((
             expected_remains.as_ref(),
             Uri::new_schemaless(domain!("hostname"))
