@@ -24,7 +24,7 @@ pub fn parse_schema<'a, E: ParseError<&'a [u8]>>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], UriSchema, E> {
     alt::<_, _, E, _>((
-        map(tag_no_case::<_, _, E>("sip"), |_| UriSchema::Sip),
         map(tag_no_case::<_, _, E>("sips"), |_| UriSchema::Sips),
+        map(tag_no_case::<_, _, E>("sip"), |_| UriSchema::Sip),
     ))(input)
 }
